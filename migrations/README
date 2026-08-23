@@ -1,0 +1,5 @@
+Alembic-Migrationen für eBauteileFuchs.
+
+Neue Schemaänderungen werden ausschließlich als überprüfbare Migrationen unter
+`versions/` ergänzt. Die Anwendung führt Migrationen nicht stillschweigend beim
+Import aus.

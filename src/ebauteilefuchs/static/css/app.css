@@ -1,0 +1,282 @@
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-bg);
+  font-family: var(--font-sans);
+  color: var(--color-text);
+}
+
+body {
+  min-width: 20rem;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 12% -10%, var(--color-brand-primary-glow), transparent 34rem),
+    radial-gradient(circle at 90% 5%, var(--color-brand-secondary-glow), transparent 28rem),
+    var(--color-bg);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--color-link);
+}
+
+a:hover {
+  color: var(--color-link-hover);
+}
+
+a:focus-visible {
+  border-radius: var(--radius-sm);
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 10;
+  top: var(--space-3);
+  left: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--color-text);
+  color: var(--color-bg);
+  transform: translateY(-180%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.site-header,
+.site-footer,
+.page-shell {
+  width: min(100% - 2rem, var(--content-width));
+  margin-inline: auto;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 6rem;
+  gap: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.brand__logo {
+  width: 7.5rem;
+  height: auto;
+}
+
+.brand__product {
+  font-size: clamp(1.15rem, 3vw, 1.5rem);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.milestone-badge,
+.card-label {
+  color: var(--color-brand-secondary);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.milestone-badge {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-brand-secondary-border);
+  border-radius: 999px;
+  background: var(--color-brand-secondary-surface);
+}
+
+.page-shell {
+  padding-block: clamp(3rem, 8vw, 7rem);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(16rem, 0.7fr);
+  align-items: center;
+  gap: clamp(2rem, 7vw, 6rem);
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-3);
+  color: var(--color-brand-secondary);
+  font-weight: 700;
+}
+
+h1,
+h2,
+h3,
+p {
+  text-wrap: pretty;
+}
+
+h1 {
+  max-width: 13ch;
+  margin: 0;
+  font-size: clamp(2.5rem, 8vw, 5.8rem);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.hero__intro {
+  max-width: 42rem;
+  margin: var(--space-5) 0;
+  color: var(--color-text-muted);
+  font-size: clamp(1rem, 2.2vw, 1.2rem);
+}
+
+.status-card {
+  display: flex;
+  align-items: flex-start;
+  max-width: 38rem;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-success-border);
+  border-radius: var(--radius-md);
+  background: var(--color-success-surface);
+}
+
+.status-card strong,
+.status-card span {
+  display: block;
+}
+
+.status-card span {
+  color: var(--color-text-muted);
+}
+
+.status-dot {
+  flex: 0 0 auto;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-top: 0.45rem;
+  border-radius: 50%;
+  background: var(--color-success);
+  box-shadow: 0 0 0 0.3rem var(--color-success-ring);
+}
+
+.mascot-placeholder {
+  display: grid;
+  min-height: 18rem;
+  place-content: center;
+  padding: var(--space-5);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, var(--color-surface-raised), var(--color-surface));
+  color: var(--color-text-muted);
+  text-align: center;
+  box-shadow: var(--shadow-raised);
+}
+
+.mascot-placeholder > span {
+  color: var(--color-brand-secondary);
+  font-size: 4rem;
+  line-height: 1;
+}
+
+.mascot-placeholder strong,
+.mascot-placeholder small {
+  display: block;
+}
+
+.mascot-placeholder small {
+  margin-top: var(--space-2);
+  color: var(--color-text-subtle);
+}
+
+.foundation {
+  margin-top: clamp(4rem, 10vw, 8rem);
+}
+
+.foundation h2 {
+  margin-bottom: var(--space-5);
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+}
+
+.foundation__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.foundation article {
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.foundation h3 {
+  margin: var(--space-2) 0;
+}
+
+.foundation p {
+  margin-top: 0;
+  color: var(--color-text-muted);
+}
+
+.text-link {
+  font-weight: 700;
+}
+
+.site-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block: var(--space-5);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 48rem) {
+  .hero,
+  .foundation__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .site-header {
+    align-items: flex-start;
+    padding-block: var(--space-4);
+  }
+
+  .brand {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .mascot-placeholder {
+    min-height: 12rem;
+  }
+}
+
+@media (max-width: 32rem) {
+  .milestone-badge {
+    display: none;
+  }
+
+  .site-footer {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a {
+    transition: color 120ms ease;
+  }
+}

@@ -1,0 +1,15 @@
+services:
+  ebauteilefuchs:
+    build: .
+    ports:
+      - "8008:8008"
+    environment:
+      EBAUTEILEFUCHS_APP_ENV: production
+      EBAUTEILEFUCHS_DATA_DIR: /data
+      EBAUTEILEFUCHS_LOG_LEVEL: INFO
+    volumes:
+      - ebauteilefuchs-data:/data
+    restart: unless-stopped
+
+volumes:
+  ebauteilefuchs-data:

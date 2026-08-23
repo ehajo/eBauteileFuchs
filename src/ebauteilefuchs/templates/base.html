@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="{{ branding.theme_color }}">
+    <title>{% block title %}{{ branding.product_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/design-tokens.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Zum Inhalt springen</a>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="{{ branding.product_name }} Startseite">
+        <img
+          class="brand__logo"
+          src="{{ url_for('static', path='/branding/ehajo-logo.svg') }}"
+          alt="eHaJo"
+          width="160"
+          height="90"
+        >
+        <span class="brand__product">{{ branding.product_name }}</span>
+      </a>
+      <span class="milestone-badge">Projektfundament M0</span>
+    </header>
+    <main id="main-content" class="page-shell">
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">
+      <span>{{ branding.footer }}</span>
+      <a href="{{ branding.website }}" rel="external">www.ehajo.de</a>
+    </footer>
+  </body>
+</html>

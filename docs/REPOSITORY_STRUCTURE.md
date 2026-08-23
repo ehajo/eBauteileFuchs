@@ -1,0 +1,140 @@
+# Vorgeschlagene Repositorystruktur
+
+Status: Grundsätzlich freigegeben am 23. August 2026. Die Struktur wird jeweils
+im Umfang des ausdrücklich freigegebenen Meilensteins angelegt.
+
+```text
+eBauteileFuchs/
+├── AGENTS.md
+├── README.md
+├── LICENSE                         # erst nach Lizenzfreigabe
+├── TRADEMARKS.md                   # getrennte Marken-/Asset-Regeln
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── CHANGELOG.md
+├── .env.example
+├── .gitignore
+├── pyproject.toml
+├── alembic.ini
+├── Dockerfile
+├── compose.yaml
+├── branding/
+│   ├── branding.md
+│   ├── ehajo-logo.svg
+│   ├── ehajo-logo.png
+│   └── README.md                   # Nutzung/Rechte der Assets
+├── docs/
+│   ├── PRODUCT_SPEC.md
+│   ├── ARCHITECTURE.md
+│   ├── DATA_MODEL.md
+│   ├── UX_FLOWS.md
+│   ├── IMPLEMENTATION_PLAN.md
+│   ├── REPOSITORY_STRUCTURE.md
+│   ├── OPEN_DECISIONS.md
+│   ├── adr/
+│   ├── installation/
+│   │   ├── raspberry-pi.md
+│   │   ├── linux.md
+│   │   ├── windows.md
+│   │   └── docker.md
+│   ├── backup-restore.md
+│   ├── configuration.md
+│   └── release-process.md
+├── src/
+│   └── ebauteilefuchs/
+│       ├── __init__.py
+│       ├── main.py
+│       ├── config.py
+│       ├── branding.py
+│       ├── domain/
+│       │   ├── articles.py
+│       │   ├── inventory.py
+│       │   ├── locations.py
+│       │   ├── normalization.py
+│       │   └── errors.py
+│       ├── application/
+│       │   ├── articles.py
+│       │   ├── duplicates.py
+│       │   ├── inventory.py
+│       │   ├── locations.py
+│       │   ├── search.py
+│       │   ├── backup.py
+│       │   └── ports/
+│       ├── persistence/
+│       │   ├── models.py
+│       │   ├── repositories.py
+│       │   ├── session.py
+│       │   └── unit_of_work.py
+│       ├── suppliers/
+│       │   ├── base.py
+│       │   └── mouser/
+│       │       ├── client.py
+│       │       ├── mapper.py
+│       │       └── schemas.py
+│       ├── api/
+│       │   ├── dependencies.py
+│       │   ├── schemas/
+│       │   └── v1/
+│       ├── web/
+│       │   ├── routes/
+│       │   ├── forms.py
+│       │   └── viewmodels.py
+│       ├── platform/
+│       │   ├── network.py
+│       │   └── paths.py
+│       ├── templates/
+│       └── static/
+├── migrations/
+│   ├── env.py
+│   └── versions/
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   ├── api/
+│   ├── e2e/
+│   ├── fixtures/
+│   │   └── mouser/                 # anonymisierte API-Fixtures
+│   └── conftest.py
+├── scripts/
+│   ├── install-linux.sh
+│   ├── start-dev.ps1
+│   ├── backup.py
+│   └── restore.py
+├── packaging/
+│   ├── systemd/
+│   ├── windows/
+│   └── docker/
+├── examples/
+│   └── demo-data/                  # ausschließlich synthetische Daten
+├── data/
+│   └── .gitkeep                    # Entwicklung; Inhalte ignoriert
+└── .github/
+    ├── workflows/
+    ├── ISSUE_TEMPLATE/
+    └── pull_request_template.md
+```
+
+## Begründete Abweichungen vom groben Vorschlag
+
+- `domain`, `application` und `persistence` ersetzen ein allgemeines `models`-
+  Verzeichnis. So bleiben Fachobjekte, Use Cases und ORM klar getrennt.
+- HTML-Routen liegen in `web`, JSON-Routen in `api`; beide verwenden
+  `application`.
+- Betriebspakete liegen in `packaging`, einmalige Entwickler-/Adminwerkzeuge in
+  `scripts`.
+- `compose.yaml` folgt dem aktuellen neutralen Compose-Dateinamen; eine spätere
+  Entscheidung kann aus Kompatibilitätsgründen `docker-compose.yml` wählen.
+- `TRADEMARKS.md` trennt Code-Lizenz von eHaJo-, Produkt-, Logo- und
+  Maskottchenrechten.
+- Laufzeitdaten liegen bei Installationen bevorzugt in Plattform-Datenpfaden.
+  `data/` ist nur ein ignorierter Entwicklungsort, keine fest verdrahtete
+  Produktionsablage.
+
+## Paketgrenzen
+
+`domain` importiert keine anderen Projektbereiche. `application` darf `domain`
+und Port-Protokolle verwenden. `persistence`, `suppliers`, `platform`, `web` und
+`api` sind Adapter; sie dürfen nach innen importieren, werden aber nicht von
+Domainmodulen importiert. Diese Regeln sollen später mit Tests beziehungsweise
+einem Import-Linter abgesichert werden, sofern dafür keine unverhältnismäßige
+Zusatzabhängigkeit nötig ist.
