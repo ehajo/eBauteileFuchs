@@ -149,3 +149,14 @@ Zusatzabhängigkeit nötig ist.
   `labels/renderer.py` erzeugt QR-SVG und PDF vollständig offline.
 - `api/v1/locations.py`, `web/locations.py` und `templates/locations/` bilden die
   JSON- beziehungsweise HTML-Eingänge ab.
+
+## In M2 realisierte Ergänzungen
+
+- `domain/articles.py` enthält Artikelobjekte und deterministische
+  Normalisierungs- und Validierungsregeln.
+- `application/articles.py` koordiniert Referenzdaten, Artikel, Eigenschaften,
+  Lieferantennummern, Suche und Dublettenstufen.
+- `persistence/articles.py` und `persistence/article_catalog.py` implementieren
+  Repository, Unit of Work und stabile Startdaten.
+- `api/v1/articles.py`, `web/articles.py` und `templates/articles/` bilden die
+  REST- und responsive HTML-Oberfläche ab.

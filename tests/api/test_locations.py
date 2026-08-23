@@ -114,6 +114,11 @@ async def test_location_tree_qr_and_pdf_labels(client: AsyncClient) -> None:
     assert sheet.status_code == 200
     assert len(PdfReader(BytesIO(sheet.content)).pages) == 1
 
+    compact = await client.get(f"/api/v1/locations/{drawer['id']}/compact-label.pdf")
+    compact_page = PdfReader(BytesIO(compact.content)).pages[0]
+    assert float(compact_page.mediabox.width) == pytest.approx(35 / 25.4 * 72, abs=0.1)
+    assert float(compact_page.mediabox.height) == pytest.approx(13 / 25.4 * 72, abs=0.1)
+
 
 @pytest.mark.anyio
 async def test_magazine_batch_preview_create_and_atomic_conflict(
@@ -147,6 +152,31 @@ async def test_magazine_batch_preview_create_and_atomic_conflict(
     assert conflict.status_code == 409
     locations = (await client.get("/api/v1/locations")).json()
     assert len(locations) == 61
+
+
+@pytest.mark.anyio
+async def test_split_magazine_creates_two_compartments_per_drawer(
+    client: AsyncClient,
+) -> None:
+    magazine = await _create_location(
+        client, code="MAG-SPLIT", name="Geteiltes Magazin", type_code="magazine"
+    )
+    payload = {
+        "parent_id": magazine["id"],
+        "location_type_id": await _type_id(client, "drawer"),
+        "count": 2,
+        "split_into_compartments": True,
+    }
+    created = await client.post("/api/v1/locations/batch", json=payload)
+    assert created.status_code == 201, created.text
+    assert len(created.json()) == 6
+    tree = (await client.get("/api/v1/locations/tree")).json()[0]
+    drawers = tree["children"]
+    assert len(drawers) == 2
+    assert [item["location"]["code"] for item in drawers[0]["children"]] == [
+        "A",
+        "B",
+    ]
 
 
 @pytest.mark.anyio

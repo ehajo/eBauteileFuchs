@@ -7,9 +7,22 @@ from sqlalchemy.orm import Session
 
 from ebauteilefuchs.config import Settings
 from ebauteilefuchs.main import create_app
+from ebauteilefuchs.persistence.article_catalog import (
+    ATTRIBUTE_DEFINITIONS,
+    ATTRIBUTE_IDS,
+    CATEGORIES,
+    CATEGORY_ATTRIBUTE_CODES,
+    MOUSER_SUPPLIER,
+)
 from ebauteilefuchs.persistence.database import Base, create_database_engine
 from ebauteilefuchs.persistence.location_types import SYSTEM_LOCATION_TYPES
-from ebauteilefuchs.persistence.models import LocationTypeModel
+from ebauteilefuchs.persistence.models import (
+    AttributeDefinitionModel,
+    CategoryAttributeModel,
+    CategoryModel,
+    LocationTypeModel,
+    SupplierModel,
+)
 
 
 @pytest.fixture
@@ -42,6 +55,54 @@ async def client(test_settings: Settings) -> AsyncIterator[AsyncClient]:
                 is_active=True,
             )
             for identifier, code, name, sort_order in SYSTEM_LOCATION_TYPES
+        )
+        category_ids = {code: identifier for identifier, code, *_ in CATEGORIES}
+        session.add_all(
+            CategoryModel(
+                id=str(identifier),
+                code=code,
+                name=name,
+                description=None,
+                is_system=True,
+                is_active=True,
+                sort_order=sort_order,
+            )
+            for identifier, code, name, sort_order in CATEGORIES
+        )
+        session.add_all(
+            AttributeDefinitionModel(
+                id=str(ATTRIBUTE_IDS[code]),
+                code=code,
+                name=name,
+                value_kind=value_kind,
+                canonical_unit=unit,
+                is_system=True,
+                is_active=True,
+            )
+            for code, name, value_kind, unit in ATTRIBUTE_DEFINITIONS
+        )
+        session.flush()
+        session.add_all(
+            CategoryAttributeModel(
+                category_id=str(category_ids[category_code]),
+                attribute_definition_id=str(ATTRIBUTE_IDS[attribute_code]),
+                sort_order=sort_order,
+                is_typical=True,
+                allowed_units_json="[]",
+            )
+            for category_code, attribute_codes in CATEGORY_ATTRIBUTE_CODES.items()
+            for sort_order, attribute_code in enumerate(attribute_codes, start=10)
+        )
+        supplier_id, supplier_code, supplier_name, adapter_name = MOUSER_SUPPLIER
+        session.add(
+            SupplierModel(
+                id=str(supplier_id),
+                code=supplier_code,
+                name=supplier_name,
+                adapter_name=adapter_name,
+                is_system=True,
+                is_active=True,
+            )
         )
         session.commit()
     engine.dispose()

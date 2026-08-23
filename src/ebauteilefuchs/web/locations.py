@@ -88,6 +88,7 @@ def locations(request: Request) -> HTMLResponse:
 @router.get("/locations/new", response_class=HTMLResponse)
 def new_location(request: Request) -> HTMLResponse:
     service = _service(request)
+    selected_parent = request.query_params.get("parent_id", "")
     return _render(
         request,
         "locations/form.html",
@@ -97,7 +98,7 @@ def new_location(request: Request) -> HTMLResponse:
             "action": "/locations",
             "types": service.list_types(),
             "parents": service.list_details(include_inactive=False),
-            "values": {},
+            "values": {"parent_id": selected_parent},
             "error": None,
         },
     )
@@ -177,6 +178,7 @@ def _batch_spec(
     padding: int,
     code_pattern: str,
     name_pattern: str,
+    split_into_compartments: bool,
 ) -> BatchSpecification:
     return BatchSpecification(
         parent_id=UUID(parent_id),
@@ -186,6 +188,7 @@ def _batch_spec(
         padding=padding,
         code_pattern=code_pattern,
         name_pattern=name_pattern,
+        split_into_compartments=split_into_compartments,
     )
 
 
@@ -204,6 +207,7 @@ def preview_magazine(
     padding: int = Form(default=2),
     code_pattern: str = Form(default="{number_padded}"),
     name_pattern: str = Form(default="Schublade {number_padded}"),
+    split_into_compartments: bool = Form(default=False),
 ) -> HTMLResponse:
     _verify_csrf(request, csrf_token)
     service = _service(request)
@@ -215,6 +219,7 @@ def preview_magazine(
         padding=padding,
         code_pattern=code_pattern,
         name_pattern=name_pattern,
+        split_into_compartments=split_into_compartments,
     )
     try:
         preview = service.preview_batch(_batch_spec(**values))
@@ -247,6 +252,7 @@ def create_magazine(
     padding: int = Form(),
     code_pattern: str = Form(),
     name_pattern: str = Form(),
+    split_into_compartments: bool = Form(default=False),
 ) -> Response:
     _verify_csrf(request, csrf_token)
     service = _service(request)
@@ -258,6 +264,7 @@ def create_magazine(
         padding=padding,
         code_pattern=code_pattern,
         name_pattern=name_pattern,
+        split_into_compartments=split_into_compartments,
     )
     try:
         created = service.create_batch(_batch_spec(**values))

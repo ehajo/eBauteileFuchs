@@ -1,8 +1,9 @@
 # Implementierungsplan – eBauteileFuchs
 
-Status: Grundsätzlich freigegeben am 23. August 2026. M0 ist umgesetzt und lokal
-verifiziert. M1 wurde ausdrücklich freigegeben und am 23. August 2026 umgesetzt;
-die lokale Abnahme steht aus. M2 und spätere Meilensteine bleiben gesperrt.
+Status: Grundsätzlich freigegeben am 23. August 2026. M0 und M1 sind umgesetzt
+und lokal abgenommen. M2 wurde ausdrücklich freigegeben und am 23. August 2026
+umgesetzt; die lokale Abnahme steht aus. M3 und spätere Meilensteine bleiben
+gesperrt.
 
 ## 1. Vorgehensmodell
 
@@ -29,7 +30,7 @@ sein.
 Abnahme: App startet ohne Cloudzugriff, Test/Lint laufen, Daten und Geheimnisse
 werden nicht versioniert, Startseite zeigt korrektes Branding.
 
-### M1 – Lagerplätze und QR (umgesetzt am 23. August 2026, Abnahme ausstehend)
+### M1 – Lagerplätze und QR (umgesetzt und abgenommen am 23. August 2026)
 
 - Lagerplatztypen, Baumregeln, CRUD und Deaktivierung.
 - Magazin-Assistent mit atomarer Vorschau/Erzeugung für 60 Schubladen.
@@ -43,12 +44,18 @@ PDF-Renderer und automatisierter Zyklus-, Konflikt-, Migrations- und Rendertests
 Abnahmekriterien: Projektauftrag 7 und 8; zusätzlich Zyklus-, Konflikt- und
 PDF-Render-Tests.
 
-### M2 – Artikel, Kategorien und Dubletten
+### M2 – Artikel, Kategorien und Dubletten (umgesetzt am 23. August 2026, Abnahme ausstehend)
 
 - Hersteller, Kategorien, typische/freie Eigenschaften und Lieferantenzuordnungen.
 - Manuelle Artikelanlage und -bearbeitung.
 - Versionierte Normalisierung und Dublettenstufen 1 bis 4.
 - Suchindexgrundlage und synthetische Demo-/Testdaten.
+
+Umsetzungsstand: Hersteller, Start- und eigene Kategorien, relationale typische
+und freie Eigenschaften, Lieferantenzuordnungen, versionierbare deterministische
+Normalisierung, vierstufige Dublettenprüfung, manuelle HTML-/REST-Verwaltung und
+portable lokale UND-Suche sind implementiert. Die Alembic-Revision
+`0003_m2_articles` aktualisiert vorhandene M1-Datenbanken ohne Datenverlust.
 
 Abnahmekriterien: 9, 13, 14 und fachliche Regressionstests für Schreibweisen,
 Trennzeichen und mehrdeutige Kandidaten.

@@ -13,13 +13,14 @@
       <label>Stellenzahl<input name="padding" type="number" min="1" max="6" required value="{{ values.get('padding', 2) }}"></label>
       <label>Kennungsmuster<input name="code_pattern" maxlength="120" required value="{{ values.get('code_pattern', '{number_padded}') }}"><small>Platzhalter: {number}, {number_padded}, {index}</small></label>
       <label class="form-field--wide">Bezeichnungsmuster<input name="name_pattern" maxlength="120" required value="{{ values.get('name_pattern', 'Schublade {number_padded}') }}"></label>
+      <label class="checkbox-field form-field--wide"><input name="split_into_compartments" type="checkbox" value="true" {% if values.get('split_into_compartments') %}checked{% endif %}><span>Jede Schublade mittig in Unterfach A und B teilen</span></label>
     </div>
     <button class="button" type="submit">Vorschau prüfen</button>
   </form>
   {% if preview %}
-    <section class="panel preview-panel"><div class="panel__heading"><div><h2>Vorschau</h2><p>{{ preview.items|length }} Lagerplätze · {% if preview.has_conflicts %}Konflikte gefunden{% else %}bereit zum Anlegen{% endif %}</p></div></div>
+    <section class="panel preview-panel"><div class="panel__heading"><div><h2>Vorschau</h2><p>{{ preview.items|length }} Schubladen{% if preview.specification.split_into_compartments %} mit jeweils zwei Unterfächern ({{ preview.items|length * 3 }} Lagerplätze insgesamt){% endif %} · {% if preview.has_conflicts %}Konflikte gefunden{% else %}bereit zum Anlegen{% endif %}</p></div></div>
       <div class="table-scroll"><table><thead><tr><th>Kennung</th><th>Bezeichnung</th><th>Prüfung</th></tr></thead><tbody>{% for item in preview.items %}<tr><td>{{ item.draft.code }}</td><td>{{ item.draft.name }}</td><td>{% if item.conflict %}<span class="error-text">{{ item.conflict }}</span>{% else %}<span class="success-text">Frei</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
-      {% if not preview.has_conflicts %}<form method="post" action="/locations/magazine/create"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">{% for key, value in values.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}<button class="button" type="submit">{{ preview.items|length }} Lagerplätze anlegen</button></form>{% endif %}
+      {% if not preview.has_conflicts %}<form method="post" action="/locations/magazine/create"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">{% for key, value in values.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}<button class="button" type="submit">{% if preview.specification.split_into_compartments %}{{ preview.items|length * 3 }} Lagerplätze{% else %}{{ preview.items|length }} Lagerplätze{% endif %} anlegen</button></form>{% endif %}
     </section>
   {% endif %}
 {% endblock %}

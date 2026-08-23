@@ -91,6 +91,7 @@ class BatchRequest(BaseModel):
     name_pattern: str = Field(
         default="Schublade {number_padded}", min_length=1, max_length=120
     )
+    split_into_compartments: bool = False
 
 
 class BatchPreviewItemResponse(BaseModel):

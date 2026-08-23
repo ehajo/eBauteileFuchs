@@ -8,6 +8,15 @@ Semantic Versioning.
 
 ### Added
 
+- M2-Artikelverwaltung mit Herstellern, Kategorien, flexiblen technischen
+  Eigenschaften, Lieferantenartikelnummern und lokaler UND-Suche.
+- Vierstufige Dublettenerkennung für Lieferantennummern, exakte und normalisierte
+  Herstelleridentitäten sowie bewusst bestätigbare Ähnlichkeitswarnungen.
+- Responsive Artikelübersicht, Detail- und Bearbeitungsformulare sowie
+  entsprechende `/api/v1`-Ressourcen.
+- Kompaktes Lagerplatzetikett mit 35 × 13 mm für kleine Magazin-Schubladen.
+- Direktes Anlegen eines Unterplatzes aus einer Lagerplatzdetailseite und
+  optionale Unterteilung jeder Magazin-Schublade in Unterfach A und B.
 - M1-Lagerplatzverwaltung mit System- und eigenen Typen, Hierarchie, Pfadansicht,
   Bearbeitung und kontrollierter Deaktivierung.
 - Atomarer Magazin-Assistent mit Vorschau und Voreinstellung für 60 Schubladen.

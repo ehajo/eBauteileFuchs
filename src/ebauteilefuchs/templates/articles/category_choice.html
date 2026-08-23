@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Kategorie wählen – {{ branding.product_name }}{% endblock %}
+{% block content %}
+  <div class="page-heading"><div><p class="eyebrow">Neuer Artikel</p><h1>Was möchtest du anlegen?</h1><p class="lead">Die Kategorie bestimmt die vorgeschlagenen technischen Eigenschaften.</p></div></div>
+  <div class="choice-grid">
+    {% for category in categories %}<a class="choice-card" href="/articles/new?category_id={{ category.id }}"><strong>{{ category.name }}</strong><span>{{ category.description or 'Typische Eigenschaften passend erfassen' }}</span></a>{% endfor %}
+  </div>
+{% endblock %}

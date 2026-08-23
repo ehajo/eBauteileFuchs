@@ -19,9 +19,18 @@ def test_empty_database_upgrades_and_downgrades(monkeypatch, tmp_path: Path) -> 
         revision = connection.execute(
             text("SELECT version_num FROM alembic_version")
         ).scalar_one()
-    assert revision == "0002_m1_locations"
+    assert revision == "0003_m2_articles"
     inspector = inspect(engine)
-    assert {"location", "location_type"} <= set(inspector.get_table_names())
+    assert {
+        "article",
+        "article_attribute",
+        "category",
+        "location",
+        "location_type",
+        "manufacturer",
+        "supplier",
+        "supplier_part",
+    } <= set(inspector.get_table_names())
     with engine.connect() as connection:
         assert (
             connection.execute(text("SELECT COUNT(*) FROM location_type")).scalar() == 8
@@ -37,16 +46,17 @@ def test_empty_database_upgrades_and_downgrades(monkeypatch, tmp_path: Path) -> 
     engine.dispose()
 
 
-def test_existing_m0_database_upgrades_to_m1(monkeypatch, tmp_path: Path) -> None:
-    database_path = tmp_path / "new-data-directory" / "existing-m0.db"
+def test_existing_m1_database_upgrades_to_m2(monkeypatch, tmp_path: Path) -> None:
+    database_path = tmp_path / "new-data-directory" / "existing-m1.db"
     database_url = f"sqlite+pysqlite:///{database_path.as_posix()}"
     monkeypatch.setenv("EBAUTEILEFUCHS_APP_ENV", "test")
     monkeypatch.setenv("EBAUTEILEFUCHS_DATABASE_URL", database_url)
     alembic_config = Config("alembic.ini")
 
-    command.upgrade(alembic_config, "0001_m0_baseline")
+    command.upgrade(alembic_config, "0002_m1_locations")
     engine = create_engine(database_url)
-    assert "location" not in inspect(engine).get_table_names()
+    assert "location" in inspect(engine).get_table_names()
+    assert "article" not in inspect(engine).get_table_names()
 
     command.upgrade(alembic_config, "head")
     with engine.connect() as connection:
@@ -54,9 +64,12 @@ def test_existing_m0_database_upgrades_to_m1(monkeypatch, tmp_path: Path) -> Non
             connection.execute(
                 text("SELECT version_num FROM alembic_version")
             ).scalar_one()
-            == "0002_m1_locations"
+            == "0003_m2_articles"
         )
-        assert (
-            connection.execute(text("SELECT COUNT(*) FROM location_type")).scalar() == 8
-        )
+        assert connection.execute(text("SELECT COUNT(*) FROM category")).scalar() == 10
+        assert connection.execute(text("SELECT COUNT(*) FROM supplier")).scalar() == 1
+
+    command.downgrade(alembic_config, "0002_m1_locations")
+    assert "location" in inspect(engine).get_table_names()
+    assert "article" not in inspect(engine).get_table_names()
     engine.dispose()

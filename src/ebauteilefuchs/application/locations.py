@@ -321,6 +321,15 @@ class LocationService:
             self._validate_type_and_parent(
                 uow, specification.location_type_id, specification.parent_id
             )
+            compartment_type = None
+            if specification.split_into_compartments:
+                compartment_type = self._require_type(
+                    uow.locations.get_type_by_code("compartment")
+                )
+                if not compartment_type.is_active:
+                    raise LocationTypeNotFoundError(
+                        "Der Lagerplatztyp Unterfach ist deaktiviert."
+                    )
             normalized_codes = [normalize_location_code(draft.code) for draft in drafts]
             if len(set(normalized_codes)) != len(normalized_codes):
                 raise BatchConflictError(
@@ -355,6 +364,23 @@ class LocationService:
                 )
                 uow.locations.add(location)
                 created_ids.append(location.id)
+                if compartment_type is not None:
+                    for compartment_code in ("A", "B"):
+                        compartment = Location(
+                            id=uuid4(),
+                            code=compartment_code,
+                            normalized_code=normalize_location_code(compartment_code),
+                            name=f"Unterfach {compartment_code}",
+                            location_type_id=compartment_type.id,
+                            parent_id=location.id,
+                            description=None,
+                            is_active=True,
+                            qr_token=self._new_qr_token(uow),
+                            created_at=now,
+                            updated_at=now,
+                        )
+                        uow.locations.add(compartment)
+                        created_ids.append(compartment.id)
             uow.commit()
         return [self.get(location_id) for location_id in created_ids]
 
@@ -366,6 +392,12 @@ class LocationService:
     def render_single_label(self, location_id: UUID, base_url: str) -> bytes:
         details = self.get(location_id)
         return self._require_renderer().render_single(
+            self._label_data(details, base_url)
+        )
+
+    def render_compact_label(self, location_id: UUID, base_url: str) -> bytes:
+        details = self.get(location_id)
+        return self._require_renderer().render_compact(
             self._label_data(details, base_url)
         )
 

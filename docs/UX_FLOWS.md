@@ -117,6 +117,11 @@ erzeugt noch keine Bewegung.
 
 ## 5. Suche und Artikel
 
+**M2-Stand:** Artikelübersicht, lokale Suche, Kategoriewahl, typische und freie
+Eigenschaften, Hersteller-/Lieferantennummern, Detailseite, Bearbeitung und
+Dublettenwarnungen sind responsive umgesetzt. Bestand, Bewegungen und die
+Ein-/Auslagerungsaktionen in den nachfolgenden Abläufen folgen mit M3.
+
 ### Globale Suche
 
 Das Suchfeld steht oben, erhält auf der Suchseite automatisch Fokus und startet
@@ -142,6 +147,11 @@ Dublettenerkennung aus.
 responsive serverseitige Oberfläche umgesetzt. Die Baumansicht dient am
 Smartphone zugleich als eingerückte Pfadübersicht; Detailseiten zeigen einen
 expliziten navigierbaren Brotkrumenpfad.
+
+Aus der Detailseite kann ein Unterplatz mit bereits ausgewähltem Elternknoten
+angelegt werden. Der Magazin-Assistent kann jede Schublade zusätzlich atomar in
+Unterfach A und B gliedern. Für 60er-Kleinteilemagazine steht neben dem
+Standardetikett ein reduziertes 35 × 13-mm-QR-Etikett bereit.
 
 ### Hierarchie verwalten
 

@@ -5,19 +5,31 @@ from fastapi.responses import JSONResponse
 
 from ebauteilefuchs.domain.errors import (
     ActiveChildrenError,
+    ArticleNotFoundError,
     BatchConflictError,
     DomainError,
+    DuplicateArticleError,
     DuplicateLocationCodeError,
+    DuplicateReferenceError,
     InactiveLocationError,
     LocationCycleError,
     LocationNotFoundError,
     LocationTypeNotFoundError,
+    ReferenceNotFoundError,
     ValidationError,
 )
 
 
 def domain_error_response(_: Request, error: DomainError) -> JSONResponse:
-    if isinstance(error, (LocationNotFoundError, LocationTypeNotFoundError)):
+    if isinstance(
+        error,
+        (
+            ArticleNotFoundError,
+            LocationNotFoundError,
+            LocationTypeNotFoundError,
+            ReferenceNotFoundError,
+        ),
+    ):
         response_status = status.HTTP_404_NOT_FOUND
     elif isinstance(
         error,
@@ -25,6 +37,8 @@ def domain_error_response(_: Request, error: DomainError) -> JSONResponse:
             ActiveChildrenError,
             BatchConflictError,
             DuplicateLocationCodeError,
+            DuplicateArticleError,
+            DuplicateReferenceError,
             InactiveLocationError,
             LocationCycleError,
         ),
@@ -34,7 +48,13 @@ def domain_error_response(_: Request, error: DomainError) -> JSONResponse:
         response_status = status.HTTP_422_UNPROCESSABLE_CONTENT
     else:
         response_status = status.HTTP_400_BAD_REQUEST
-    return JSONResponse(
-        status_code=response_status,
-        content={"detail": error.message, "code": error.code},
-    )
+    content: dict = {"detail": error.message, "code": error.code}
+    if isinstance(error, DuplicateArticleError):
+        content.update(
+            {
+                "candidate_ids": list(error.candidate_ids),
+                "match_level": error.match_level,
+                "can_override": error.can_override,
+            }
+        )
+    return JSONResponse(status_code=response_status, content=content)

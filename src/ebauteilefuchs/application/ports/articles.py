@@ -1,0 +1,96 @@
+"""Persistence ports used by the M2 article application service."""
+
+from types import TracebackType
+from typing import Protocol
+from uuid import UUID
+
+from ebauteilefuchs.domain.articles import (
+    Article,
+    ArticleAttribute,
+    AttributeDefinition,
+    Category,
+    CategoryAttribute,
+    Manufacturer,
+    Supplier,
+    SupplierPart,
+)
+
+
+class ArticleRepository(Protocol):
+    def list_manufacturers(
+        self, *, include_inactive: bool = False
+    ) -> list[Manufacturer]: ...
+    def get_manufacturer(self, manufacturer_id: UUID) -> Manufacturer | None: ...
+    def get_manufacturer_by_normalized(
+        self, normalized_name: str
+    ) -> Manufacturer | None: ...
+    def add_manufacturer(self, manufacturer: Manufacturer) -> None: ...
+    def update_manufacturer(self, manufacturer: Manufacturer) -> None: ...
+
+    def list_categories(self, *, include_inactive: bool = False) -> list[Category]: ...
+    def get_category(self, category_id: UUID) -> Category | None: ...
+    def add_category(self, category: Category) -> None: ...
+    def update_category(self, category: Category) -> None: ...
+    def list_category_attributes(
+        self, category_id: UUID
+    ) -> list[CategoryAttribute]: ...
+    def get_attribute_definition(
+        self, definition_id: UUID
+    ) -> AttributeDefinition | None: ...
+
+    def list_suppliers(self, *, include_inactive: bool = False) -> list[Supplier]: ...
+    def get_supplier(self, supplier_id: UUID) -> Supplier | None: ...
+
+    def list_articles(self, *, include_inactive: bool = True) -> list[Article]: ...
+    def search_articles(
+        self, tokens: tuple[str, ...], *, include_inactive: bool = False
+    ) -> list[Article]: ...
+    def get_article(self, article_id: UUID) -> Article | None: ...
+    def add_article(self, article: Article) -> None: ...
+    def update_article(self, article: Article) -> None: ...
+    def list_article_attributes(self, article_id: UUID) -> list[ArticleAttribute]: ...
+    def replace_article_attributes(
+        self, article_id: UUID, values: list[ArticleAttribute]
+    ) -> None: ...
+    def list_supplier_parts(self, article_id: UUID) -> list[SupplierPart]: ...
+    def replace_supplier_parts(
+        self, article_id: UUID, values: list[SupplierPart]
+    ) -> None: ...
+    def find_supplier_part(
+        self,
+        supplier_id: UUID,
+        normalized_number: str,
+        *,
+        exclude_article_id: UUID | None = None,
+    ) -> Article | None: ...
+    def find_exact_manufacturer_part(
+        self,
+        manufacturer_name: str,
+        part_number: str,
+        *,
+        exclude_article_id: UUID | None = None,
+    ) -> list[Article]: ...
+    def find_normalized_manufacturer_part(
+        self,
+        normalized_manufacturer: str,
+        normalized_part_number: str,
+        *,
+        exclude_article_id: UUID | None = None,
+    ) -> list[Article]: ...
+
+
+class ArticleUnitOfWork(Protocol):
+    articles: ArticleRepository
+
+    def __enter__(self) -> "ArticleUnitOfWork": ...
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None: ...
+    def commit(self) -> None: ...
+
+
+class ArticleUnitOfWorkFactory(Protocol):
+    def __call__(self) -> ArticleUnitOfWork: ...

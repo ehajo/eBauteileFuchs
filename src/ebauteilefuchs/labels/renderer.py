@@ -49,6 +49,18 @@ class ReportLabLabelRenderer:
         document.save()
         return output.getvalue()
 
+    def render_compact(self, label: LabelData) -> bytes:
+        """Render a 35 x 13 mm label for small parts-magazine drawers."""
+
+        output = BytesIO()
+        page_size = (35 * mm, 13 * mm)
+        document = Canvas(output, pagesize=page_size)
+        self._set_metadata(document, "Kompaktes Magazin-Etikett")
+        self._draw_compact_label(document, label, *page_size)
+        document.showPage()
+        document.save()
+        return output.getvalue()
+
     def render_sheet(self, labels: list[LabelData], layout: LabelSheetLayout) -> bytes:
         self._validate_layout(layout)
         output = BytesIO()
@@ -206,13 +218,59 @@ class ReportLabLabelRenderer:
         document.drawString(text_x, y + padding, "eBauteileFuchs | eHaJo")
         document.restoreState()
 
+    def _draw_compact_label(
+        self, document: Canvas, label: LabelData, width: float, height: float
+    ) -> None:
+        padding = 0.7 * mm
+        qr_size = height - 2 * padding
+        document.saveState()
+        document.setStrokeColor(HexColor("#c7d0d8"))
+        document.setLineWidth(0.15)
+        document.rect(0.1, 0.1, width - 0.2, height - 0.2, stroke=1, fill=0)
+        document.drawImage(
+            ImageReader(self._qr_png(label.qr_url, compact=True)),
+            padding,
+            padding,
+            qr_size,
+            qr_size,
+            preserveAspectRatio=True,
+            mask="auto",
+        )
+        text_x = padding + qr_size + 1 * mm
+        text_width = width - text_x - padding
+        document.setFillColor(HexColor(BRANDING.primary_color))
+        document.setFont("Helvetica-Bold", 8)
+        document.drawString(
+            text_x,
+            height - 3.8 * mm,
+            self._fit_text(label.code, "Helvetica-Bold", 8, text_width),
+        )
+        document.setFillColor(HexColor("#17212b"))
+        document.setFont("Helvetica-Bold", 5.2)
+        document.drawString(
+            text_x,
+            height - 6.8 * mm,
+            self._fit_text(label.name, "Helvetica-Bold", 5.2, text_width),
+        )
+        document.setFillColor(HexColor("#4b5966"))
+        document.setFont("Helvetica", 4.2)
+        document.drawString(text_x, 2.5 * mm, label.qr_short_code)
+        document.setFillColor(HexColor(BRANDING.secondary_color))
+        document.setFont("Helvetica-Bold", 3.8)
+        document.drawString(text_x, 0.9 * mm, "eBauteileFuchs")
+        document.restoreState()
+
     @staticmethod
-    def _qr_png(payload: str) -> BytesIO:
+    def _qr_png(payload: str, *, compact: bool = False) -> BytesIO:
         qr = qrcode.QRCode(
             version=None,
-            error_correction=qrcode.constants.ERROR_CORRECT_M,
-            box_size=8,
-            border=2,
+            error_correction=(
+                qrcode.constants.ERROR_CORRECT_L
+                if compact
+                else qrcode.constants.ERROR_CORRECT_M
+            ),
+            box_size=12 if compact else 8,
+            border=1 if compact else 2,
         )
         qr.add_data(payload)
         qr.make(fit=True)

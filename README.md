@@ -9,10 +9,10 @@ für Elektronikbauteile, Kleinteile und private Bastellager.
 
 ## Projektstatus
 
-Meilenstein M1 ist umgesetzt: Neben dem technischen Fundament stehen jetzt eine
-hierarchische Lagerplatzverwaltung, ein Magazin-Assistent für fortlaufend
-nummerierte Schubladen, stabile Lagerplatz-QR-Codes und PDF-Etiketten bereit.
-Artikel- und Bestandsfunktionen folgen erst in späteren Meilensteinen.
+Meilenstein M2 ist umgesetzt: Neben der hierarchischen Lagerplatzverwaltung sind
+jetzt ein lokaler Artikelkatalog, Hersteller und Kategorien, flexible technische
+Eigenschaften, Lieferantenartikelnummern, Dublettenerkennung und Artikelsuche
+vorhanden. Bestandsbuchungen folgen erst mit M3.
 
 ## Schnellstart unter Windows
 
@@ -55,6 +55,7 @@ docker compose up --build
 Nach dem Start:
 
 - Startseite: <http://127.0.0.1:8008>
+- Artikel: <http://127.0.0.1:8008/articles>
 - Lagerplätze: <http://127.0.0.1:8008/locations>
 - Health-Check: <http://127.0.0.1:8008/api/v1/health>
 - OpenAPI: <http://127.0.0.1:8008/docs>
@@ -73,8 +74,20 @@ python -m alembic upgrade head
 python -m ebauteilefuchs
 ```
 
-`requirements.lock` und `requirements-dev.lock` halten die für M1 geprüften
+`requirements.lock` und `requirements-dev.lock` halten die für M2 geprüften
 Abhängigkeiten reproduzierbar fest.
+
+## Artikelverwaltung
+
+Unter **Artikel** können Bauteile mit Original-Herstellerartikelnummer,
+Kategorie, Beschreibung, Links, Notizen, typischen oder freien Eigenschaften und
+mehreren Lieferantenartikelnummern angelegt werden. Vor dem Speichern prüft
+eBauteileFuchs sichere Identitäten und ähnliche Kandidaten. Ähnlichkeitswarnungen
+müssen ausdrücklich bestätigt werden; sichere Treffer können nicht als neuer
+Artikel übergangen werden.
+
+Die lokale Suche verknüpft mehrere Suchwörter mit UND und berücksichtigt Namen,
+Hersteller, Artikelnummern, Eigenschaften, Notizen und Lieferantennummern.
 
 ## Lagerplätze und Etiketten
 
@@ -88,6 +101,10 @@ mehrere Lagerplätze für einen A4-Sammelbogen ausgewählt werden. Das Standardr
 ist 70 × 36 mm mit 24 Etiketten pro A4-Seite (3 × 8). Für dauerhaft gedruckte
 Smartphone-QR-Codes sollte `EBAUTEILEFUCHS_PUBLIC_BASE_URL` auf eine im lokalen
 Netz stabile Adresse gesetzt werden; die geführte Verbindungsseite folgt in M5.
+
+Für kleine 60er-Magazine steht auf der Lagerplatzdetailseite zusätzlich ein
+35 × 13-mm-Kompaktetikett bereit. Im Magazin-Assistenten können Schubladen
+optional automatisch mit den Unterfächern A und B angelegt werden.
 
 Qualitätsprüfung:
 

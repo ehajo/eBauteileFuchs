@@ -100,7 +100,11 @@ Mouser-API-Nutzungsbedingungen auf erlaubte Cache-Dauer zu prüfen.
 
 ### B5. Suchähnlichkeit (vor M2/M5)
 
-**Übernommen:** konservative transparente Warnung, nie automatische Vereinigung.
+**Abgeschlossen für M2:** Die konservative transparente Warnung ist als Stufe 4
+umgesetzt. Sie vergleicht normalisierte Bezeichnungen nur innerhalb derselben
+Kategorie, legt niemals automatisch zusammen und verlangt vor einem neuen
+Artikel eine ausdrückliche Bestätigung. Die globale Suchgewichtung wird in M5
+weiter verfeinert.
 
 **Vorschlag:** Stufe 4 ist eine transparente, konservative Warnung aus
 normalisierten Tokens und übereinstimmenden Kerneigenschaften, ohne externe
@@ -182,6 +186,6 @@ werden, wenn die Produktabsicht abweicht:
 
 ## Freigabestatus
 
-M0 ist abgenommen. M1 wurde ausdrücklich freigegeben und umgesetzt; die lokale
-Abnahme steht aus. M2 und spätere Meilensteine benötigen weiterhin eine
-ausdrückliche Freigabe. Für M1 sind keine Entscheidungen mehr offen.
+M0 und M1 sind abgenommen. M2 wurde ausdrücklich freigegeben und umgesetzt; die
+lokale Abnahme steht aus. M3 und spätere Meilensteine benötigen weiterhin eine
+ausdrückliche Freigabe. Für M2 sind keine Entscheidungen mehr offen.

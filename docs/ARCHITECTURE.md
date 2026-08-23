@@ -91,6 +91,13 @@ In M1 umgesetzt sind `/location-types`, `/locations`, `/locations/tree`,
 denselben `LocationService` und dieselbe SQLAlchemy-Unit-of-Work. QR und PDF sind
 über einen eigenen Renderer-Port angebunden und benötigen keinen Netzzugriff.
 
+In M2 ergänzt wurden `/manufacturers`, `/categories`, Kategorieeigenschaften,
+`/suppliers` und `/articles`. HTML und REST verwenden denselben `ArticleService`.
+SQLAlchemy-Modelle bleiben im Persistenzadapter; Dublettenstufen,
+Normalisierungsregeln, URL-Validierung und Aufbau des portablen Suchtexts liegen
+in Domain und Application Service. Die lokale Suche nutzt normalisierte
+Suchtexte und eine portable SQLite-`LIKE`-Strategie mit UND-Verknüpfung.
+
 HTML-spezifische HTMX-Fragmente liegen nicht unter `/api`. OpenAPI dokumentiert
 die API, gilt vor Version 1.0 aber als intern. Schreibzugriffe sind im lokalen Netz
 ohne Benutzerkonten trotzdem gegen Cross-Site Requests, versehentliche

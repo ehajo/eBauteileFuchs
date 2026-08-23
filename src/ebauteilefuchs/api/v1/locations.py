@@ -81,6 +81,7 @@ def _batch_specification(payload: BatchRequest) -> BatchSpecification:
         padding=payload.padding,
         code_pattern=payload.code_pattern,
         name_pattern=payload.name_pattern,
+        split_into_compartments=payload.split_into_compartments,
     )
 
 
@@ -277,6 +278,23 @@ def single_location_label(
         media_type="application/pdf",
         headers={
             "Content-Disposition": f'attachment; filename="location-{location_id}.pdf"'
+        },
+    )
+
+
+@router.get("/locations/{location_id}/compact-label.pdf")
+def compact_location_label(
+    location_id: UUID,
+    request: Request,
+    service: LocationServiceDependency,
+) -> Response:
+    return Response(
+        service.render_compact_label(location_id, request_base_url(request)),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="compact-location-{location_id}.pdf"'
+            )
         },
     )
 

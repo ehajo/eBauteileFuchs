@@ -41,3 +41,32 @@ class ActiveChildrenError(DomainError):
 
 class BatchConflictError(DomainError):
     code = "batch_conflict"
+
+
+class ArticleNotFoundError(DomainError):
+    code = "article_not_found"
+
+
+class ReferenceNotFoundError(DomainError):
+    code = "reference_not_found"
+
+
+class DuplicateReferenceError(DomainError):
+    code = "duplicate_reference"
+
+
+class DuplicateArticleError(DomainError):
+    code = "duplicate_article"
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        candidate_ids: tuple[str, ...],
+        match_level: int,
+        can_override: bool,
+    ) -> None:
+        super().__init__(message)
+        self.candidate_ids = candidate_ids
+        self.match_level = match_level
+        self.can_override = can_override

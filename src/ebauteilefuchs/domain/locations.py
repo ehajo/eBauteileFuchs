@@ -89,6 +89,7 @@ class BatchSpecification:
     padding: int = 2
     code_pattern: str = "{number_padded}"
     name_pattern: str = "Schublade {number_padded}"
+    split_into_compartments: bool = False
 
     def validate(self) -> None:
         if not 1 <= self.count <= 200:

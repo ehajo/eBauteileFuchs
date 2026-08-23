@@ -2,6 +2,9 @@
 
 Status: Grundsätzlich freigegeben am 23. August 2026
 
+Umsetzungsstand: Die Kapitel 3 bis 6 sind mit M1/M2 realisiert. Bestand und
+Journal ab Kapitel 7 folgen erst mit M3.
+
 ## 1. Konventionen
 
 - Primärschlüssel: UUID, als kanonischer Text persistiert.
@@ -54,6 +57,9 @@ Regeln:
 - In M1 blockieren aktive Unterplätze die Deaktivierung. Ab M2/M3 verhindern
   zusätzlich Artikelzuordnungen, Bestand und Historie eine Löschung; Lagerplätze
   werden grundsätzlich nur deaktiviert.
+- Der Magazin-Assistent kann unter jeder erzeugten Schublade atomar die
+  Unterfächer `A` und `B` anlegen; dafür ist keine zusätzliche Tabellenspalte
+  erforderlich, weil dieselbe freie Hierarchie verwendet wird.
 
 ## 4. Artikelidentität
 
