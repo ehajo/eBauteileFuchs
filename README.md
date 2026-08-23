@@ -9,10 +9,10 @@ für Elektronikbauteile, Kleinteile und private Bastellager.
 
 ## Projektstatus
 
-Meilenstein M0 ist umgesetzt: Das technische Fundament, eine gebrandete
-Startseite, SQLite-/Alembic-Grundlage und ein Health-Check sind vorhanden.
-Lagerplätze, Artikel und Bestandsfunktionen beginnen erst in den späteren
-Meilensteinen und sind noch nicht verfügbar.
+Meilenstein M1 ist umgesetzt: Neben dem technischen Fundament stehen jetzt eine
+hierarchische Lagerplatzverwaltung, ein Magazin-Assistent für fortlaufend
+nummerierte Schubladen, stabile Lagerplatz-QR-Codes und PDF-Etiketten bereit.
+Artikel- und Bestandsfunktionen folgen erst in späteren Meilensteinen.
 
 ## Schnellstart unter Windows
 
@@ -55,6 +55,7 @@ docker compose up --build
 Nach dem Start:
 
 - Startseite: <http://127.0.0.1:8008>
+- Lagerplätze: <http://127.0.0.1:8008/locations>
 - Health-Check: <http://127.0.0.1:8008/api/v1/health>
 - OpenAPI: <http://127.0.0.1:8008/docs>
 
@@ -66,14 +67,27 @@ Verbindungsseite samt Netzwerkadressauswahl und QR-Code folgt erst in M5.
 Nach Aktivierung einer Python-3.12-Umgebung:
 
 ```text
-python -m pip install -r requirements-dev.lock
+python -m pip install -r requirements.lock -r requirements-dev.lock
 python -m pip install --no-deps --no-build-isolation -e .
 python -m alembic upgrade head
 python -m ebauteilefuchs
 ```
 
-`requirements.lock` und `requirements-dev.lock` halten die für M0 geprüften
+`requirements.lock` und `requirements-dev.lock` halten die für M1 geprüften
 Abhängigkeiten reproduzierbar fest.
+
+## Lagerplätze und Etiketten
+
+Unter **Lagerplätze** können Räume, Schränke, Regale, Magazine, Schubladen,
+Unterfächer, Boxen und Kisten hierarchisch angelegt werden. Eigene Typen lassen
+sich unter **Typen** ergänzen. Der Magazin-Assistent erzeugt standardmäßig 60
+Schubladen (`01` bis `60`) erst nach einer konfliktfreien Vorschau atomar.
+
+Die Detailseite bietet ein universelles Einzeletikett. In der Baumansicht können
+mehrere Lagerplätze für einen A4-Sammelbogen ausgewählt werden. Das Standardraster
+ist 70 × 36 mm mit 24 Etiketten pro A4-Seite (3 × 8). Für dauerhaft gedruckte
+Smartphone-QR-Codes sollte `EBAUTEILEFUCHS_PUBLIC_BASE_URL` auf eine im lokalen
+Netz stabile Adresse gesetzt werden; die geführte Verbindungsseite folgt in M5.
 
 Qualitätsprüfung:
 

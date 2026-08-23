@@ -1,8 +1,8 @@
 # Implementierungsplan – eBauteileFuchs
 
 Status: Grundsätzlich freigegeben am 23. August 2026. M0 ist umgesetzt und lokal
-verifiziert; M1 und spätere Meilensteine bleiben bis zur ausdrücklichen Freigabe
-gesperrt.
+verifiziert. M1 wurde ausdrücklich freigegeben und am 23. August 2026 umgesetzt;
+die lokale Abnahme steht aus. M2 und spätere Meilensteine bleiben gesperrt.
 
 ## 1. Vorgehensmodell
 
@@ -29,12 +29,16 @@ sein.
 Abnahme: App startet ohne Cloudzugriff, Test/Lint laufen, Daten und Geheimnisse
 werden nicht versioniert, Startseite zeigt korrektes Branding.
 
-### M1 – Lagerplätze und QR
+### M1 – Lagerplätze und QR (umgesetzt am 23. August 2026, Abnahme ausstehend)
 
 - Lagerplatztypen, Baumregeln, CRUD und Deaktivierung.
 - Magazin-Assistent mit atomarer Vorschau/Erzeugung für 60 Schubladen.
 - Stabile QR-Tokens, Einzel- und Sammel-PDF nach festgelegtem Etikettenformat.
 - Responsive Baum-/Pfadnavigation und REST-Ressourcen.
+
+Umsetzungsstand: vollständig implementiert einschließlich Alembic-Revision
+`0002_m1_locations`, HTML-Oberfläche, `/api/v1`-Ressourcen, QR-Auflösung,
+PDF-Renderer und automatisierter Zyklus-, Konflikt-, Migrations- und Rendertests.
 
 Abnahmekriterien: Projektauftrag 7 und 8; zusätzlich Zyklus-, Konflikt- und
 PDF-Render-Tests.

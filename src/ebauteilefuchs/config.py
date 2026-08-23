@@ -3,6 +3,7 @@
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlsplit
 
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -30,6 +31,7 @@ class Settings(BaseSettings):
     port: int = Field(default=8008, ge=1, le=65535)
     data_dir: Path | None = None
     database_url: str | None = None
+    public_base_url: str | None = None
     log_level: str = "INFO"
     mouser_api_key: SecretStr | None = None
 
@@ -42,6 +44,19 @@ class Settings(BaseSettings):
             msg = f"log_level must be one of {', '.join(sorted(allowed))}"
             raise ValueError(msg)
         return level
+
+    @field_validator("public_base_url")
+    @classmethod
+    def validate_public_base_url(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+        cleaned = value.strip().rstrip("/")
+        parsed = urlsplit(cleaned)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            raise ValueError("public_base_url must be an absolute HTTP(S) URL")
+        if parsed.username or parsed.password:
+            raise ValueError("public_base_url must not contain credentials")
+        return cleaned
 
     @property
     def resolved_data_dir(self) -> Path:

@@ -138,3 +138,14 @@ und Port-Protokolle verwenden. `persistence`, `suppliers`, `platform`, `web` und
 Domainmodulen importiert. Diese Regeln sollen später mit Tests beziehungsweise
 einem Import-Linter abgesichert werden, sofern dafür keine unverhältnismäßige
 Zusatzabhängigkeit nötig ist.
+
+## In M1 realisierte Ergänzungen
+
+- `domain/locations.py` und `application/locations.py` enthalten Regeln und Use
+  Cases der Lagerhierarchie.
+- `application/ports/locations.py` und `application/ports/labels.py` definieren
+  die Persistenz- und Ausgabeverträge.
+- `persistence/locations.py` kapselt Repository und Unit of Work;
+  `labels/renderer.py` erzeugt QR-SVG und PDF vollständig offline.
+- `api/v1/locations.py`, `web/locations.py` und `templates/locations/` bilden die
+  JSON- beziehungsweise HTML-Eingänge ab.

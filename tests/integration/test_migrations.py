@@ -5,9 +5,7 @@ from alembic.config import Config
 from sqlalchemy import create_engine, inspect, text
 
 
-def test_baseline_migration_upgrades_and_downgrades(
-    monkeypatch, tmp_path: Path
-) -> None:
+def test_empty_database_upgrades_and_downgrades(monkeypatch, tmp_path: Path) -> None:
     database_path = tmp_path / "migration.db"
     database_url = f"sqlite+pysqlite:///{database_path.as_posix()}"
     monkeypatch.setenv("EBAUTEILEFUCHS_APP_ENV", "test")
@@ -21,7 +19,13 @@ def test_baseline_migration_upgrades_and_downgrades(
         revision = connection.execute(
             text("SELECT version_num FROM alembic_version")
         ).scalar_one()
-    assert revision == "0001_m0_baseline"
+    assert revision == "0002_m1_locations"
+    inspector = inspect(engine)
+    assert {"location", "location_type"} <= set(inspector.get_table_names())
+    with engine.connect() as connection:
+        assert (
+            connection.execute(text("SELECT COUNT(*) FROM location_type")).scalar() == 8
+        )
 
     command.downgrade(alembic_config, "base")
     assert "alembic_version" in inspect(engine).get_table_names()
@@ -29,5 +33,30 @@ def test_baseline_migration_upgrades_and_downgrades(
         assert (
             connection.execute(text("SELECT COUNT(*) FROM alembic_version")).scalar()
             == 0
+        )
+    engine.dispose()
+
+
+def test_existing_m0_database_upgrades_to_m1(monkeypatch, tmp_path: Path) -> None:
+    database_path = tmp_path / "new-data-directory" / "existing-m0.db"
+    database_url = f"sqlite+pysqlite:///{database_path.as_posix()}"
+    monkeypatch.setenv("EBAUTEILEFUCHS_APP_ENV", "test")
+    monkeypatch.setenv("EBAUTEILEFUCHS_DATABASE_URL", database_url)
+    alembic_config = Config("alembic.ini")
+
+    command.upgrade(alembic_config, "0001_m0_baseline")
+    engine = create_engine(database_url)
+    assert "location" not in inspect(engine).get_table_names()
+
+    command.upgrade(alembic_config, "head")
+    with engine.connect() as connection:
+        assert (
+            connection.execute(
+                text("SELECT version_num FROM alembic_version")
+            ).scalar_one()
+            == "0002_m1_locations"
+        )
+        assert (
+            connection.execute(text("SELECT COUNT(*) FROM location_type")).scalar() == 8
         )
     engine.dispose()

@@ -68,9 +68,11 @@ QR plus lesbarer Kurzcode auf dem Etikett.
 
 ### B2. Etikettenformate (vor M1)
 
-**Teilweise abgeschlossen:** frei konfigurierbarer A4-Bogen und universelles
-Einzeletikett sind gesetzt. Ein konkretes Standardraster muss vor M1 anhand der
-tatsächlich verwendeten Etiketten benannt werden.
+**Abgeschlossen für M1:** frei konfigurierbarer A4-Bogen und universelles
+Einzeletikett sind umgesetzt. Als praxistauglicher Standard gilt das Raster
+70 × 36 mm mit 24 Etiketten pro A4-Seite (3 × 8), kompatibel zum verbreiteten
+Avery-Zweckform-Format 3475. Abweichende Bögen können über Ränder, Raster,
+Etikettengröße und Abstände im REST-Vertrag beschrieben werden.
 
 **Vorschlag für V1:** A4-Bogen frei konfigurierbar über Ränder, Spalten, Zeilen
 und Etikettengröße sowie ein universelles Einzeletikett. Ein konkretes häufig
@@ -180,6 +182,6 @@ werden, wenn die Produktabsicht abweicht:
 
 ## Freigabestatus
 
-M0 ist freigegeben. M1 und spätere Meilensteine benötigen weiterhin eine
-ausdrückliche Freigabe. Vor M1 ist lediglich das konkrete Standard-Etikettenraster
-aus B2 noch zu benennen; dies blockiert M0 nicht.
+M0 ist abgenommen. M1 wurde ausdrücklich freigegeben und umgesetzt; die lokale
+Abnahme steht aus. M2 und spätere Meilensteine benötigen weiterhin eine
+ausdrückliche Freigabe. Für M1 sind keine Entscheidungen mehr offen.

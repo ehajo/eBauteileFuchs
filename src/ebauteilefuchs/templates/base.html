@@ -22,7 +22,11 @@
         >
         <span class="brand__product">{{ branding.product_name }}</span>
       </a>
-      <span class="milestone-badge">Projektfundament M0</span>
+      <nav class="main-nav" aria-label="Hauptnavigation">
+        <a href="/locations">Lagerplätze</a>
+        <a href="/locations/types">Typen</a>
+      </nav>
+      <span class="milestone-badge">Lagerstruktur M1</span>
     </header>
     <main id="main-content" class="page-shell">
       {% block content %}{% endblock %}

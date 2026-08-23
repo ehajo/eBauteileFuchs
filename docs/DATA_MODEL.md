@@ -37,18 +37,23 @@ Eigene Typen dürfen ergänzt werden; verwendete Typen bleiben stabil.
 
 ### `location`
 
-`id`, `code`, `name`, `location_type_id`, `parent_id` (nullable), `description`,
-`is_active`, `qr_token`, `created_at`, `updated_at`.
+`id`, `code`, `normalized_code`, `name`, `location_type_id`, `parent_id`
+(nullable), `parent_scope`, `description`, `is_active`, `qr_token`, `created_at`,
+`updated_at`.
 
 Regeln:
 
-- `(parent_id, normalized_code)` ist eindeutig; für Wurzelknoten gilt eine
-  entsprechende partielle beziehungsweise service-seitig abgesicherte Regel.
+- `(parent_scope, normalized_code)` ist eindeutig. `parent_scope` enthält die
+  Eltern-UUID oder für Wurzelknoten den festen Wert `__root__`; ein Check
+  verhindert Abweichungen. Damit erzwingt auch SQLite die Geschwistereindeutigkeit
+  einschließlich der Wurzelebene.
 - Ein Knoten darf weder eigener Vorfahr sein noch unter einen Nachfahren
   verschoben werden.
 - `qr_token` ist stabil, zufällig und eindeutig. Anzeige-Code und Name dürfen sich
   ändern, ohne gedruckte Etiketten zu entwerten.
-- Ein Lagerplatz mit Bestand oder Historie wird nur deaktiviert.
+- In M1 blockieren aktive Unterplätze die Deaktivierung. Ab M2/M3 verhindern
+  zusätzlich Artikelzuordnungen, Bestand und Historie eine Löschung; Lagerplätze
+  werden grundsätzlich nur deaktiviert.
 
 ## 4. Artikelidentität
 

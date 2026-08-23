@@ -17,7 +17,7 @@ if [ ! -x .venv/bin/python ]; then
   "$PYTHON" -m venv .venv
 fi
 
-.venv/bin/python -m pip install -r requirements-dev.lock
+.venv/bin/python -m pip install -r requirements.lock -r requirements-dev.lock
 .venv/bin/python -m pip install --no-deps --no-build-isolation -e .
 .venv/bin/python -m alembic upgrade head
 exec .venv/bin/python -m ebauteilefuchs

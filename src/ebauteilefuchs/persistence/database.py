@@ -20,7 +20,8 @@ def _is_sqlite_url(database_url: str) -> bool:
     return database_url.startswith("sqlite")
 
 
-def _ensure_sqlite_parent(database_url: str) -> None:
+def ensure_sqlite_parent(database_url: str) -> None:
+    """Create the parent directory for a file-based SQLite database URL."""
     prefix = "sqlite+pysqlite:///"
     if not database_url.startswith(prefix):
         return
@@ -34,7 +35,7 @@ def create_database_engine(settings: Settings) -> Engine:
     """Create an engine with safe SQLite defaults for local use."""
 
     database_url = settings.resolved_database_url
-    _ensure_sqlite_parent(database_url)
+    ensure_sqlite_parent(database_url)
     kwargs: dict[str, Any] = {"pool_pre_ping": True}
 
     if _is_sqlite_url(database_url):

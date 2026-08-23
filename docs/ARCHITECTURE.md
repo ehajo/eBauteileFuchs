@@ -86,6 +86,11 @@ Die interne API beginnt unter `/api/v1`. Geplante Ressourcen:
 - `/suppliers/mouser/search`
 - `/exports/*`, `/backups` und `/connection`
 
+In M1 umgesetzt sind `/location-types`, `/locations`, `/locations/tree`,
+`/locations/batch` sowie QR- und PDF-Unterressourcen. HTML und REST verwenden
+denselben `LocationService` und dieselbe SQLAlchemy-Unit-of-Work. QR und PDF sind
+über einen eigenen Renderer-Port angebunden und benötigen keinen Netzzugriff.
+
 HTML-spezifische HTMX-Fragmente liegen nicht unter `/api`. OpenAPI dokumentiert
 die API, gilt vor Version 1.0 aber als intern. Schreibzugriffe sind im lokalen Netz
 ohne Benutzerkonten trotzdem gegen Cross-Site Requests, versehentliche

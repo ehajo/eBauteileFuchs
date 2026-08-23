@@ -48,7 +48,7 @@ function Test-LocalPortAvailable {
     }
 }
 
-& $VenvPython -m pip install -r requirements-dev.lock
+& $VenvPython -m pip install -r requirements.lock -r requirements-dev.lock
 Assert-LastExitCode
 & $VenvPython -m pip install --no-deps --no-build-isolation -e .
 Assert-LastExitCode

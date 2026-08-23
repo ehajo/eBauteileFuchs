@@ -138,6 +138,11 @@ Dublettenerkennung aus.
 
 ## 6. Lagerplätze
 
+**M1-Stand:** Die folgenden Hierarchie-, Magazin- und Etikettenabläufe sind als
+responsive serverseitige Oberfläche umgesetzt. Die Baumansicht dient am
+Smartphone zugleich als eingerückte Pfadübersicht; Detailseiten zeigen einen
+expliziten navigierbaren Brotkrumenpfad.
+
 ### Hierarchie verwalten
 
 Die Standardansicht zeigt einen aufklappbaren Baum und auf kleinen Bildschirmen

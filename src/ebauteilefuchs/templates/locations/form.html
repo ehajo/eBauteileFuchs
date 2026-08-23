@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ heading }} – {{ branding.product_name }}{% endblock %}
+{% block content %}
+  <div class="page-heading"><div><p class="eyebrow">Lagerstruktur</p><h1>{{ heading }}</h1></div></div>
+  {% if error %}<p class="notice notice--error" role="alert">{{ error }}</p>{% endif %}
+  <form class="form-card" method="post" action="{{ action }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="form-grid">
+      <label>Kennung <span class="required">Pflichtfeld</span><input name="code" maxlength="64" required autofocus value="{{ values.get('code', '') }}" placeholder="z. B. SCHRANK-1"></label>
+      <label>Bezeichnung <span class="required">Pflichtfeld</span><input name="name" maxlength="120" required value="{{ values.get('name', '') }}" placeholder="z. B. Bauteileschrank"></label>
+      <label>Typ <span class="required">Pflichtfeld</span><select name="location_type_id" required><option value="">Bitte wählen</option>{% for type in types %}<option value="{{ type.id }}" {% if values.get('location_type_id') == type.id|string %}selected{% endif %}>{{ type.name }}{% if not type.is_active %} (deaktiviert){% endif %}</option>{% endfor %}</select></label>
+      <label>Übergeordneter Lagerplatz<select name="parent_id"><option value="">Kein übergeordneter Lagerplatz</option>{% for parent in parents %}<option value="{{ parent.location.id }}" {% if values.get('parent_id') == parent.location.id|string %}selected{% endif %}>{{ parent.path | map(attribute='code') | join(' / ') }} · {{ parent.location.name }}</option>{% endfor %}</select></label>
+      <label class="form-field--wide">Beschreibung<textarea name="description" maxlength="1000" rows="4">{{ values.get('description', '') }}</textarea></label>
+    </div>
+    <div class="button-row"><button class="button" type="submit">{{ submit_label }}</button><a class="button button--ghost" href="/locations">Abbrechen</a></div>
+  </form>
+{% endblock %}

@@ -28,3 +28,14 @@ def test_settings_normalize_log_level() -> None:
 
 def test_default_port_is_8008() -> None:
     assert Settings().port == 8008
+
+
+def test_public_base_url_is_normalized_and_validated() -> None:
+    assert (
+        Settings(public_base_url=" http://lager.local:8008/ ").public_base_url
+        == "http://lager.local:8008"
+    )
+    with pytest.raises(ValidationError):
+        Settings(public_base_url="lager.local:8008")
+    with pytest.raises(ValidationError):
+        Settings(public_base_url="http://name:secret@lager.local:8008")
