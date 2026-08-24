@@ -16,9 +16,11 @@ from ebauteilefuchs.api.v1.articles import router as articles_api_router
 from ebauteilefuchs.api.v1.health import router as health_router
 from ebauteilefuchs.api.v1.inventory import router as inventory_api_router
 from ebauteilefuchs.api.v1.locations import router as locations_api_router
+from ebauteilefuchs.api.v1.suppliers import router as suppliers_api_router
 from ebauteilefuchs.application.articles import ArticleService
 from ebauteilefuchs.application.inventory import InventoryService
 from ebauteilefuchs.application.locations import LocationService
+from ebauteilefuchs.application.supplier_search import SupplierSearchService
 from ebauteilefuchs.branding import BRANDING
 from ebauteilefuchs.config import Settings, get_settings
 from ebauteilefuchs.domain.errors import DomainError
@@ -31,11 +33,15 @@ from ebauteilefuchs.persistence.database import (
 )
 from ebauteilefuchs.persistence.inventory import SqlAlchemyInventoryUnitOfWork
 from ebauteilefuchs.persistence.locations import SqlAlchemyLocationUnitOfWork
+from ebauteilefuchs.persistence.supplier_cache import SqlAlchemySupplierCache
+from ebauteilefuchs.suppliers.mouser import MouserAdapter
+from ebauteilefuchs.suppliers.mouser.client import MouserHttpClient
 from ebauteilefuchs.web.articles import router as articles_web_router
 from ebauteilefuchs.web.inventory import router as inventory_web_router
 from ebauteilefuchs.web.locations import router as locations_web_router
 from ebauteilefuchs.web.presentation import format_decimal
 from ebauteilefuchs.web.routes import router as web_router
+from ebauteilefuchs.web.suppliers import router as suppliers_web_router
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 
@@ -70,6 +76,26 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.inventory_service_factory = lambda: InventoryService(
         lambda: SqlAlchemyInventoryUnitOfWork(session_factory)
     )
+    mouser_key = (
+        runtime_settings.mouser_api_key.get_secret_value()
+        if runtime_settings.mouser_api_key
+        else None
+    )
+    app.state.supplier_adapter = MouserAdapter(
+        mouser_key,
+        client=(
+            MouserHttpClient(
+                mouser_key,
+                timeout_seconds=runtime_settings.mouser_timeout_seconds,
+            )
+            if mouser_key
+            else None
+        ),
+    )
+    app.state.supplier_search_service_factory = lambda: SupplierSearchService(
+        app.state.article_service_factory(), app.state.supplier_adapter
+    )
+    app.state.supplier_cache = SqlAlchemySupplierCache(session_factory)
     app.state.templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
     app.state.templates.env.filters["number"] = format_decimal
 
@@ -82,10 +108,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(locations_web_router)
     app.include_router(articles_web_router)
     app.include_router(inventory_web_router)
+    app.include_router(suppliers_web_router)
     app.include_router(health_router, prefix="/api/v1")
     app.include_router(locations_api_router, prefix="/api/v1")
     app.include_router(articles_api_router, prefix="/api/v1")
     app.include_router(inventory_api_router, prefix="/api/v1")
+    app.include_router(suppliers_api_router, prefix="/api/v1")
     app.add_exception_handler(DomainError, domain_error_response)
 
     @app.middleware("http")

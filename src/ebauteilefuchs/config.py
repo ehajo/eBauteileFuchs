@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     public_base_url: str | None = None
     log_level: str = "INFO"
     mouser_api_key: SecretStr | None = None
+    mouser_timeout_seconds: float = Field(default=8.0, ge=1.0, le=30.0)
 
     @field_validator("log_level")
     @classmethod

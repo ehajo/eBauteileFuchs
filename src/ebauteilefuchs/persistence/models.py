@@ -260,6 +260,36 @@ class SupplierPartModel(Base):
     )
 
 
+class SupplierCacheEntryModel(Base):
+    __tablename__ = "supplier_cache_entry"
+    __table_args__ = (
+        UniqueConstraint(
+            "supplier_id",
+            "query_type",
+            "query_normalized",
+            "adapter_version",
+            name="uq_supplier_cache_lookup",
+        ),
+        Index("ix_supplier_cache_expires_at", "expires_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    supplier_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("supplier.id", ondelete="CASCADE"), nullable=False
+    )
+    query_type: Mapped[str] = mapped_column(String(40), nullable=False)
+    query_normalized: Mapped[str] = mapped_column(String(160), nullable=False)
+    adapter_version: Mapped[str] = mapped_column(String(40), nullable=False)
+    response_json: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+
+
 class InventoryBalanceModel(Base):
     __tablename__ = "inventory_balance"
     __table_args__ = (

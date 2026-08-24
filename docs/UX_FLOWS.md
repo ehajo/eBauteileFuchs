@@ -47,6 +47,14 @@ Die Menge startet nicht automatisch bei 1, sofern dies nicht später als
 Nutzereinstellung freigegeben wird. Ein abweichender Lagerplatz ist immer
 erkennbar auswählbar.
 
+Die Einlagerungsmaske trennt die Hierarchienavigation von der eigentlichen
+Buchungsauswahl: Zuerst kann ein Raum, Regal, Magazin oder anderer Teilbaum als
+Bereich gewählt werden. Danach enthält die Lagerplatzauswahl regulär nur aktive
+Endlagerplätze dieses Bereichs. „Nächster freier Platz“ wählt darin den ersten
+Endlagerplatz ohne aktuellen Bestand deterministisch nach Lagerpfad aus. Ein
+explizit über einen bestehenden QR- oder Direktlink vorgewählter übergeordneter
+Platz bleibt weiterhin auswählbar.
+
 ### 3.2 Unbekannter Artikel
 
 ```text
@@ -85,6 +93,13 @@ Eine Auswahl öffnet immer die bearbeitbare Prüfung vor dem Speichern.
   mobile Karten dargestellt. Der Nutzer wählt genau einen oder bricht ab.
 - Nur Ähnlichkeitswarnung: „Trotzdem neu anlegen“ bleibt möglich, ist aber nicht
   vorausgewählt.
+
+**M4-Stand:** Der Ablauf aus 3.2 bis 3.4 ist unter **Suchen** umgesetzt. Lokale
+Treffer erscheinen mit Lagerplätzen und Bestand vor jeder externen Anfrage.
+Mouser-Mehrfachtreffer werden als responsive Karten dargestellt; eine Auswahl
+öffnet die bearbeitbare Prüfung. Normalisierte Werte und freie Rohattribute sind
+gekennzeichnet. Die Zuordnung zu einem vorhandenen Artikel ergänzt ausschließlich
+die Mouser-Nummer und verändert weder lokale Felder noch Bestand.
 
 ## 4. Auslagern
 

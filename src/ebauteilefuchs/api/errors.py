@@ -21,12 +21,25 @@ from ebauteilefuchs.domain.errors import (
     LocationNotFoundError,
     LocationTypeNotFoundError,
     ReferenceNotFoundError,
+    SupplierAuthenticationError,
+    SupplierNotConfiguredError,
+    SupplierRateLimitError,
+    SupplierResponseError,
+    SupplierUnavailableError,
     ValidationError,
 )
 
 
 def domain_error_response(_: Request, error: DomainError) -> JSONResponse:
-    if isinstance(
+    if isinstance(error, SupplierRateLimitError):
+        response_status = status.HTTP_429_TOO_MANY_REQUESTS
+    elif isinstance(error, SupplierNotConfiguredError):
+        response_status = status.HTTP_503_SERVICE_UNAVAILABLE
+    elif isinstance(error, SupplierAuthenticationError | SupplierResponseError):
+        response_status = status.HTTP_502_BAD_GATEWAY
+    elif isinstance(error, SupplierUnavailableError):
+        response_status = status.HTTP_503_SERVICE_UNAVAILABLE
+    elif isinstance(
         error,
         (
             ArticleNotFoundError,

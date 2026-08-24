@@ -9,10 +9,10 @@ für Elektronikbauteile, Kleinteile und private Bastellager.
 
 ## Projektstatus
 
-Meilenstein M3 ist umgesetzt: Neben Lagerplätzen und Artikelstammdaten stehen ein
-unveränderliches Bestandsjournal, schnelle Salden je Artikel und Lagerplatz sowie
-initiale Bestände, Ein-, Aus-, Um- und Korrekturbuchungen bereit. M2 wurde lokal
-abgenommen; die lokale M3-Abnahme steht aus.
+Meilenstein M4 ist umgesetzt: M0 bis M3 sind lokal abgenommen. Zusätzlich stehen
+die lokale Suche vor Mouser, die offizielle Mouser-Search-API, eine bearbeitbare
+Importprüfung, Dublettenschutz und die bewusste Zuordnung zu vorhandenen Artikeln
+bereit. Die lokale M4-Abnahme steht aus.
 
 ## Schnellstart unter Windows
 
@@ -60,6 +60,7 @@ Nach dem Start:
 - Bestand: <http://127.0.0.1:8008/inventory>
 - Einlagern: <http://127.0.0.1:8008/inventory/stock-in>
 - Auslagern: <http://127.0.0.1:8008/inventory/stock-out>
+- Suchen/Mouser: <http://127.0.0.1:8008/suppliers/mouser>
 - Health-Check: <http://127.0.0.1:8008/api/v1/health>
 - OpenAPI: <http://127.0.0.1:8008/docs>
 
@@ -77,8 +78,31 @@ python -m alembic upgrade head
 python -m ebauteilefuchs
 ```
 
-`requirements.lock` und `requirements-dev.lock` halten die für M3 geprüften
+`requirements.lock` und `requirements-dev.lock` halten die für M4 geprüften
 Abhängigkeiten reproduzierbar fest.
+
+## Mouser-Suche und Import
+
+Ohne API-Schlüssel startet und funktioniert eBauteileFuchs weiterhin vollständig
+offline. Für die freiwillige Mouser-Suche einen eigenen Schlüssel beantragen und
+ausschließlich in der nicht versionierten `.env` eintragen:
+
+```text
+EBAUTEILEFUCHS_MOUSER_API_KEY=dein-lokaler-schlüssel
+```
+
+Die Suche prüft zuerst lokale Lieferanten- und Herstellerartikelnummern. Erst
+wenn kein lokaler Treffer vorliegt oder „Trotzdem bei Mouser suchen“ gewählt
+wird, erfolgt ein externer Aufruf. Ergebnisse werden niemals automatisch
+gespeichert. Auswahl, normalisierte Eigenschaften, Kategorie und Links müssen auf
+der Prüfseite bestätigt werden. Bei einem vorhandenen Artikel kann ausschließlich
+die Mouser-Nummer ergänzt werden; lokale Stammdaten und Bestände bleiben dabei
+unverändert.
+
+Die veröffentlichten Mouser-API-Bedingungen untersagen das Cachen von
+Mouser-Inhalten. Deshalb ist der technisch allgemeine Supplier-Cache für Mouser
+deaktiviert. Details, Schlüsselbeantragung und Tests beschreibt die
+[Mouser-Anleitung](docs/MOUSER.md).
 
 ## Bestand buchen
 
@@ -165,6 +189,7 @@ Lokale Einstellungen können aus `.env.example` in eine nicht versionierte
 - [Offene Entscheidungen](docs/OPEN_DECISIONS.md)
 - [Interne REST-API](docs/API.md)
 - [Manuelle M3-Abnahme](docs/MANUAL_TEST_M3.md)
+- [Mouser-Einrichtung und manuelle M4-Abnahme](docs/MOUSER.md)
 
 Version 1 ist als responsive lokale Webanwendung für Raspberry Pi, Linux und
 Windows vorgesehen. Kerntechnologien sind Python 3.12, FastAPI, SQLAlchemy,

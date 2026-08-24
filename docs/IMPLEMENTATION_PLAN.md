@@ -1,9 +1,8 @@
 # Implementierungsplan – eBauteileFuchs
 
-Status: Grundsätzlich freigegeben am 23. August 2026. M0 bis M2 sind umgesetzt
-und lokal abgenommen. M3 wurde ausdrücklich freigegeben und am 23. August 2026
-umgesetzt; die lokale Abnahme steht aus. M4 und spätere Meilensteine bleiben
-gesperrt.
+Status: M0 bis M3 sind umgesetzt und lokal abgenommen. M4 wurde ausdrücklich
+freigegeben und am 24. August 2026 umgesetzt; die lokale Abnahme steht aus. M5
+und spätere Meilensteine bleiben gesperrt.
 
 ## 1. Vorgehensmodell
 
@@ -60,7 +59,7 @@ portable lokale UND-Suche sind implementiert. Die Alembic-Revision
 Abnahmekriterien: 9, 13, 14 und fachliche Regressionstests für Schreibweisen,
 Trennzeichen und mehrdeutige Kandidaten.
 
-### M3 – Bestandsjournal und Scanabläufe (umgesetzt am 23. August 2026, Abnahme ausstehend)
+### M3 – Bestandsjournal und Scanabläufe (umgesetzt und abgenommen)
 
 - Saldo, unveränderliche Bewegungen, Transaktionen und Idempotenz.
 - Einlagern, Auslagern und Umlagern über HTML/HTMX und `/api/v1`.
@@ -78,7 +77,7 @@ QR-Einstieg und `/api/v1/inventory` sind implementiert. Revision
 Stammdaten. SQLite-Schreiber werden vor der Saldenprüfung mit `BEGIN IMMEDIATE`
 serialisiert; Konflikte werden fachlich gemeldet.
 
-### M4 – Mouser-Integration
+### M4 – Mouser-Integration (umgesetzt am 24. August 2026, Abnahme ausstehend)
 
 - Supplier Port, offizieller Mouser-Adapter, Timeout/Retry-Grenzen und Cache.
 - Suchmodi, kein/ein/mehrere Treffer und bearbeitbare Importprüfung.
@@ -88,6 +87,14 @@ serialisiert; Konflikte werden fachlich gemeldet.
 Abnahmekriterien: 10 bis 12 und 14. Automatisierte Tests verwenden ausschließlich
 Fixtures/Fakes; ein optionaler, expliziter Integrationstest prüft einen eigenen
 Mouser-Schlüssel und läuft nicht in Standard-CI.
+
+Umsetzungsstand: Supplier-Port, offizieller Search-API-Adapter, begrenzter
+HTTP-Transport, neutrale Antwortmodelle, lokale Vorprüfung, alle Suchmodi,
+Mehrfachauswahl, bearbeitbare Prüfung, Einheitenmapping, Dublettenschutz,
+Zuordnung zu bestehenden Artikeln, responsive HTML-Seiten und REST-Verträge sind
+implementiert. Der allgemeine Cache und seine Revision `0005_m4_supplier_cache`
+sind vorhanden; Mouser-Inhalte werden wegen des ausdrücklichen Cacheverbots in
+den veröffentlichten Mouser-API-Bedingungen nicht hineingeschrieben.
 
 ### M5 – Suche, Verbindung und PWA
 

@@ -19,7 +19,7 @@ def test_empty_database_upgrades_and_downgrades(monkeypatch, tmp_path: Path) -> 
         revision = connection.execute(
             text("SELECT version_num FROM alembic_version")
         ).scalar_one()
-    assert revision == "0004_m3_inventory"
+    assert revision == "0005_m4_supplier_cache"
     inspector = inspect(engine)
     assert {
         "article",
@@ -33,6 +33,7 @@ def test_empty_database_upgrades_and_downgrades(monkeypatch, tmp_path: Path) -> 
         "inventory_transaction",
         "supplier",
         "supplier_part",
+        "supplier_cache_entry",
     } <= set(inspector.get_table_names())
     with engine.connect() as connection:
         assert (
@@ -49,7 +50,7 @@ def test_empty_database_upgrades_and_downgrades(monkeypatch, tmp_path: Path) -> 
     engine.dispose()
 
 
-def test_existing_m2_database_upgrades_to_m3_and_downgrades_without_data_loss(
+def test_existing_m3_database_upgrades_to_m4_and_downgrades_without_data_loss(
     monkeypatch, tmp_path: Path
 ) -> None:
     database_path = tmp_path / "new-data-directory" / "existing-m2.db"
@@ -58,11 +59,12 @@ def test_existing_m2_database_upgrades_to_m3_and_downgrades_without_data_loss(
     monkeypatch.setenv("EBAUTEILEFUCHS_DATABASE_URL", database_url)
     alembic_config = Config("alembic.ini")
 
-    command.upgrade(alembic_config, "0003_m2_articles")
+    command.upgrade(alembic_config, "0004_m3_inventory")
     engine = create_engine(database_url)
     assert "location" in inspect(engine).get_table_names()
     assert "article" in inspect(engine).get_table_names()
-    assert "inventory_balance" not in inspect(engine).get_table_names()
+    assert "inventory_balance" in inspect(engine).get_table_names()
+    assert "supplier_cache_entry" not in inspect(engine).get_table_names()
     with engine.begin() as connection:
         connection.execute(
             text(
@@ -100,17 +102,18 @@ def test_existing_m2_database_upgrades_to_m3_and_downgrades_without_data_loss(
             connection.execute(
                 text("SELECT version_num FROM alembic_version")
             ).scalar_one()
-            == "0004_m3_inventory"
+            == "0005_m4_supplier_cache"
         )
         assert connection.execute(text("SELECT COUNT(*) FROM category")).scalar() == 10
         assert connection.execute(text("SELECT COUNT(*) FROM supplier")).scalar() == 1
         assert connection.execute(text("SELECT COUNT(*) FROM article")).scalar() == 1
         assert connection.execute(text("SELECT COUNT(*) FROM location")).scalar() == 1
 
-    command.downgrade(alembic_config, "0003_m2_articles")
+    command.downgrade(alembic_config, "0004_m3_inventory")
     assert "location" in inspect(engine).get_table_names()
     assert "article" in inspect(engine).get_table_names()
-    assert "inventory_balance" not in inspect(engine).get_table_names()
+    assert "inventory_balance" in inspect(engine).get_table_names()
+    assert "supplier_cache_entry" not in inspect(engine).get_table_names()
     with engine.connect() as connection:
         assert connection.execute(text("SELECT COUNT(*) FROM article")).scalar() == 1
         assert connection.execute(text("SELECT COUNT(*) FROM location")).scalar() == 1

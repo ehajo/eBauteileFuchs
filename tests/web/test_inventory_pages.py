@@ -167,3 +167,73 @@ async def test_inventory_search_preserves_location_and_stock_out_filters_locatio
 
     start_page = await client.get("/")
     assert 'href="/inventory"' in start_page.text
+
+
+@pytest.mark.anyio
+async def test_stock_in_filters_leaf_locations_and_selects_next_free_in_scope(
+    client: AsyncClient,
+) -> None:
+    category = next(
+        item
+        for item in (await client.get("/api/v1/categories")).json()
+        if item["code"] == "other"
+    )
+    article = (
+        await client.post(
+            "/api/v1/articles",
+            json={"name": "Artikel für freie Box", "category_id": category["id"]},
+        )
+    ).json()
+    types = (await client.get("/api/v1/location-types")).json()
+
+    async def location(code: str, type_code: str, parent_id: str | None = None):
+        location_type = next(item for item in types if item["code"] == type_code)
+        response = await client.post(
+            "/api/v1/locations",
+            json={
+                "code": code,
+                "name": code,
+                "location_type_id": location_type["id"],
+                "parent_id": parent_id,
+            },
+        )
+        assert response.status_code == 201
+        return response.json()
+
+    room = await location("RAUM-A", "room")
+    shelf = await location("REGAL-1", "shelf", room["id"])
+    occupied = await location("BOX-01", "box", shelf["id"])
+    free = await location("BOX-02", "box", shelf["id"])
+    other_room = await location("RAUM-B", "room")
+    other_box = await location("BOX-99", "box", other_room["id"])
+
+    booked = await client.post(
+        "/api/v1/inventory/stock-in",
+        headers={"Idempotency-Key": "occupied-location-1"},
+        json={
+            "article_id": article["id"],
+            "location_id": occupied["id"],
+            "quantity": "1",
+        },
+    )
+    assert booked.status_code == 201
+
+    page = await client.get(
+        "/inventory/stock-in",
+        params={
+            "article_id": article["id"],
+            "location_scope_id": room["id"],
+            "choose_free": "1",
+        },
+    )
+    assert page.status_code == 200
+    assert "Nächster freier Platz vorausgewählt" in page.text
+    select = re.search(
+        r'<select name="location_id".*?</select>', page.text, re.DOTALL
+    ).group(0)
+    assert occupied["id"] in select
+    assert free["id"] in select
+    assert re.search(rf'<option value="{free["id"]}"[^>]*selected', select)
+    assert room["id"] not in select
+    assert shelf["id"] not in select
+    assert other_box["id"] not in select

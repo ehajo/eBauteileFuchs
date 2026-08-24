@@ -7,6 +7,9 @@ from uuid import UUID
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
+from ebauteilefuchs.application.location_selection import (
+    build_booking_location_selection,
+)
 from ebauteilefuchs.domain.errors import DomainError, ValidationError
 from ebauteilefuchs.web.locations import _render, _verify_csrf
 
@@ -46,6 +49,7 @@ def _context(
     query = supplied("q")
     article_id = supplied("article_id")
     location_id = supplied("location_id")
+    location_scope_id = supplied("location_scope_id")
     source_location_id = supplied("source_location_id", location_id)
     target_location_id = supplied("target_location_id")
     article_results = (
@@ -60,6 +64,38 @@ def _context(
         except (ValueError, DomainError):
             article_id = ""
     location_results = locations.list_details(include_inactive=False)
+    try:
+        parsed_location_id = UUID(location_id) if location_id else None
+    except ValueError:
+        parsed_location_id = None
+        location_id = ""
+    try:
+        parsed_scope_id = UUID(location_scope_id) if location_scope_id else None
+    except ValueError:
+        parsed_scope_id = None
+        location_scope_id = ""
+    occupied_location_ids = {
+        item.balance.location_id for item in inventory.list_positions()
+    }
+    location_selection = build_booking_location_selection(
+        location_results,
+        occupied_location_ids=occupied_location_ids,
+        scope_id=parsed_scope_id,
+        explicitly_selected_id=parsed_location_id,
+    )
+    free_location_message = None
+    if mode == "stock-in" and supplied("choose_free") == "1":
+        if location_selection.next_free is None:
+            location_id = ""
+            free_location_message = (
+                "In diesem Bereich wurde kein freier Endlagerplatz gefunden."
+            )
+        else:
+            location_id = str(location_selection.next_free.location.id)
+            free_location_message = (
+                "Nächster freier Platz vorausgewählt: "
+                + " / ".join(item.code for item in location_selection.next_free.path)
+            )
     positions = []
     if article_id:
         try:
@@ -72,6 +108,7 @@ def _context(
     ]
     preserved = {
         "location_id": location_id,
+        "location_scope_id": location_scope_id,
         "source_location_id": source_location_id,
         "target_location_id": target_location_id,
     }
@@ -95,12 +132,16 @@ def _context(
         "article_choices": article_choices,
         "selected_article": selected_article,
         "locations": location_results,
+        "booking_locations": location_selection.locations,
+        "location_scopes": location_selection.scopes,
+        "free_location_message": free_location_message,
         "source_locations": source_locations,
         "positions": positions,
         "values": {
             "q": query,
             "article_id": article_id,
             "location_id": location_id,
+            "location_scope_id": location_scope_id,
             "source_location_id": source_location_id,
             "target_location_id": target_location_id,
             "quantity": str(current_values.get("quantity", "")),

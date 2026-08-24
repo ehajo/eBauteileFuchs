@@ -186,6 +186,88 @@ class ArticleService:
         with self._uow_factory() as uow:
             return uow.articles.list_suppliers()
 
+    def find_by_supplier_number(
+        self, supplier_code: str, part_number: str
+    ) -> ArticleDetails | None:
+        normalized = normalize_part_number(part_number)
+        with self._uow_factory() as uow:
+            supplier = next(
+                (
+                    item
+                    for item in uow.articles.list_suppliers()
+                    if item.code == supplier_code
+                ),
+                None,
+            )
+            if supplier is None or not normalized:
+                return None
+            article = uow.articles.find_supplier_part(supplier.id, normalized)
+            return self._details(uow, article) if article else None
+
+    def attach_supplier_part(
+        self,
+        article_id: UUID,
+        *,
+        supplier_code: str,
+        part_number: str,
+        product_url: str | None = None,
+    ) -> ArticleDetails:
+        cleaned_number = clean_text(
+            part_number, "Lieferantenartikelnummer", 160, required=True
+        )
+        assert cleaned_number is not None
+        normalized = normalize_part_number(cleaned_number)
+        cleaned_url = validate_optional_url(product_url, "Lieferanten-Produktlink")
+        with self._uow_factory() as uow:
+            article = uow.articles.get_article(article_id)
+            if article is None:
+                raise ArticleNotFoundError("Der Artikel wurde nicht gefunden.")
+            supplier = next(
+                (
+                    item
+                    for item in uow.articles.list_suppliers()
+                    if item.code == supplier_code
+                ),
+                None,
+            )
+            if supplier is None:
+                raise ReferenceNotFoundError("Der Lieferant wurde nicht gefunden.")
+            assigned = uow.articles.find_supplier_part(supplier.id, normalized)
+            if assigned and assigned.id != article_id:
+                raise DuplicateReferenceError(
+                    "Diese Mouser-Artikelnummer ist bereits einem anderen Artikel zugeordnet."
+                )
+            values = uow.articles.list_supplier_parts(article_id)
+            if any(
+                item.supplier_id == supplier.id
+                and item.normalized_supplier_part_number == normalized
+                for item in values
+            ):
+                return self._details(uow, article)
+            now = datetime.now(UTC)
+            values.append(
+                SupplierPart(
+                    id=uuid4(),
+                    article_id=article_id,
+                    supplier_id=supplier.id,
+                    supplier_part_number=cleaned_number,
+                    normalized_supplier_part_number=normalized,
+                    product_url=cleaned_url,
+                    created_at=now,
+                    updated_at=now,
+                    supplier_name=supplier.name,
+                )
+            )
+            updated = replace(
+                article,
+                search_text=f"{article.search_text} {normalize_search_text(cleaned_number)}".strip(),
+                updated_at=now,
+            )
+            uow.articles.update_article(updated)
+            uow.articles.replace_supplier_parts(article_id, values)
+            uow.commit()
+        return self.get(article_id)
+
     def list_articles(
         self, *, query: str | None = None, include_inactive: bool = True
     ) -> list[ArticleDetails]:

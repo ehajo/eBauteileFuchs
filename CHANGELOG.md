@@ -8,6 +8,16 @@ Semantic Versioning.
 
 ### Added
 
+- M4-Lieferantenschnittstelle mit isoliertem Mouser-HTTP-Client,
+  defensiven Antwortmodellen und neutralem Produktmapper.
+- Lokale Suche vor Mouser, Scanner-/Artikelnummern-, Herstellerartikelnummern-
+  und Freitextsuche sowie explizite Auswahl bei mehreren Treffern.
+- Bearbeitbare Importprüfung mit Quellenkennzeichnung, Einheiten-Normalisierung,
+  freien Rohattributen, Dublettenprüfung und manueller Anlage als Fallback.
+- Bewusste Mouser-Zuordnung zu vorhandenen Artikeln ohne Überschreiben lokaler
+  Stammdaten, Bestände oder Lagerplätze.
+- M4-REST-Ressourcen unter `/api/v1/suppliers/mouser` und generisches
+  Supplier-Cache-Schema mit kontrollierter Bereinigung.
 - M3-Bestandsjournal mit materialisierten Salden je Artikel, Lagerplatz und
   Einheit sowie unveränderlichen Transaktionen und Bewegungen.
 - Initiale Bestände, Einlagerungen, Auslagerungen, atomare Umlagerungen und
@@ -41,6 +51,11 @@ Semantic Versioning.
 
 ### Fixed
 
+- Seitentitel verwenden auch bei langen Artikelbezeichnungen eine kompaktere,
+  responsive Schriftgröße.
+- Die Einlagerung trennt Lagerbereich und buchbaren Endlagerplatz, filtert die
+  Auswahl hierarchisch und kann innerhalb des Bereichs den nächsten Platz ohne
+  aktuellen Bestand vorauswählen.
 - Bestandsmengen werden in der Oberfläche ohne wissenschaftliche Schreibweise
   angezeigt; beispielsweise erscheint `1E+2` jetzt als `100`.
 - Technische Artikeleigenschaften bieten passende SI-Einheiten und Vorsätze als

@@ -1,0 +1,23 @@
+{
+  "Errors": [],
+  "SearchResults": {
+    "NumberOfResult": 1,
+    "Parts": [
+      {
+        "MouserPartNumber": "71-SYNTH-10K",
+        "ManufacturerPartNumber": "SYNTH-10K-0805",
+        "Manufacturer": "Synthetic Components",
+        "Description": "Synthetischer 10-kOhm-Widerstand",
+        "Category": "Resistors",
+        "DataSheetUrl": "https://example.invalid/datasheet.pdf",
+        "ProductDetailUrl": "https://example.invalid/product",
+        "Availability": "123 auf Lager",
+        "ProductAttributes": [
+          {"AttributeName": "Resistance", "AttributeValue": "10000 Ohms"},
+          {"AttributeName": "Power", "AttributeValue": "250 mW"},
+          {"AttributeName": "Package / Case", "AttributeValue": "0805"}
+        ]
+      }
+    ]
+  }
+}

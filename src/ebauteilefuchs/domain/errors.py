@@ -94,3 +94,23 @@ class IdempotencyConflictError(DomainError):
 
 class InventoryConflictError(DomainError):
     code = "inventory_conflict"
+
+
+class SupplierNotConfiguredError(DomainError):
+    code = "supplier_not_configured"
+
+
+class SupplierAuthenticationError(DomainError):
+    code = "supplier_authentication"
+
+
+class SupplierRateLimitError(DomainError):
+    code = "supplier_rate_limit"
+
+
+class SupplierUnavailableError(DomainError):
+    code = "supplier_unavailable"
+
+
+class SupplierResponseError(DomainError):
+    code = "supplier_response"

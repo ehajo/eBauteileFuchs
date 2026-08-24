@@ -14,9 +14,14 @@ ausgeschlossen.
 | `EBAUTEILEFUCHS_DATABASE_URL` | lokale SQLite-URL | optionale vollständige SQLAlchemy-URL |
 | `EBAUTEILEFUCHS_PUBLIC_BASE_URL` | aktuelle Anfrage-URL | vollständige HTTP(S)-Basis-URL für Lagerplatz-QR-Codes |
 | `EBAUTEILEFUCHS_LOG_LEVEL` | `INFO` | `DEBUG` bis `CRITICAL` |
+| `EBAUTEILEFUCHS_MOUSER_API_KEY` | leer | persönlicher Schlüssel für die optionale Mouser Search API |
+| `EBAUTEILEFUCHS_MOUSER_TIMEOUT_SECONDS` | `8` | Zeitlimit je Mouser-Anfrage in Sekunden (1–30) |
 
-Der Mouser-Schlüssel ist in `.env.example` nur als auskommentierter Platzhalter
-enthalten und wird erst in M4 verwendet.
+Der Mouser-Schlüssel wird ausschließlich aus der lokalen Umgebung oder `.env`
+gelesen. Er darf weder in das Repository übernommen noch in Protokollen oder
+Fehlermeldungen ausgegeben werden. Ohne Schlüssel bleiben lokale Suche,
+Artikelerfassung und alle übrigen Funktionen verfügbar; nur die externe
+Mouser-Suche wird deaktiviert. Einzelheiten stehen in [MOUSER.md](MOUSER.md).
 
 ## Datenpfade
 

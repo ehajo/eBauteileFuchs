@@ -7,6 +7,7 @@ from fastapi import Request
 from ebauteilefuchs.application.articles import ArticleService
 from ebauteilefuchs.application.inventory import InventoryService
 from ebauteilefuchs.application.locations import LocationService
+from ebauteilefuchs.application.supplier_search import SupplierSearchService
 
 
 def get_location_service(request: Request) -> LocationService:
@@ -22,6 +23,13 @@ def get_article_service(request: Request) -> ArticleService:
 def get_inventory_service(request: Request) -> InventoryService:
     factory: Callable[[], InventoryService] = (
         request.app.state.inventory_service_factory
+    )
+    return factory()
+
+
+def get_supplier_search_service(request: Request) -> SupplierSearchService:
+    factory: Callable[[], SupplierSearchService] = (
+        request.app.state.supplier_search_service_factory
     )
     return factory()
 

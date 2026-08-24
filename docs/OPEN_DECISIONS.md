@@ -93,8 +93,12 @@ erfordert eine Korrekturbuchung beziehungsweise neuen Bestandsschlüssel.
 
 ### B4. Mouser-Cache-Aufbewahrung (vor M4)
 
-**Übernommen unter Vorbehalt der Vertragsprüfung:** 24 Stunden für Treffer,
-15 Minuten für „kein Treffer“, keine Fehlerzwischenspeicherung.
+**Abgeschlossen für M4:** Der allgemeine Cache-Port und das relationale
+Cache-Schema sind umgesetzt. Für Mouser ist die Speicherung von API-Inhalten
+deaktiviert, weil die am 24. August 2026 geprüften veröffentlichten
+Mouser-API-Bedingungen Caching, Aufzeichnung und sonstige Speicherung ausdrücklich
+untersagen. Ohne abweichende schriftliche Erlaubnis von Mouser gelten deshalb
+effektiv 0 Sekunden Aufbewahrung und kein Offline-Fallback auf Mouser-Daten.
 
 **Vorschlag:** erfolgreiche Suchergebnisse 24 Stunden, „kein Treffer“ 15 Minuten,
 Fehler nicht cachen; manuelles Leeren in Einstellungen. Rohantworten nur soweit
@@ -189,6 +193,6 @@ werden, wenn die Produktabsicht abweicht:
 
 ## Freigabestatus
 
-M0 bis M2 sind abgenommen. M3 wurde ausdrücklich freigegeben und umgesetzt; die
-lokale Abnahme steht aus. M4 und spätere Meilensteine benötigen weiterhin eine
-ausdrückliche Freigabe. Für M3 sind keine Entscheidungen mehr offen.
+M0 bis M3 sind abgenommen. M4 wurde ausdrücklich freigegeben und umgesetzt; die
+lokale Abnahme steht aus. M5 und spätere Meilensteine benötigen weiterhin eine
+ausdrückliche Freigabe. Für M4 sind keine Entscheidungen mehr offen.

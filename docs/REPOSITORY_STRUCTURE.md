@@ -28,6 +28,7 @@ eBauteileFuchs/
 │   ├── ARCHITECTURE.md
 │   ├── API.md
 │   ├── MANUAL_TEST_M3.md
+│   ├── MOUSER.md
 │   ├── DATA_MODEL.md
 │   ├── UX_FLOWS.md
 │   ├── IMPLEMENTATION_PLAN.md
@@ -173,3 +174,16 @@ Zusatzabhängigkeit nötig ist.
   Journal, materialisierte Salden und die SQLite-Schreibserialisierung.
 - `api/v1/inventory.py`, `web/inventory.py`, `templates/inventory/` und das lokale
   `static/js/inventory.js` bilden REST-, Scan- und mobile HTML-Abläufe ab.
+
+## In M4 realisierte Ergänzungen
+
+- `domain/suppliers.py`, `application/ports/suppliers.py` und
+  `application/supplier_search.py` bilden neutrale Lieferantenprodukte und Use
+  Cases ohne Mouser-Abhängigkeit ab.
+- `suppliers/mouser/` trennt HTTP-Kommunikation, Antwortschema, Mapping und den
+  offiziellen Adapter.
+- `persistence/supplier_cache.py` sowie Revision `0005_m4_supplier_cache`
+  implementieren den allgemeinen Cachevertrag; Mouser-Schreibzugriffe bleiben
+  aus Vertragsgründen deaktiviert.
+- `api/v1/suppliers.py`, `web/suppliers.py` und `templates/suppliers/` bilden
+  REST-, Scan-, Auswahl-, Prüf- und Importabläufe ab.

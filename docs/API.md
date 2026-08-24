@@ -1,6 +1,6 @@
-# Interne REST-API – M3
+# Interne REST-API – M4
 
-Status: M3 umgesetzt am 23. August 2026. Die API ist vor Version 1.0 intern und
+Status: M4 umgesetzt am 24. August 2026. Die API ist vor Version 1.0 intern und
 kann sich zwischen Vorabversionen ändern. Die interaktive OpenAPI-Beschreibung
 steht im laufenden System unter `/docs`.
 
@@ -46,3 +46,23 @@ keine internen SQL- oder Dateipfaddetails.
 
 Schreibzugriffe aus Browserformularen verwenden zusätzlich CSRF-Tokens. Fremde
 Origins werden wie bei den bisherigen `/api/v1`-Ressourcen abgewiesen.
+
+## Mouser und neutrale Lieferantenergebnisse
+
+- `GET /api/v1/suppliers/mouser/status`: nur Status „eingerichtet“ sowie der aus
+  Vertragsgründen deaktivierte Mouser-Cache; niemals der Schlüssel.
+- `POST /api/v1/suppliers/mouser/search`: `query`, `mode` (`part_number`,
+  `manufacturer_part_number`, `keyword`, `barcode`) und optional
+  `force_external`. Lokale Treffer werden zuerst geliefert. Neutrale externe
+  Ergebnisse enthalten nur geprüfte Felder und gemappte Eigenschaften, keine
+  beliebige Mouser-Rohantwort.
+- `POST /api/v1/suppliers/mouser/import`: kontrollierter Neuimport oder reine
+  Zuordnung über `existing_article_id`. Benötigt `Idempotency-Key`. Die eindeutige
+  Mouser-Lieferantennummer macht dieselbe Importwiederholung natürlich idempotent.
+- `DELETE /api/v1/suppliers/mouser/cache`: bereinigt den allgemeinen Supplier-
+  Cache. Mouser selbst schreibt wegen der veröffentlichten API-Bedingungen keine
+  Einträge.
+
+Fehlender Schlüssel und Netzwerkfehler ergeben 503, abgelehnte Authentifizierung
+und ungültige Antworten 502, Rate Limits 429, fehlerhafte Eingaben 422 und sichere
+Dubletten 409. Antworten und Logs enthalten keinen API-Schlüssel.

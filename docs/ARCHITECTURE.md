@@ -69,8 +69,9 @@ Quelle. Tests stellen sicher, dass beide übereinstimmen.
 
 1. Lokale Identitäts- und Lieferantensuche läuft immer zuerst.
 2. Nur bei unbekanntem Artikel und Nutzerabsicht wird der Supplier Port aufgerufen.
-3. Ein Cache-Schlüssel besteht aus Adapter, Suchmodus, normalisierter Anfrage und
-   Adapterversion.
+3. Der allgemeine Cache-Schlüssel besteht aus Adapter, Suchmodus, normalisierter
+   Anfrage und Adapterversion. Der Mouser-Adapter nutzt ihn nicht, solange die
+   veröffentlichten Mouser-Bedingungen die Speicherung von API-Inhalten verbieten.
 4. Mouser-Rohdaten werden in ein internes Suchergebnis gemappt. Die Domain kennt
    keine Mouser-Antwortstrukturen.
 5. Auswahl und Überprüfung geschehen vor Dublettenprüfung und Speicherung.
@@ -104,6 +105,11 @@ Buchungsressourcen `/inventory/initial`, `/inventory/stock-in`,
 HTML und REST verwenden denselben `InventoryService`. Buchungsantworten enthalten
 die gemeinsame Transaktionskennung, Bewegungen, Folgesalden und die Information,
 ob ein Idempotenzschlüssel wiederholt wurde.
+
+In M4 ergänzt wurden `/suppliers/mouser/status`, `/suppliers/mouser/search`,
+`/suppliers/mouser/import` und die kontrollierte Cache-Bereinigung. Web und REST
+verwenden denselben `SupplierSearchService`; Mouser-HTTP, Mouser-Schema, Mapper
+und neutrale Domainprodukte bleiben getrennte Adapterbausteine.
 
 HTML-spezifische HTMX-Fragmente liegen nicht unter `/api`. OpenAPI dokumentiert
 die API, gilt vor Version 1.0 aber als intern. Schreibzugriffe sind im lokalen Netz

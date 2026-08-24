@@ -3,7 +3,7 @@
 Status: Grundsätzlich freigegeben am 23. August 2026
 
 Umsetzungsstand: Die Kapitel 3 bis 7 sowie die Integritätsregeln für Bestand und
-Journal sind mit M1 bis M3 realisiert.
+Journal sind mit M1 bis M4 realisiert.
 
 ## 1. Konventionen
 
@@ -125,6 +125,12 @@ beliebig vielen Lieferantenzuordnungen.
 
 Cacheeinträge sind austauschbar und keine Stammdaten. Schlüssel, Auth-Header und
 unnötige personenbezogene Inhalte werden nicht gespeichert.
+
+Die Tabelle wurde mit M4 als allgemeine Erweiterungsschnittstelle angelegt. Der
+Mouser-Adapter schreibt aufgrund der veröffentlichten Mouser-API-Bedingungen
+keine Antwortdaten hinein. Sie bleibt für Adapter mit nachweislich erlaubter
+Zwischenspeicherung beziehungsweise eine spätere schriftliche Mouser-Freigabe
+verfügbar.
 
 ## 6. Technische Eigenschaften
 

@@ -1,0 +1,26 @@
+{
+  "Errors": [],
+  "SearchResults": {
+    "NumberOfResult": 2,
+    "Parts": [
+      {
+        "MouserPartNumber": "80-SYNTH-100N-A",
+        "ManufacturerPartNumber": "SYNTH-100N-A",
+        "Manufacturer": "Synthetic Components",
+        "Description": "<script>alert('synthetic')</script>",
+        "Category": "Capacitors",
+        "ProductAttributes": [
+          {"AttributeName": "Capacitance", "AttributeValue": "0.1 uF"}
+        ]
+      },
+      {
+        "MouserPartNumber": "80-SYNTH-100N-B",
+        "ManufacturerPartNumber": "SYNTH-100N-B",
+        "Manufacturer": "Synthetic Components",
+        "Description": "Synthetischer Kondensator B",
+        "Category": "Capacitors",
+        "ProductAttributes": []
+      }
+    ]
+  }
+}

@@ -32,6 +32,7 @@ def test_settings(tmp_path: Path) -> Settings:
         data_dir=tmp_path,
         database_url=f"sqlite+pysqlite:///{(tmp_path / 'test.db').as_posix()}",
         log_level="WARNING",
+        mouser_api_key=None,
     )
 
 
