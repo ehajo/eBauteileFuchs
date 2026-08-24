@@ -39,6 +39,10 @@ class ActiveChildrenError(DomainError):
     code = "active_children"
 
 
+class LocationInUseError(DomainError):
+    code = "location_in_use"
+
+
 class BatchConflictError(DomainError):
     code = "batch_conflict"
 
@@ -70,3 +74,23 @@ class DuplicateArticleError(DomainError):
         self.candidate_ids = candidate_ids
         self.match_level = match_level
         self.can_override = can_override
+
+
+class InventoryNotFoundError(DomainError):
+    code = "inventory_not_found"
+
+
+class InsufficientStockError(DomainError):
+    code = "insufficient_stock"
+
+    def __init__(self, message: str, *, available: str) -> None:
+        super().__init__(message)
+        self.available = available
+
+
+class IdempotencyConflictError(DomainError):
+    code = "idempotency_conflict"
+
+
+class InventoryConflictError(DomainError):
+    code = "inventory_conflict"

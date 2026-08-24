@@ -41,6 +41,8 @@ class LocationRepository(Protocol):
 
     def update(self, location: Location) -> None: ...
 
+    def remove(self, location_id: UUID) -> None: ...
+
 
 class LocationUnitOfWork(Protocol):
     locations: LocationRepository

@@ -26,6 +26,8 @@ eBauteileFuchs/
 ├── docs/
 │   ├── PRODUCT_SPEC.md
 │   ├── ARCHITECTURE.md
+│   ├── API.md
+│   ├── MANUAL_TEST_M3.md
 │   ├── DATA_MODEL.md
 │   ├── UX_FLOWS.md
 │   ├── IMPLEMENTATION_PLAN.md
@@ -160,3 +162,14 @@ Zusatzabhängigkeit nötig ist.
   Repository, Unit of Work und stabile Startdaten.
 - `api/v1/articles.py`, `web/articles.py` und `templates/articles/` bilden die
   REST- und responsive HTML-Oberfläche ab.
+
+## In M3 realisierte Ergänzungen
+
+- `domain/inventory.py` enthält Dezimalmengen, Transaktionsarten, Salden,
+  Bewegungen und Buchungsergebnisse.
+- `application/inventory.py` koordiniert Initial-, Ein-, Aus-, Um- und
+  Korrekturbuchungen sowie Idempotenz und Negativbestandsschutz.
+- `application/ports/inventory.py` und `persistence/inventory.py` kapseln das
+  Journal, materialisierte Salden und die SQLite-Schreibserialisierung.
+- `api/v1/inventory.py`, `web/inventory.py`, `templates/inventory/` und das lokale
+  `static/js/inventory.js` bilden REST-, Scan- und mobile HTML-Abläufe ab.

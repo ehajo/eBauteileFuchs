@@ -27,6 +27,14 @@ async def test_article_pages_create_search_and_edit(client: AsyncClient) -> None
     supplier = re.search(r'<option value="([^"]+)"[^>]*>Mouser Electronics', form.text)
     assert resistance is not None
     assert supplier is not None
+    resistance_units = re.search(
+        rf'<select[^>]*name="unit_{resistance.group(1)}".*?</select>',
+        form.text,
+        re.DOTALL,
+    )
+    assert resistance_units is not None
+    for unit in ("Ω", "kΩ", "MΩ"):
+        assert f'value="{unit}"' in resistance_units.group(0)
     created = await client.post(
         "/articles",
         data={
@@ -35,8 +43,8 @@ async def test_article_pages_create_search_and_edit(client: AsyncClient) -> None
             "category_id": category_match.group(1),
             "manufacturer_name": "Vishay",
             "manufacturer_part_number": "CRCW0805-10K0-FKEA",
-            f"attribute_{resistance.group(1)}": "10 kΩ",
-            f"unit_{resistance.group(1)}": "Ω",
+            f"attribute_{resistance.group(1)}": "10",
+            f"unit_{resistance.group(1)}": "kΩ",
             "supplier_id_1": supplier.group(1),
             "supplier_number_1": "71-CRCW0805-10K-E3",
             "description": "Synthetischer Testartikel",
@@ -56,6 +64,23 @@ async def test_article_pages_create_search_and_edit(client: AsyncClient) -> None
     edit = await client.get(edit_link.group(1))
     assert edit.status_code == 200
     assert "CRCW0805-10K0-FKEA" in edit.text
+    assert re.search(r'<option value="kΩ" selected>kΩ</option>', edit.text)
+
+    categories = (await client.get("/api/v1/categories")).json()
+    capacitor_id = next(
+        item["id"] for item in categories if item["code"] == "capacitor"
+    )
+    capacitor_form = await client.get(
+        "/articles/new", params={"category_id": capacitor_id}
+    )
+    capacitance = re.search(
+        r'Kapazität.*?<select[^>]*name="unit_[^"]+".*?</select>',
+        capacitor_form.text,
+        re.DOTALL,
+    )
+    assert capacitance is not None
+    for unit in ("pF", "nF", "µF", "mF", "F"):
+        assert f'value="{unit}"' in capacitance.group(0)
 
 
 @pytest.mark.anyio

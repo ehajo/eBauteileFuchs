@@ -291,6 +291,19 @@ class LocationService:
                 uow.commit()
         return self.get(location_id)
 
+    def remove(self, location_id: UUID) -> None:
+        """Permanently remove an unused location without inventory history."""
+
+        with self._uow_factory() as uow:
+            location = self._require_location(uow.locations.get(location_id))
+            children = uow.locations.list_children(location.id, include_inactive=True)
+            if children:
+                raise ActiveChildrenError(
+                    "Entferne zuerst alle Unterplätze dieses Lagerplatzes."
+                )
+            uow.locations.remove(location.id)
+            uow.commit()
+
     def preview_batch(self, specification: BatchSpecification) -> BatchPreview:
         drafts = specification.drafts()
         items: list[BatchPreviewItem] = []

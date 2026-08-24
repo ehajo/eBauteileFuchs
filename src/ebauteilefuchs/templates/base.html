@@ -23,11 +23,13 @@
         <span class="brand__product">{{ branding.product_name }}</span>
       </a>
       <nav class="main-nav" aria-label="Hauptnavigation">
+        <a href="/inventory/stock-in">Einlagern</a>
+        <a href="/inventory/stock-out">Auslagern</a>
+        <a href="/inventory">Bestand</a>
         <a href="/articles">Artikel</a>
         <a href="/locations">Lagerplätze</a>
-        <a href="/locations/types">Typen</a>
       </nav>
-      <span class="milestone-badge">Artikelverwaltung M2</span>
+      <span class="milestone-badge">Bestandsjournal M3</span>
     </header>
     <main id="main-content" class="page-shell">
       {% block content %}{% endblock %}

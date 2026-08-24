@@ -98,6 +98,13 @@ Normalisierungsregeln, URL-Validierung und Aufbau des portablen Suchtexts liegen
 in Domain und Application Service. Die lokale Suche nutzt normalisierte
 Suchtexte und eine portable SQLite-`LIKE`-Strategie mit UND-Verknüpfung.
 
+In M3 ergänzt wurden `/inventory`, `/inventory/transactions`, die
+Buchungsressourcen `/inventory/initial`, `/inventory/stock-in`,
+`/inventory/stock-out`, `/inventory/transfers` und `/inventory/adjustments`.
+HTML und REST verwenden denselben `InventoryService`. Buchungsantworten enthalten
+die gemeinsame Transaktionskennung, Bewegungen, Folgesalden und die Information,
+ob ein Idempotenzschlüssel wiederholt wurde.
+
 HTML-spezifische HTMX-Fragmente liegen nicht unter `/api`. OpenAPI dokumentiert
 die API, gilt vor Version 1.0 aber als intern. Schreibzugriffe sind im lokalen Netz
 ohne Benutzerkonten trotzdem gegen Cross-Site Requests, versehentliche
@@ -118,6 +125,13 @@ Teil von V1.
 - Flexible Eigenschaften liegen relational in Definitionen und Werten, nicht als
   immer weiter wachsende Artikeltabelle. Ein begrenztes JSON-Feld ist nur für den
   kurzlebigen Lieferantencache vorgesehen.
+- `inventory_movement` und `inventory_transaction` bilden das führende,
+  unveränderliche Journal. `inventory_balance` ist ein in derselben Transaktion
+  aktualisierter materialisierter Saldo mit Versionszähler.
+- SQLite-Schreibvorgänge verwenden vor allen Bestandslesevorgängen
+  `BEGIN IMMEDIATE`. Damit werden lokale Schreiber kurz serialisiert; WAL und
+  Busy-Timeout lassen parallele Leser zu. Ein unerwarteter Versionskonflikt oder
+  Busy-Timeout wird als kontrollierter Bestandskonflikt beantwortet.
 
 ## 7. Suche
 

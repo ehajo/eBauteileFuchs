@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ details.location.code }} löschen – {{ branding.product_name }}{% endblock %}
+{% block content %}
+  <nav class="breadcrumbs" aria-label="Navigation"><a href="/locations">Lagerplätze</a><span aria-hidden="true">/</span><a href="/locations/{{ details.location.id }}">{{ details.location.code }}</a><span aria-hidden="true">/</span><span aria-current="page">Löschen</span></nav>
+  <div class="page-heading"><div><p class="eyebrow">Endgültiges Löschen</p><h1>{{ details.location.code }}</h1><p class="lead">{{ details.path|map(attribute='code')|join(' / ') }}</p></div></div>
+  {% if error %}<p class="notice notice--error" role="alert">{{ error }}</p>{% endif %}
+  <form class="form-card danger-zone" method="post" action="/locations/{{ details.location.id }}/delete">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <h2>Lagerplatz endgültig löschen?</h2>
+    <p>Das ist nur möglich, wenn keine Unterplätze, Bestände oder Bestandsbewegungen auf diesen Lagerplatz verweisen. Verwendete Lagerplätze bleiben aus Gründen der Nachvollziehbarkeit erhalten und können stattdessen deaktiviert werden.</p>
+    <label class="choice"><input type="checkbox" name="confirm" value="yes" required> Ich möchte den unbenutzten Lagerplatz endgültig löschen.</label>
+    <div class="button-row button-row--start"><button class="button button--danger" type="submit">Endgültig löschen</button><a class="button button--ghost" href="/locations/{{ details.location.id }}">Abbrechen</a></div>
+  </form>
+{% endblock %}

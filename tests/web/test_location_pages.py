@@ -68,3 +68,83 @@ async def test_html_form_rejects_csrf_and_shows_validation(client: AsyncClient) 
     )
     assert invalid.status_code == 422
     assert "Kennung darf nicht leer sein" in invalid.text
+
+
+@pytest.mark.anyio
+async def test_unused_location_can_be_deleted(client: AsyncClient) -> None:
+    drawer_type = next(
+        item
+        for item in (await client.get("/api/v1/location-types")).json()
+        if item["code"] == "drawer"
+    )
+    location = (
+        await client.post(
+            "/api/v1/locations",
+            json={
+                "code": "LOESCH-01",
+                "name": "Unbenutzte Schublade",
+                "location_type_id": drawer_type["id"],
+            },
+        )
+    ).json()
+
+    detail = await client.get(f"/locations/{location['id']}")
+    assert detail.status_code == 200
+    assert f"/locations/{location['id']}/delete" in detail.text
+
+    confirmation = await client.get(f"/locations/{location['id']}/delete")
+    token = re.search(r'name="csrf_token" value="([^"]+)"', confirmation.text)
+    assert token is not None
+    deleted = await client.post(
+        f"/locations/{location['id']}/delete",
+        data={"csrf_token": token.group(1), "confirm": "yes"},
+        follow_redirects=True,
+    )
+    assert deleted.status_code == 200
+    assert "LOESCH-01" not in deleted.text
+    assert (await client.get(f"/api/v1/locations/{location['id']}")).status_code == 404
+
+
+@pytest.mark.anyio
+async def test_location_with_child_cannot_be_deleted(client: AsyncClient) -> None:
+    room_type = next(
+        item
+        for item in (await client.get("/api/v1/location-types")).json()
+        if item["code"] == "room"
+    )
+    shelf_type = next(
+        item
+        for item in (await client.get("/api/v1/location-types")).json()
+        if item["code"] == "shelf"
+    )
+    parent = (
+        await client.post(
+            "/api/v1/locations",
+            json={
+                "code": "RAUM-LOESCH",
+                "name": "Raum mit Unterplatz",
+                "location_type_id": room_type["id"],
+            },
+        )
+    ).json()
+    child = await client.post(
+        "/api/v1/locations",
+        json={
+            "code": "REGAL-LOESCH",
+            "name": "Untergeordnetes Regal",
+            "location_type_id": shelf_type["id"],
+            "parent_id": parent["id"],
+        },
+    )
+    assert child.status_code == 201
+
+    confirmation = await client.get(f"/locations/{parent['id']}/delete")
+    token = re.search(r'name="csrf_token" value="([^"]+)"', confirmation.text)
+    assert token is not None
+    rejected = await client.post(
+        f"/locations/{parent['id']}/delete",
+        data={"csrf_token": token.group(1), "confirm": "yes"},
+    )
+    assert rejected.status_code == 409
+    assert "Entferne zuerst alle Unterplätze" in rejected.text
+    assert (await client.get(f"/api/v1/locations/{parent['id']}")).status_code == 200

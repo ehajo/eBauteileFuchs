@@ -8,7 +8,10 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
-from ebauteilefuchs.domain.errors import DuplicateLocationCodeError
+from ebauteilefuchs.domain.errors import (
+    DuplicateLocationCodeError,
+    LocationInUseError,
+)
 from ebauteilefuchs.domain.locations import Location, LocationType
 from ebauteilefuchs.persistence.models import LocationModel, LocationTypeModel
 
@@ -175,6 +178,20 @@ class SqlAlchemyLocationRepository:
         model.description = location.description
         model.is_active = location.is_active
         model.updated_at = location.updated_at
+
+    def remove(self, location_id: UUID) -> None:
+        model = self._session.get(LocationModel, str(location_id))
+        if model is None:
+            return
+        self._session.delete(model)
+        try:
+            self._session.flush()
+        except IntegrityError as error:
+            self._session.rollback()
+            raise LocationInUseError(
+                "Dieser Lagerplatz wird noch von Unterplätzen, Beständen oder "
+                "Bestandsbewegungen verwendet und kann deshalb nur deaktiviert werden."
+            ) from error
 
 
 class SqlAlchemyLocationUnitOfWork:

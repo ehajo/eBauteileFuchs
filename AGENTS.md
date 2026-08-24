@@ -94,7 +94,8 @@ oder einen lokalen Fake ersetzt.
 
 ## Freigabestatus
 
-Die Planung und Meilenstein M0 wurden am 23. August 2026 freigegeben. M1 und alle
-späteren Meilensteine dürfen erst nach einer weiteren ausdrücklichen Freigabe
-begonnen werden. Maßgeblich sind `docs/IMPLEMENTATION_PLAN.md` und
-`docs/OPEN_DECISIONS.md`.
+Die Planung sowie M0 bis M2 wurden am 23. August 2026 umgesetzt und lokal
+abgenommen. M3 wurde danach ausdrücklich freigegeben und umgesetzt; seine lokale
+Abnahme steht aus. M4 und alle späteren Meilensteine bleiben bis zu einer weiteren
+ausdrücklichen Freigabe gesperrt. Maßgeblich sind `docs/IMPLEMENTATION_PLAN.md`
+und `docs/OPEN_DECISIONS.md`.

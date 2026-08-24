@@ -81,7 +81,10 @@ der Hardware vorbeigehen.
 
 ### B3. Mengeneinheiten (vor M3)
 
-**Übernommen:** Standard `Stück`, Dezimalmengen, keine Einheitenumrechnung in V1.
+**Abgeschlossen für M3:** Standard `Stück`, Dezimalmengen mit höchstens acht
+Nachkommastellen und keine Einheitenumrechnung in V1 sind umgesetzt. Salden werden
+je Artikel, Lagerplatz und Einheit getrennt geführt; Gesamtanzeigen vermischen
+unterschiedliche Einheiten nicht.
 
 **Vorschlag:** pro Artikel/Lagerplatz genau eine frei benannte Einheit, Standard
 `Stück`; Mengen als Dezimalzahl. Umrechnungen zwischen Rollen, Metern, Packungen
@@ -186,6 +189,6 @@ werden, wenn die Produktabsicht abweicht:
 
 ## Freigabestatus
 
-M0 und M1 sind abgenommen. M2 wurde ausdrücklich freigegeben und umgesetzt; die
-lokale Abnahme steht aus. M3 und spätere Meilensteine benötigen weiterhin eine
-ausdrückliche Freigabe. Für M2 sind keine Entscheidungen mehr offen.
+M0 bis M2 sind abgenommen. M3 wurde ausdrücklich freigegeben und umgesetzt; die
+lokale Abnahme steht aus. M4 und spätere Meilensteine benötigen weiterhin eine
+ausdrückliche Freigabe. Für M3 sind keine Entscheidungen mehr offen.

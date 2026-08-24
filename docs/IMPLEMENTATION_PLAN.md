@@ -1,8 +1,8 @@
 # Implementierungsplan – eBauteileFuchs
 
-Status: Grundsätzlich freigegeben am 23. August 2026. M0 und M1 sind umgesetzt
-und lokal abgenommen. M2 wurde ausdrücklich freigegeben und am 23. August 2026
-umgesetzt; die lokale Abnahme steht aus. M3 und spätere Meilensteine bleiben
+Status: Grundsätzlich freigegeben am 23. August 2026. M0 bis M2 sind umgesetzt
+und lokal abgenommen. M3 wurde ausdrücklich freigegeben und am 23. August 2026
+umgesetzt; die lokale Abnahme steht aus. M4 und spätere Meilensteine bleiben
 gesperrt.
 
 ## 1. Vorgehensmodell
@@ -44,7 +44,7 @@ PDF-Renderer und automatisierter Zyklus-, Konflikt-, Migrations- und Rendertests
 Abnahmekriterien: Projektauftrag 7 und 8; zusätzlich Zyklus-, Konflikt- und
 PDF-Render-Tests.
 
-### M2 – Artikel, Kategorien und Dubletten (umgesetzt am 23. August 2026, Abnahme ausstehend)
+### M2 – Artikel, Kategorien und Dubletten (umgesetzt und abgenommen am 23. August 2026)
 
 - Hersteller, Kategorien, typische/freie Eigenschaften und Lieferantenzuordnungen.
 - Manuelle Artikelanlage und -bearbeitung.
@@ -60,7 +60,7 @@ portable lokale UND-Suche sind implementiert. Die Alembic-Revision
 Abnahmekriterien: 9, 13, 14 und fachliche Regressionstests für Schreibweisen,
 Trennzeichen und mehrdeutige Kandidaten.
 
-### M3 – Bestandsjournal und Scanabläufe
+### M3 – Bestandsjournal und Scanabläufe (umgesetzt am 23. August 2026, Abnahme ausstehend)
 
 - Saldo, unveränderliche Bewegungen, Transaktionen und Idempotenz.
 - Einlagern, Auslagern und Umlagern über HTML/HTMX und `/api/v1`.
@@ -69,6 +69,14 @@ Trennzeichen und mehrdeutige Kandidaten.
 
 Abnahmekriterien: 15 und 16; zusätzlich Doppelabsendung, parallele Entnahme,
 Transfer-Rollback und Journal-Saldo-Abgleich.
+
+Umsetzungsstand: Dezimalmengen, materialisierte Salden mit Versionszähler,
+unveränderliche Transaktionen/Bewegungen, Initial-, Ein-, Aus-, Um- und
+Korrekturbuchungen, Idempotenz, Negativbestandsschutz, responsive HTML-Abläufe,
+QR-Einstieg und `/api/v1/inventory` sind implementiert. Revision
+`0004_m3_inventory` aktualisiert bestehende M2-Datenbanken ohne Änderungen an
+Stammdaten. SQLite-Schreiber werden vor der Saldenprüfung mit `BEGIN IMMEDIATE`
+serialisiert; Konflikte werden fachlich gemeldet.
 
 ### M4 – Mouser-Integration
 

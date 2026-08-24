@@ -2,8 +2,8 @@
 
 Status: Grundsätzlich freigegeben am 23. August 2026
 
-Umsetzungsstand: Die Kapitel 3 bis 6 sind mit M1/M2 realisiert. Bestand und
-Journal ab Kapitel 7 folgen erst mit M3.
+Umsetzungsstand: Die Kapitel 3 bis 7 sowie die Integritätsregeln für Bestand und
+Journal sind mit M1 bis M3 realisiert.
 
 ## 1. Konventionen
 
@@ -175,11 +175,16 @@ schnelle Wiederverwendung erhalten bleiben.
 
 ### `inventory_transaction`
 
-`id`, `transaction_type`, `idempotency_key`, `comment`, `created_at`.
+`id`, `transaction_type`, `idempotency_key`, `request_fingerprint`, `comment`,
+`created_at`.
 
 Typen: `stock_in`, `stock_out`, `transfer`, `adjustment`, `initial`.
 `idempotency_key` ist eindeutig und wird für einen begrenzten, dokumentierten
 Zeitraum akzeptiert. Ein Vorgang gruppiert eine oder mehrere Bewegungen.
+`request_fingerprint` erkennt eine versehentliche Wiederverwendung desselben
+Schlüssels für inhaltlich verschiedene Buchungen. In M3 werden Schlüssel für die
+gesamte lokale Journalhistorie eindeutig gehalten; eine automatische Bereinigung
+findet nicht statt.
 
 ### `inventory_movement`
 
@@ -210,6 +215,12 @@ keine Geheimnisse.
 - Bestand und Bewegung werden atomar aktualisiert; die Prüfung auf negativen
   Bestand erfolgt innerhalb derselben Schreibtransaktion.
 - Die erwartete `version` verhindert stilles Überschreiben paralleler Buchungen.
+- Unter SQLite beginnt jeder Bestands-Schreibvorgang mit `BEGIN IMMEDIATE`.
+  Dadurch kann zwischen Saldenprüfung und Aktualisierung kein zweiter Schreiber
+  denselben alten Saldo verwenden; der Versionsvergleich bleibt zusätzliche
+  Konflikterkennung.
+- Datenbanktrigger verhindern `UPDATE` und `DELETE` auf Journaltransaktionen und
+  Bewegungen. Korrekturen sind ausschließlich neue Bewegungen.
 - Eindeutigkeitskonflikte werden als fachliche Dubletten beziehungsweise bereits
   gebuchte Idempotenzschlüssel behandelt.
 - Eine periodische Diagnose darf Salden aus dem Journal nachrechnen, verändert

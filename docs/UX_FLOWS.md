@@ -117,10 +117,17 @@ erzeugt noch keine Bewegung.
 
 ## 5. Suche und Artikel
 
-**M2-Stand:** Artikelübersicht, lokale Suche, Kategoriewahl, typische und freie
+**M3-Stand:** Artikelübersicht, lokale Suche, Kategoriewahl, typische und freie
 Eigenschaften, Hersteller-/Lieferantennummern, Detailseite, Bearbeitung und
-Dublettenwarnungen sind responsive umgesetzt. Bestand, Bewegungen und die
-Ein-/Auslagerungsaktionen in den nachfolgenden Abläufen folgen mit M3.
+Dublettenwarnungen sind responsive umgesetzt. Artikeldetails zeigen zusätzlich
+Gesamtbestand je Einheit, Lagerplätze, letzte Bewegungen und direkte Aktionen für
+Einlagern, Auslagern und Umlagern.
+
+Die Ein-, Aus-, Um- und Korrekturabläufe aus den Kapiteln 2 bis 4 sind mit M3 als
+serverseitige Formulare umgesetzt. Suchfelder verarbeiten Enter eines
+USB-Scanners, jede Formularinstanz besitzt einen Buchungsschlüssel und eine
+erneute Übermittlung erzeugt keine zweite Bewegung. Auf Smartphones bleiben
+Auswahl, Mengenfeld, Vorschau und Hauptaktion linear angeordnet.
 
 ### Globale Suche
 
@@ -175,6 +182,10 @@ Voreinstellung für 60 Schubladen: Start 1, zwei Stellen, Kennungen `01` bis `60
 Einzelansicht und Sammelauswahl zeigen vor dem PDF-Export eine Vorschau mit
 Logo, Produktname, Lagerplatzkennung/-name, optional vollständigem Pfad und QR.
 Papierformat und Etikettenraster werden aus freigegebenen V1-Vorgaben gewählt.
+
+Mit M3 zeigt das QR-Ziel zusätzlich die enthaltenen Artikel, Mengen und letzten
+Bewegungen. „Hier einlagern“ und „Hier auslagern“ übernehmen den Lagerplatz in
+den mobilen Buchungsablauf; bestehende QR-Pfade und Tokens bleiben unverändert.
 
 ## 7. Verbindung
 

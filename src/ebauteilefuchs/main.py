@@ -14,8 +14,10 @@ from ebauteilefuchs import __version__
 from ebauteilefuchs.api.errors import domain_error_response
 from ebauteilefuchs.api.v1.articles import router as articles_api_router
 from ebauteilefuchs.api.v1.health import router as health_router
+from ebauteilefuchs.api.v1.inventory import router as inventory_api_router
 from ebauteilefuchs.api.v1.locations import router as locations_api_router
 from ebauteilefuchs.application.articles import ArticleService
+from ebauteilefuchs.application.inventory import InventoryService
 from ebauteilefuchs.application.locations import LocationService
 from ebauteilefuchs.branding import BRANDING
 from ebauteilefuchs.config import Settings, get_settings
@@ -27,9 +29,12 @@ from ebauteilefuchs.persistence.database import (
     create_database_engine,
     create_session_factory,
 )
+from ebauteilefuchs.persistence.inventory import SqlAlchemyInventoryUnitOfWork
 from ebauteilefuchs.persistence.locations import SqlAlchemyLocationUnitOfWork
 from ebauteilefuchs.web.articles import router as articles_web_router
+from ebauteilefuchs.web.inventory import router as inventory_web_router
 from ebauteilefuchs.web.locations import router as locations_web_router
+from ebauteilefuchs.web.presentation import format_decimal
 from ebauteilefuchs.web.routes import router as web_router
 
 PACKAGE_DIR = Path(__file__).resolve().parent
@@ -62,7 +67,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.article_service_factory = lambda: ArticleService(
         lambda: SqlAlchemyArticleUnitOfWork(session_factory)
     )
+    app.state.inventory_service_factory = lambda: InventoryService(
+        lambda: SqlAlchemyInventoryUnitOfWork(session_factory)
+    )
     app.state.templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
+    app.state.templates.env.filters["number"] = format_decimal
 
     app.mount(
         "/static",
@@ -72,9 +81,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(web_router)
     app.include_router(locations_web_router)
     app.include_router(articles_web_router)
+    app.include_router(inventory_web_router)
     app.include_router(health_router, prefix="/api/v1")
     app.include_router(locations_api_router, prefix="/api/v1")
     app.include_router(articles_api_router, prefix="/api/v1")
+    app.include_router(inventory_api_router, prefix="/api/v1")
     app.add_exception_handler(DomainError, domain_error_response)
 
     @app.middleware("http")

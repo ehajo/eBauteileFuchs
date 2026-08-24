@@ -11,7 +11,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from ebauteilefuchs.api.dependencies import request_base_url
 from ebauteilefuchs.application.locations import LocationService
 from ebauteilefuchs.application.ports.labels import LabelSheetLayout
-from ebauteilefuchs.domain.errors import DomainError
+from ebauteilefuchs.domain.errors import DomainError, ValidationError
 from ebauteilefuchs.domain.locations import BatchSpecification, LocationDraft
 
 router = APIRouter(include_in_schema=False)
@@ -19,6 +19,20 @@ router = APIRouter(include_in_schema=False)
 
 def _service(request: Request) -> LocationService:
     return request.app.state.location_service_factory()
+
+
+def _location_detail_context(
+    request: Request, location_id: UUID, *, error: str | None = None
+) -> dict:
+    inventory = request.app.state.inventory_service_factory()
+    return {
+        "details": _service(request).get(location_id),
+        "error": error,
+        "inventory_positions": inventory.list_positions(location_id=location_id),
+        "inventory_movements": inventory.list_movements(
+            location_id=location_id, limit=10
+        ),
+    }
 
 
 def _csrf_token(request: Request) -> str:
@@ -469,7 +483,7 @@ def deactivate_location(
         return _render(
             request,
             "locations/detail.html",
-            {"details": service.get(location_id), "error": error.message},
+            _location_detail_context(request, location_id, error=error.message),
             status_code=409,
         )
     return RedirectResponse(f"/locations/{location_id}", status_code=303)
@@ -487,10 +501,42 @@ def activate_location(
         return _render(
             request,
             "locations/detail.html",
-            {"details": service.get(location_id), "error": error.message},
+            _location_detail_context(request, location_id, error=error.message),
             status_code=409,
         )
     return RedirectResponse(f"/locations/{location_id}", status_code=303)
+
+
+@router.get("/locations/{location_id}/delete", response_class=HTMLResponse)
+def delete_location_confirmation(location_id: UUID, request: Request) -> HTMLResponse:
+    return _render(
+        request,
+        "locations/delete.html",
+        {"details": _service(request).get(location_id), "error": None},
+    )
+
+
+@router.post("/locations/{location_id}/delete", response_class=HTMLResponse)
+def delete_location(
+    location_id: UUID,
+    request: Request,
+    csrf_token: str = Form(),
+    confirm: str = Form(),
+) -> Response:
+    _verify_csrf(request, csrf_token)
+    if confirm != "yes":
+        raise ValidationError("Bestätige das endgültige Löschen.")
+    service = _service(request)
+    try:
+        service.remove(location_id)
+    except DomainError as error:
+        return _render(
+            request,
+            "locations/delete.html",
+            {"details": service.get(location_id), "error": error.message},
+            status_code=409,
+        )
+    return RedirectResponse("/locations", status_code=303)
 
 
 @router.get("/locations/{location_id}", response_class=HTMLResponse)
@@ -498,7 +544,7 @@ def location_details(location_id: UUID, request: Request) -> HTMLResponse:
     return _render(
         request,
         "locations/detail.html",
-        {"details": _service(request).get(location_id), "error": None},
+        _location_detail_context(request, location_id),
     )
 
 

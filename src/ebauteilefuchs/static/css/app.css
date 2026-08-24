@@ -2,6 +2,87 @@
   box-sizing: border-box;
 }
 
+.inventory-booking-form {
+  max-width: 760px;
+}
+
+.booking-preview {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+}
+
+.booking-preview h2 {
+  margin-top: 0;
+  font-size: 1rem;
+}
+
+.quick-actions,
+.movement-list article {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.movement-list article {
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.quantity-delta.is-positive { color: var(--color-success); }
+.quantity-delta.is-negative { color: var(--color-error); }
+.stock-total { font-size: 1.1rem; }
+
+.article-picker,
+.selected-article {
+  margin-bottom: var(--space-5);
+}
+
+.article-picker__list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.article-picker__item,
+.selected-article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.article-picker__item:hover,
+.article-picker__item.is-selected {
+  border-color: var(--color-focus);
+  background: var(--color-surface-hover);
+}
+
+.article-picker__item span:first-child,
+.selected-article {
+  min-width: 0;
+}
+
+.article-picker__item small,
+.selected-article > span:last-child {
+  display: block;
+  color: var(--color-text-muted);
+}
+
+.selected-article {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
 html {
   background: var(--color-bg);
   font-family: var(--font-sans);
@@ -255,7 +336,29 @@ h1 {
 }
 
 .page-heading {
+  align-items: flex-start;
+  flex-wrap: wrap;
   margin-bottom: var(--space-6);
+}
+
+.page-heading > :first-child {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.page-heading > .button-row {
+  flex: 2 1 36rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.page-heading--location h1 {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.button-row form {
+  margin: 0;
 }
 
 .page-heading h1 {
@@ -283,6 +386,17 @@ h1 {
   font-weight: 750;
   text-decoration: none;
   cursor: pointer;
+}
+
+.button--danger {
+  border-color: var(--color-error);
+  background: transparent;
+  color: var(--color-error);
+}
+
+.button.button--danger:hover {
+  background: var(--color-error);
+  color: var(--color-bg);
 }
 
 .button:hover {
@@ -341,6 +455,11 @@ h1 {
   min-height: 3.25rem;
   padding-block: var(--space-2);
   border-bottom: 1px solid var(--color-border);
+}
+
+.tree-row > a {
+  flex: 1 1 14rem;
+  min-width: 0;
 }
 
 .tree-code {
@@ -693,6 +812,19 @@ td {
   font-size: 0.9rem;
 }
 
+@media (max-width: 80rem) {
+  .page-heading--location {
+    flex-direction: column;
+  }
+
+  .page-heading--location > :first-child,
+  .page-heading--location > .button-row {
+    flex: none;
+    justify-content: flex-start;
+    width: 100%;
+  }
+}
+
 @media (max-width: 48rem) {
   .hero,
   .foundation__grid {
@@ -718,6 +850,13 @@ td {
   .panel__heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .page-heading > :first-child,
+  .page-heading > .button-row {
+    flex: none;
+    justify-content: flex-start;
+    width: 100%;
   }
 
   .form-grid,
@@ -754,14 +893,26 @@ td {
 
   .main-nav {
     order: 3;
+    flex-wrap: wrap;
     width: 100%;
     margin-left: 0;
+    gap: var(--space-2) var(--space-4);
   }
 
   .button-row {
     align-items: stretch;
     flex-direction: column;
     width: 100%;
+  }
+
+  .location-tree ul {
+    margin-left: 0.25rem;
+    padding-left: 0.65rem;
+  }
+
+  .article-picker__item {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .site-footer {

@@ -11,8 +11,13 @@ from ebauteilefuchs.domain.errors import (
     DuplicateArticleError,
     DuplicateLocationCodeError,
     DuplicateReferenceError,
+    IdempotencyConflictError,
     InactiveLocationError,
+    InsufficientStockError,
+    InventoryConflictError,
+    InventoryNotFoundError,
     LocationCycleError,
+    LocationInUseError,
     LocationNotFoundError,
     LocationTypeNotFoundError,
     ReferenceNotFoundError,
@@ -28,6 +33,7 @@ def domain_error_response(_: Request, error: DomainError) -> JSONResponse:
             LocationNotFoundError,
             LocationTypeNotFoundError,
             ReferenceNotFoundError,
+            InventoryNotFoundError,
         ),
     ):
         response_status = status.HTTP_404_NOT_FOUND
@@ -41,6 +47,10 @@ def domain_error_response(_: Request, error: DomainError) -> JSONResponse:
             DuplicateReferenceError,
             InactiveLocationError,
             LocationCycleError,
+            LocationInUseError,
+            IdempotencyConflictError,
+            InsufficientStockError,
+            InventoryConflictError,
         ),
     ):
         response_status = status.HTTP_409_CONFLICT
@@ -57,4 +67,6 @@ def domain_error_response(_: Request, error: DomainError) -> JSONResponse:
                 "can_override": error.can_override,
             }
         )
+    if isinstance(error, InsufficientStockError):
+        content["available"] = error.available
     return JSONResponse(status_code=response_status, content=content)

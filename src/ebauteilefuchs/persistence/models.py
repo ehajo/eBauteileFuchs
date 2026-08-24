@@ -1,9 +1,10 @@
-"""SQLAlchemy persistence models for M1 locations."""
+"""SQLAlchemy persistence models for the M0 through M3 schema."""
 
 from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import (
+    DDL,
     Boolean,
     CheckConstraint,
     DateTime,
@@ -14,6 +15,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    event,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -255,4 +257,109 @@ class SupplierPartModel(Base):
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
+    )
+
+
+class InventoryBalanceModel(Base):
+    __tablename__ = "inventory_balance"
+    __table_args__ = (
+        UniqueConstraint(
+            "article_id", "location_id", "unit", name="uq_inventory_balance_key"
+        ),
+        CheckConstraint("quantity >= 0", name="ck_inventory_balance_non_negative"),
+        CheckConstraint("version >= 1", name="ck_inventory_balance_version"),
+        Index("ix_inventory_balance_article_id", "article_id"),
+        Index("ix_inventory_balance_location_id", "location_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    article_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("article.id", ondelete="RESTRICT"), nullable=False
+    )
+    location_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("location.id", ondelete="RESTRICT"), nullable=False
+    )
+    quantity: Mapped[Decimal] = mapped_column(Numeric(24, 8), nullable=False)
+    unit: Mapped[str] = mapped_column(String(24), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+
+
+class InventoryTransactionModel(Base):
+    __tablename__ = "inventory_transaction"
+    __table_args__ = (
+        UniqueConstraint("idempotency_key", name="uq_inventory_transaction_key"),
+        CheckConstraint(
+            "transaction_type IN ('stock_in', 'stock_out', 'transfer', "
+            "'adjustment', 'initial')",
+            name="ck_inventory_transaction_type",
+        ),
+        Index("ix_inventory_transaction_created_at", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    transaction_type: Mapped[str] = mapped_column(String(16), nullable=False)
+    idempotency_key: Mapped[str] = mapped_column(String(128), nullable=False)
+    request_fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+    comment: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+
+
+class InventoryMovementModel(Base):
+    __tablename__ = "inventory_movement"
+    __table_args__ = (
+        CheckConstraint("quantity_delta <> 0", name="ck_inventory_movement_non_zero"),
+        CheckConstraint(
+            "balance_after >= 0", name="ck_inventory_movement_balance_non_negative"
+        ),
+        Index("ix_inventory_movement_transaction_id", "transaction_id"),
+        Index("ix_inventory_movement_article_created", "article_id", "created_at"),
+        Index("ix_inventory_movement_location_created", "location_id", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    transaction_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("inventory_transaction.id", ondelete="RESTRICT"),
+        nullable=False,
+    )
+    article_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("article.id", ondelete="RESTRICT"), nullable=False
+    )
+    location_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("location.id", ondelete="RESTRICT"), nullable=False
+    )
+    quantity_delta: Mapped[Decimal] = mapped_column(Numeric(24, 8), nullable=False)
+    unit: Mapped[str] = mapped_column(String(24), nullable=False)
+    balance_after: Mapped[Decimal] = mapped_column(Numeric(24, 8), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+
+
+for table, name in (
+    (InventoryMovementModel.__table__, "inventory_movement"),
+    (InventoryTransactionModel.__table__, "inventory_transaction"),
+):
+    event.listen(
+        table,
+        "after_create",
+        DDL(
+            f"CREATE TRIGGER trg_{name}_immutable_update "
+            f"BEFORE UPDATE ON {name} BEGIN "
+            "SELECT RAISE(ABORT, 'inventory journal is immutable'); END"
+        ).execute_if(dialect="sqlite"),
+    )
+    event.listen(
+        table,
+        "after_create",
+        DDL(
+            f"CREATE TRIGGER trg_{name}_immutable_delete "
+            f"BEFORE DELETE ON {name} BEGIN "
+            "SELECT RAISE(ABORT, 'inventory journal is immutable'); END"
+        ).execute_if(dialect="sqlite"),
     )

@@ -8,6 +8,15 @@ Semantic Versioning.
 
 ### Added
 
+- M3-Bestandsjournal mit materialisierten Salden je Artikel, Lagerplatz und
+  Einheit sowie unveränderlichen Transaktionen und Bewegungen.
+- Initiale Bestände, Einlagerungen, Auslagerungen, atomare Umlagerungen und
+  Differenz- beziehungsweise Zielbestandskorrekturen.
+- Idempotente Buchungsendpunkte, Buchungstoken, optimistische Saldenversionen und
+  SQLite-Schreibserialisierung gegen Doppel- und Negativbuchungen.
+- Responsive, scanfreundliche Buchungsseiten mit Schnellmengen, Bestandsvorschau
+  sowie Bestands- und Bewegungsanzeigen auf Artikel- und Lagerplatzseiten.
+- M3-REST-Ressourcen unter `/api/v1/inventory` einschließlich Journalabfragen.
 - M2-Artikelverwaltung mit Herstellern, Kategorien, flexiblen technischen
   Eigenschaften, Lieferantenartikelnummern und lokaler UND-Suche.
 - Vierstufige Dublettenerkennung für Lieferantennummern, exakte und normalisierte
@@ -32,6 +41,21 @@ Semantic Versioning.
 
 ### Fixed
 
+- Bestandsmengen werden in der Oberfläche ohne wissenschaftliche Schreibweise
+  angezeigt; beispielsweise erscheint `1E+2` jetzt als `100`.
+- Technische Artikeleigenschaften bieten passende SI-Einheiten und Vorsätze als
+  Auswahl an, etwa pF bis F für Kapazitäten sowie mΩ bis GΩ für Widerstände.
+- Die Bestandssuche zeigt passende Artikel unmittelbar unter dem Suchfeld und
+  erhält vorausgewählte Lagerplätze auch beim mobilen Einstieg über „Hier
+  einlagern“.
+- Beim Auslagern werden nach der Artikelauswahl nur Lagerplätze mit tatsächlich
+  vorhandenem Bestand angeboten.
+- Die Bestandsübersicht ist direkt über die Hauptnavigation erreichbar.
+- Unbenutzte Lagerplätze können nach einer Sicherheitsabfrage gelöscht werden;
+  verwendete Lagerplätze bleiben als Buchungsnachweis erhalten und können
+  weiterhin deaktiviert werden.
+- Kopfzeilen und Lagerplatzbäume bleiben bei vielen Aktionen sowie auf schmalen
+  Bildschirmen lesbar und korrekt umgebrochen.
 - Der Windows-Entwicklungsstart wählt bei belegtem Standardport verständlich den
   nächsten freien Port, statt mit einem Uvicorn-Bindefehler abzubrechen.
 - Der Standardport wurde vom häufig belegten Port 8080 auf Port 8008 geändert.

@@ -13,6 +13,7 @@ from ebauteilefuchs.domain.articles import (
 )
 from ebauteilefuchs.domain.errors import DomainError, DuplicateArticleError
 from ebauteilefuchs.web.locations import _render, _verify_csrf
+from ebauteilefuchs.web.presentation import COMMON_UNIT_CHOICES, unit_choices
 
 router = APIRouter(include_in_schema=False)
 
@@ -57,6 +58,11 @@ def _form_context(
         "categories": service.list_categories(include_inactive=True),
         "selected_category": selected_category,
         "definitions": definitions,
+        "unit_options": {
+            str(mapping.definition.id): unit_choices(mapping.definition.canonical_unit)
+            for mapping in definitions
+        },
+        "common_unit_options": COMMON_UNIT_CHOICES,
         "manufacturers": service.list_manufacturers(include_inactive=True),
         "suppliers": service.list_suppliers(),
         "error": error,
@@ -345,8 +351,16 @@ async def update_article(article_id: UUID, request: Request) -> Response:
 
 @router.get("/articles/{article_id}", response_class=HTMLResponse)
 def article_details(article_id: UUID, request: Request) -> HTMLResponse:
+    inventory = request.app.state.inventory_service_factory()
     return _render(
         request,
         "articles/detail.html",
-        {"details": _service(request).get(article_id)},
+        {
+            "details": _service(request).get(article_id),
+            "inventory_positions": inventory.list_positions(article_id=article_id),
+            "inventory_movements": inventory.list_movements(
+                article_id=article_id, limit=10
+            ),
+            "inventory_totals": inventory.totals(article_id),
+        },
     )
