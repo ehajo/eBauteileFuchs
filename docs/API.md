@@ -1,8 +1,22 @@
-# Interne REST-API – M4
+# Interne REST-API – M5
 
-Status: M4 umgesetzt am 24. August 2026. Die API ist vor Version 1.0 intern und
+Status: M5 umgesetzt am 24. August 2026. Die API ist vor Version 1.0 intern und
 kann sich zwischen Vorabversionen ändern. Die interaktive OpenAPI-Beschreibung
 steht im laufenden System unter `/docs`.
+
+## Globale Suche und Verbindung
+
+- `GET /api/v1/search`: optionale Parameter `q`, `category_id`, `with_stock` und
+  `location_scope_id`. Mehrere normalisierte Suchwörter werden mit UND über
+  Stammdaten, Lieferantennummern, Eigenschaften, Notizen und aktuelle Lagerpfade
+  verknüpft. Antworten enthalten neutrale Artikeldaten, Kernattribute,
+  Lagerpositionen und Gesamtmengen je Einheit.
+- `GET /api/v1/connection`: Computername, aktuelle Browserbasis, erkannte lokale
+  IPv4-Kandidaten und ausgewählte URL. Es werden keine Netzwerkänderungen
+  vorgenommen.
+
+Der HTML-Endpunkt `GET /connection/qr.svg?base_url=...` akzeptiert ausschließlich
+vollständige HTTP(S)-Basis-URLs ohne Zugangsdaten, Pfad, Query oder Fragment.
 
 ## Bestand lesen
 

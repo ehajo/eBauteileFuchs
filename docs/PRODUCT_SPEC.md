@@ -135,6 +135,14 @@ Anfragen wie `10k 0805`, `100nF 50V` oder `Magazin 03 Schublade 42`.
 - Installierbare PWA mit lokal ausgeliefertem Manifest und Icons. Der Service
   Worker cached nur statische Anwendungsressourcen; fachliche Daten und
   Buchungsantworten werden nicht offline schreibbar gemacht.
+- Kamera-Barcode-Scan für die Lieferantensuche verwendet nur lokal ausgelieferte
+  Browserkomponenten und überträgt oder speichert keine Kamera- oder Fotodaten.
+  Der Foto-Scan funktioniert auch über HTTP im privaten LAN; ein laufendes
+  Live-Kamerabild setzt einen sicheren HTTPS-Kontext voraus. Texteingabe und
+  Tastaturscanner bleiben immer verfügbar.
+- Bei Würth-Verpackungscodes wird die Datenkennung `1P` als Produktcode
+  verwendet. `1T` bezeichnet die Lotnummer und `Q` die Packungsmenge; beide
+  werden nicht als Artikelnummer an die Lieferantensuche übergeben.
 - Netzwerkzugriff wird nicht mit öffentlicher Internetfreigabe gleichgesetzt. Die
   Dokumentation erläutert Windows-Firewall und das gleiche lokale Netzwerk.
 

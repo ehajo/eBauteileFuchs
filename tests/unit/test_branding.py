@@ -42,6 +42,20 @@ def test_packaged_logo_matches_approved_branding_asset() -> None:
     assert packaged.read_bytes() == approved.read_bytes()
 
 
+def test_packaged_mascot_matches_approved_branding_asset() -> None:
+    approved = PROJECT_ROOT / "branding" / "fuchs-maskottchen.png"
+    packaged = (
+        PROJECT_ROOT
+        / "src"
+        / "ebauteilefuchs"
+        / "static"
+        / "branding"
+        / "fuchs-maskottchen.png"
+    )
+
+    assert packaged.read_bytes() == approved.read_bytes()
+
+
 def test_core_text_colors_have_wcag_aa_contrast() -> None:
     tokens = _tokens()
 

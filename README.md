@@ -9,10 +9,9 @@ für Elektronikbauteile, Kleinteile und private Bastellager.
 
 ## Projektstatus
 
-Meilenstein M4 ist umgesetzt: M0 bis M3 sind lokal abgenommen. Zusätzlich stehen
-die lokale Suche vor Mouser, die offizielle Mouser-Search-API, eine bearbeitbare
-Importprüfung, Dublettenschutz und die bewusste Zuordnung zu vorhandenen Artikeln
-bereit. Die lokale M4-Abnahme steht aus.
+M0 bis M4 sind lokal abgenommen. M5 ergänzt die globale UND-Suche,
+Netzwerkerkennung mit Verbindungs-QR und eine installierbare PWA-App-Shell ohne
+Offline-Buchungen. Die lokale M5-Abnahme steht aus.
 
 ## Schnellstart unter Windows
 
@@ -58,14 +57,53 @@ Nach dem Start:
 - Artikel: <http://127.0.0.1:8008/articles>
 - Lagerplätze: <http://127.0.0.1:8008/locations>
 - Bestand: <http://127.0.0.1:8008/inventory>
-- Einlagern: <http://127.0.0.1:8008/inventory/stock-in>
-- Auslagern: <http://127.0.0.1:8008/inventory/stock-out>
-- Suchen/Mouser: <http://127.0.0.1:8008/suppliers/mouser>
+- Bestand direkt ändern: <http://127.0.0.1:8008/inventory/book>
+- Globale Suche: <http://127.0.0.1:8008/search>
+- Mouser-Suche: <http://127.0.0.1:8008/suppliers/mouser>
+- Smartphone verbinden: <http://127.0.0.1:8008/connection>
 - Health-Check: <http://127.0.0.1:8008/api/v1/health>
 - OpenAPI: <http://127.0.0.1:8008/docs>
 
-Der Server bindet standardmäßig an `0.0.0.0:8008`. Die komfortable
-Verbindungsseite samt Netzwerkadressauswahl und QR-Code folgt erst in M5.
+Der Server bindet standardmäßig an `0.0.0.0:8008`. Die Verbindungsseite erkennt
+geeignete lokale IPv4-Adressen, erlaubt eine manuelle Basis-URL und erzeugt den
+zugehörigen Smartphone-QR-Code. Öffentliche Portfreigaben sind nicht vorgesehen.
+
+## Smartphone-Kamera und Barcodes
+
+Auf der Startseite und unter **Suchen → Mouser** öffnet
+**Verpackungsbarcode scannen** den Scan-Dialog. **Foto aufnehmen** funktioniert
+auf Smartphones auch beim normalen HTTP-Aufruf im privaten LAN. Das Bild wird
+direkt auf dem Smartphone durch den lokal mitgelieferten Decoder ausgewertet,
+weder hochgeladen noch gespeichert und anschließend verworfen. Werden mehrere
+Codes auf einer Verpackung erkannt, muss die passende Nummer gewählt werden.
+Würth-Kennungen werden dabei fachlich ausgewertet: `1P` bezeichnet den für die
+Suche verwendeten Produktcode, `1T` die Lotnummer und `Q` die Packungsmenge.
+Lotnummer und Menge werden angezeigt, aber niemals als Artikelnummer gesucht.
+
+Der erkannte Inhalt wird als Barcode-Suche verarbeitet: eBauteileFuchs prüft
+zunächst bereits gespeicherte Artikel- und Lieferantennummern und fragt nur ohne
+lokalen Treffer die konfigurierte Mouser Search API ab. Treffer werden weiterhin
+vor dem Import angezeigt und geprüft; der Scan speichert oder bucht nichts
+automatisch.
+
+Nur der komfortable Live-Scan mit laufendem Kamerabild benötigt im lokalen
+Netzwerk eine als sicher erkannte HTTPS-Verbindung. HTTPS ist für den Foto-Scan
+also nicht erforderlich. Optional ein lokal vertrauenswürdiges Zertifikat und
+den zugehörigen privaten Schlüssel außerhalb des Repositorys ablegen und in
+`.env` konfigurieren:
+
+```text
+EBAUTEILEFUCHS_SSL_CERTFILE=C:/lokal/ebauteilefuchs-cert.pem
+EBAUTEILEFUCHS_SSL_KEYFILE=C:/lokal/ebauteilefuchs-key.pem
+EBAUTEILEFUCHS_PUBLIC_BASE_URL=https://192.168.1.42:8008
+```
+
+Die ausstellende lokale Zertifizierungsstelle muss auf dem Smartphone als
+vertrauenswürdig eingerichtet sein und das Zertifikat muss zur verwendeten
+IP-Adresse beziehungsweise zum lokalen Hostnamen passen. Ohne HTTPS bietet die
+Oberfläche automatisch den Foto-Scan sowie Texteingabe und Bluetooth-/USB-
+Scanner an. Kamera- und Fotodaten verlassen das Gerät nicht und werden nicht
+gespeichert.
 
 ## Manuelle Entwicklungsbefehle
 
@@ -78,7 +116,7 @@ python -m alembic upgrade head
 python -m ebauteilefuchs
 ```
 
-`requirements.lock` und `requirements-dev.lock` halten die für M4 geprüften
+`requirements.lock` und `requirements-dev.lock` halten die für M5 geprüften
 Abhängigkeiten reproduzierbar fest.
 
 ## Mouser-Suche und Import
@@ -141,30 +179,62 @@ passenden Einheit erfasst. Die Auswahl bietet gebräuchliche SI-Vorsätze wie
 Eigenschaften schlagen dieselben Einheiten vor, erlauben aber weiterhin eigene
 Angaben.
 
-Die lokale Suche verknüpft mehrere Suchwörter mit UND und berücksichtigt Namen,
-Hersteller, Artikelnummern, Eigenschaften, Notizen und Lieferantennummern.
+Die globale Suche steht direkt auf der Startseite und unter **Suchen**. Sie
+verknüpft mehrere Suchwörter mit UND und
+berücksichtigt Namen, Hersteller, Artikelnummern, Eigenschaften, Notizen,
+Lieferantennummern und aktuelle Lagerpfade. Kategorie, aktueller Bestand und
+grobe Lagerbereiche können zusätzlich gefiltert werden, ohne jede einzelne
+Schublade in der Filterliste anzuzeigen.
+
+Ein- und Auslagern sind unter **Bestand ändern** zusammengeführt. Bei einem
+vorausgewählten Artikel entfallen die erneute Artikelsuche und der obere
+Lagerfilter. Die Schaltflächen `−5`, `−1`, `+1` und `+5` buchen unmittelbar;
+andere Mengen werden über **Entnehmen** beziehungsweise **Hinzufügen** gebucht.
+
+## PWA und Smartphone-Verbindung
+
+Die Anwendung liefert Manifest, App-Shell und Service Worker lokal aus und kann
+in unterstützten Browsern zum Startbildschirm hinzugefügt werden. Statische
+Ressourcen und eine Offline-Hinweisseite sind verfügbar; Artikel-, Bestands- und
+Buchungsdaten werden ausdrücklich nicht offline gespeichert. Ohne bestätigten
+Health-Check sperrt die Oberfläche Schreibaktionen.
+
+Service Worker setzen einen sicheren Browserkontext voraus: `localhost` wird am
+PC als sicher behandelt, bei einer Smartphone-Adresse im LAN ist für die volle
+PWA-Installation normalerweise vertrauenswürdiges HTTPS nötig. Die normale
+responsive Browserbedienung bleibt über privates HTTP-LAN möglich.
+
+Unter **Verbindung · M5** stehen Computername, erkannte Adressen, manuelle
+Basis-URL, QR-Code sowie Hinweise zu privater Windows-Firewall, gleichem WLAN und
+DHCP-Reservierung bereit. Details enthält die
+[M5-Testanleitung](docs/MANUAL_TEST_M5.md).
 
 ## Lagerplätze und Etiketten
 
 Unter **Lagerplätze** können Räume, Schränke, Regale, Magazine, Schubladen,
 Unterfächer, Boxen und Kisten hierarchisch angelegt werden. Eigene Typen lassen
 sich unter **Typen** ergänzen. Der Magazin-Assistent erzeugt standardmäßig 60
-Schubladen (`01` bis `60`) erst nach einer konfliktfreien Vorschau atomar.
+Schubladen (`01` bis `60`) erst nach einer konfliktfreien Vorschau atomar. Dabei
+wird zuerst ein eigenständiges Magazin angelegt und die Schubladen werden darin
+einsortiert. Bereits vorhandene Schubladen derselben Ebene lassen sich in der
+Baumansicht auswählen und nachträglich unter einem neuen Magazin gruppieren.
 
 Die Detailseite bietet ein universelles Einzeletikett. In der Baumansicht können
 mehrere Lagerplätze für einen A4-Sammelbogen ausgewählt werden. Das Standardraster
 ist 70 × 36 mm mit 24 Etiketten pro A4-Seite (3 × 8). Für dauerhaft gedruckte
 Smartphone-QR-Codes sollte `EBAUTEILEFUCHS_PUBLIC_BASE_URL` auf eine im lokalen
-Netz stabile Adresse gesetzt werden; die geführte Verbindungsseite folgt in M5.
+Netz stabile Adresse gesetzt oder über die Verbindungsseite geprüft werden.
 
 Für kleine 60er-Magazine steht auf der Lagerplatzdetailseite zusätzlich ein
 35 × 13-mm-Kompaktetikett bereit. Im Magazin-Assistenten können Schubladen
 optional automatisch mit den Unterfächern A und B angelegt werden.
 
-Ein noch unbenutzter Lagerplatz kann über seine Detailseite nach einer
-Sicherheitsabfrage endgültig gelöscht werden. Sobald Unterplätze, Bestände oder
-Bestandsbewegungen darauf verweisen, bleibt er zur Nachvollziehbarkeit erhalten
-und kann stattdessen deaktiviert werden.
+In der Baumansicht können ein oder mehrere Lagerplätze einschließlich aller
+Unterplätze sicher gelöscht werden. Vorher zeigt eBauteileFuchs alle betroffenen
+Bauteile. Je Bauteil kann der Bestand ohne Lagerplatz erhalten, einem anderen
+Lagerplatz zugewiesen oder vollständig ausgebucht und das Bauteil deaktiviert
+werden. Lagerplätze und Buchungshistorie werden revisionssicher archiviert; in
+der normalen Übersicht sind sie anschließend nicht mehr sichtbar.
 
 Qualitätsprüfung:
 
@@ -190,6 +260,7 @@ Lokale Einstellungen können aus `.env.example` in eine nicht versionierte
 - [Interne REST-API](docs/API.md)
 - [Manuelle M3-Abnahme](docs/MANUAL_TEST_M3.md)
 - [Mouser-Einrichtung und manuelle M4-Abnahme](docs/MOUSER.md)
+- [Manuelle M5-Abnahme](docs/MANUAL_TEST_M5.md)
 
 Version 1 ist als responsive lokale Webanwendung für Raspberry Pi, Linux und
 Windows vorgesehen. Kerntechnologien sind Python 3.12, FastAPI, SQLAlchemy,
@@ -202,3 +273,6 @@ gewährt keine Rechte an eHaJo, eBauteileFuchs, Logo, einem späteren
 Fuchs-Maskottchen oder anderen Brandingbestandteilen. Es gelten die Hinweise in
 [TRADEMARKS.md](TRADEMARKS.md). Das vorhandene eHaJo-Logo darf nicht verändert
 oder nachgezeichnet werden.
+
+Hinweise und Lizenztexte der lokal mitgelieferten Barcode-Komponente stehen in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

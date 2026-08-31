@@ -326,7 +326,11 @@ class ArticleService:
                 product_url=cleaned.product_url,
                 note=cleaned.note,
                 search_text=self._search_text(
-                    cleaned, manufacturer, category, attributes, supplier_parts
+                    cleaned,
+                    manufacturer,
+                    category,
+                    attributes,
+                    supplier_parts,
                 ),
                 is_active=True,
                 created_at=now,
@@ -379,7 +383,11 @@ class ArticleService:
                 product_url=cleaned.product_url,
                 note=cleaned.note,
                 search_text=self._search_text(
-                    cleaned, manufacturer, category, attributes, supplier_parts
+                    cleaned,
+                    manufacturer,
+                    category,
+                    attributes,
+                    supplier_parts,
                 ),
                 is_active=current.is_active if is_active is None else is_active,
                 updated_at=datetime.now(UTC),

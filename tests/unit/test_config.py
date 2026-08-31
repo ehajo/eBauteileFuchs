@@ -39,3 +39,14 @@ def test_public_base_url_is_normalized_and_validated() -> None:
         Settings(public_base_url="lager.local:8008")
     with pytest.raises(ValidationError):
         Settings(public_base_url="http://name:secret@lager.local:8008")
+
+
+def test_https_configuration_requires_certificate_and_key(tmp_path: Path) -> None:
+    assert Settings().url_scheme == "http"
+    with pytest.raises(ValidationError):
+        Settings(ssl_certfile=tmp_path / "certificate.pem")
+    configured = Settings(
+        ssl_certfile=tmp_path / "certificate.pem",
+        ssl_keyfile=tmp_path / "key.pem",
+    )
+    assert configured.url_scheme == "https"

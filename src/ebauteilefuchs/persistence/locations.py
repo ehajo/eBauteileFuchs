@@ -179,6 +179,9 @@ class SqlAlchemyLocationRepository:
         model.is_active = location.is_active
         model.updated_at = location.updated_at
 
+    def flush(self) -> None:
+        self._session.flush()
+
     def remove(self, location_id: UUID) -> None:
         model = self._session.get(LocationModel, str(location_id))
         if model is None:

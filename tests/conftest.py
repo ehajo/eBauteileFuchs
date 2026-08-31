@@ -1,4 +1,5 @@
 from collections.abc import AsyncIterator
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -20,6 +21,7 @@ from ebauteilefuchs.persistence.models import (
     AttributeDefinitionModel,
     CategoryAttributeModel,
     CategoryModel,
+    LocationModel,
     LocationTypeModel,
     SupplierModel,
 )
@@ -33,6 +35,7 @@ def test_settings(tmp_path: Path) -> Settings:
         database_url=f"sqlite+pysqlite:///{(tmp_path / 'test.db').as_posix()}",
         log_level="WARNING",
         mouser_api_key=None,
+        public_base_url=None,
     )
 
 
@@ -56,6 +59,24 @@ async def client(test_settings: Settings) -> AsyncIterator[AsyncClient]:
                 is_active=True,
             )
             for identifier, code, name, sort_order in SYSTEM_LOCATION_TYPES
+        )
+        session.flush()
+        now = datetime.now(UTC)
+        session.add(
+            LocationModel(
+                id="10000000-0000-4000-8000-000000000099",
+                code="OHNE-LAGERPLATZ",
+                normalized_code="ohne-lagerplatz",
+                name="Ohne Lagerplatz",
+                location_type_id="10000000-0000-4000-8000-000000000008",
+                parent_id=None,
+                parent_scope="__root__",
+                description="Interner Sammelplatz für archivierte Lagerbereiche.",
+                is_active=True,
+                qr_token="internal-unassigned-v1",
+                created_at=now,
+                updated_at=now,
+            )
         )
         category_ids = {code: identifier for identifier, code, *_ in CATEGORIES}
         session.add_all(

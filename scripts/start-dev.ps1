@@ -73,7 +73,7 @@ if ($SelectedPort -ne $ConfiguredPort) {
 }
 
 if (-not $NoBrowser) {
-    $BrowserUrlCommand = "from ebauteilefuchs.config import get_settings; s = get_settings(); h = '127.0.0.1' if s.host == '0.0.0.0' else s.host; print(f'http://{h}:{s.port}')"
+    $BrowserUrlCommand = "from ebauteilefuchs.config import get_settings; s = get_settings(); h = '127.0.0.1' if s.host == '0.0.0.0' else s.host; print(f'{s.url_scheme}://{h}:{s.port}')"
     $BrowserUrl = (& $VenvPython -c $BrowserUrlCommand).Trim()
     Assert-LastExitCode
     Start-Process $BrowserUrl

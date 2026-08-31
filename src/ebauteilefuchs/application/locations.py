@@ -23,6 +23,7 @@ from ebauteilefuchs.domain.errors import (
     ValidationError,
 )
 from ebauteilefuchs.domain.locations import (
+    UNASSIGNED_LOCATION_ID,
     BatchSpecification,
     Location,
     LocationDraft,
@@ -136,6 +137,11 @@ class LocationService:
                 location_type.id: location_type
                 for location_type in uow.locations.list_types(include_inactive=True)
             }
+            locations = [
+                location
+                for location in locations
+                if location.id != UNASSIGNED_LOCATION_ID
+            ]
             by_id = {location.id: location for location in locations}
             child_counts: dict[UUID, int] = {}
             for location in locations:
@@ -312,12 +318,18 @@ class LocationService:
             self._validate_type_and_parent(
                 uow, specification.location_type_id, specification.parent_id
             )
+            if specification.magazine_code is not None:
+                self._ensure_unique(
+                    uow,
+                    specification.parent_id,
+                    normalize_location_code(specification.magazine_code),
+                )
             for draft in drafts:
                 normalized_code = normalize_location_code(draft.code)
                 conflict: str | None = None
                 if normalized_code in seen:
                     conflict = "Das Muster erzeugt diese Kennung mehrfach."
-                elif uow.locations.find_sibling(
+                elif specification.magazine_code is None and uow.locations.find_sibling(
                     specification.parent_id, normalized_code
                 ):
                     conflict = (
@@ -334,6 +346,42 @@ class LocationService:
             self._validate_type_and_parent(
                 uow, specification.location_type_id, specification.parent_id
             )
+            child_parent_id = specification.parent_id
+            now = datetime.now(UTC)
+            if specification.magazine_code is not None:
+                magazine_type = self._require_type(
+                    uow.locations.get_type_by_code("magazine")
+                )
+                if not magazine_type.is_active:
+                    raise LocationTypeNotFoundError(
+                        "Der Lagerplatztyp Magazin ist deaktiviert."
+                    )
+                normalized_magazine_code = normalize_location_code(
+                    specification.magazine_code
+                )
+                self._ensure_unique(
+                    uow, specification.parent_id, normalized_magazine_code
+                )
+                magazine = Location(
+                    id=uuid4(),
+                    code=clean_required_text(
+                        specification.magazine_code, "Magazinkennung", 64
+                    ),
+                    normalized_code=normalized_magazine_code,
+                    name=clean_required_text(
+                        specification.magazine_name, "Magazinbezeichnung", 120
+                    ),
+                    location_type_id=magazine_type.id,
+                    parent_id=specification.parent_id,
+                    description=None,
+                    is_active=True,
+                    qr_token=self._new_qr_token(uow),
+                    created_at=now,
+                    updated_at=now,
+                )
+                uow.locations.add(magazine)
+                created_ids.append(magazine.id)
+                child_parent_id = magazine.id
             compartment_type = None
             if specification.split_into_compartments:
                 compartment_type = self._require_type(
@@ -351,7 +399,7 @@ class LocationService:
             conflicts = [
                 draft.code
                 for draft, normalized_code in zip(drafts, normalized_codes, strict=True)
-                if uow.locations.find_sibling(specification.parent_id, normalized_code)
+                if uow.locations.find_sibling(child_parent_id, normalized_code)
             ]
             if conflicts:
                 preview = ", ".join(conflicts[:5])
@@ -360,7 +408,6 @@ class LocationService:
                     f"Bereits vorhandene Kennungen: {preview}{suffix}. "
                     "Es wurde nichts angelegt."
                 )
-            now = datetime.now(UTC)
             for draft, normalized_code in zip(drafts, normalized_codes, strict=True):
                 location = Location(
                     id=uuid4(),
@@ -368,7 +415,7 @@ class LocationService:
                     normalized_code=normalized_code,
                     name=draft.name,
                     location_type_id=draft.location_type_id,
-                    parent_id=draft.parent_id,
+                    parent_id=child_parent_id,
                     description=None,
                     is_active=True,
                     qr_token=self._new_qr_token(uow),
@@ -396,6 +443,74 @@ class LocationService:
                         created_ids.append(compartment.id)
             uow.commit()
         return [self.get(location_id) for location_id in created_ids]
+
+    def group_into_magazine(
+        self,
+        location_ids: list[UUID],
+        *,
+        code: str,
+        name: str,
+    ) -> LocationDetails:
+        """Create a magazine and move selected sibling branches beneath it."""
+
+        selected_ids = list(dict.fromkeys(location_ids))
+        if not selected_ids:
+            raise ValidationError("Wähle mindestens einen Lagerplatz aus.")
+        if len(selected_ids) > 200:
+            raise ValidationError(
+                "Es können höchstens 200 Lagerplätze gruppiert werden."
+            )
+        if UNASSIGNED_LOCATION_ID in selected_ids:
+            raise ValidationError("Der interne Lagerplatz kann nicht gruppiert werden.")
+        clean_code = clean_required_text(code, "Magazinkennung", 64)
+        clean_name = clean_required_text(name, "Magazinbezeichnung", 120)
+        normalized_code = normalize_location_code(clean_code)
+        with self._uow_factory() as uow:
+            selected = [
+                self._require_location(uow.locations.get(location_id))
+                for location_id in selected_ids
+            ]
+            if any(not location.is_active for location in selected):
+                raise InactiveLocationError(
+                    "Deaktivierte Lagerplätze können nicht gruppiert werden."
+                )
+            parent_ids = {location.parent_id for location in selected}
+            if len(parent_ids) != 1:
+                raise ValidationError(
+                    "Wähle Lagerplätze aus derselben Hierarchieebene aus."
+                )
+            selected_set = set(selected_ids)
+            if any(location.parent_id in selected_set for location in selected):
+                raise ValidationError(
+                    "Wähle nicht gleichzeitig einen Lagerplatz und seinen Unterplatz aus."
+                )
+            parent_id = parent_ids.pop()
+            self._ensure_unique(uow, parent_id, normalized_code)
+            magazine_type = self._require_type(
+                uow.locations.get_type_by_code("magazine")
+            )
+            now = datetime.now(UTC)
+            magazine = Location(
+                id=uuid4(),
+                code=clean_code,
+                normalized_code=normalized_code,
+                name=clean_name,
+                location_type_id=magazine_type.id,
+                parent_id=parent_id,
+                description=None,
+                is_active=True,
+                qr_token=self._new_qr_token(uow),
+                created_at=now,
+                updated_at=now,
+            )
+            uow.locations.add(magazine)
+            uow.locations.flush()
+            for location in selected:
+                uow.locations.update(
+                    replace(location, parent_id=magazine.id, updated_at=now)
+                )
+            uow.commit()
+        return self.get(magazine.id)
 
     def render_qr_svg(self, location_id: UUID, base_url: str) -> bytes:
         details = self.get(location_id)

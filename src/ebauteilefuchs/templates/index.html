@@ -3,6 +3,11 @@
 {% block title %}{{ branding.product_name }} – {{ branding.tagline }}{% endblock %}
 
 {% block content %}
+  <form class="home-search" method="get" action="/search" role="search">
+    <label for="home-query">Bauteil direkt finden</label>
+    <div class="search-bar__row search-bar__row--scanner"><input id="home-query" name="q" maxlength="200" autocomplete="off" autofocus placeholder="Name, Nummer, Eigenschaft oder Lagerplatz"><button class="button" type="submit">Suchen</button><button class="button button--secondary" type="button" data-barcode-scan-start data-barcode-target="home-query" data-scan-url="/suppliers/mouser?mode=barcode&amp;q=">Verpackungsbarcode scannen</button></div>
+  </form>
+  <dialog class="barcode-scanner" data-barcode-scanner aria-labelledby="barcode-scanner-title"><div class="barcode-scanner__header"><h2 id="barcode-scanner-title">Verpackungsbarcode scannen</h2><button class="button button--ghost button--small" type="button" data-barcode-scan-close>Schließen</button></div><video data-barcode-video playsinline muted hidden></video><p data-barcode-status role="status">Wähle den Foto-Scan oder halte den Code vor die Live-Kamera.</p><div class="barcode-scanner__actions"><button class="button" type="button" data-barcode-photo-trigger>Foto aufnehmen</button><input class="visually-hidden" id="home-barcode-photo" type="file" accept="image/*" capture="environment" data-barcode-photo><small>Das Foto wird nur auf diesem Gerät ausgewertet und nicht gespeichert.</small></div><div class="barcode-scanner__choices" data-barcode-choices hidden></div></dialog>
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero__copy">
       <p class="eyebrow">Lokale Lagerverwaltung für Maker</p>
@@ -19,10 +24,14 @@
         </div>
       </div>
     </div>
-    <aside class="mascot-placeholder" aria-label="Platzhalter für das Fuchs-Maskottchen">
-      <span aria-hidden="true">◇</span>
-      <strong>Maskottchen-Platzhalter</strong>
-      <small>Noch kein freigegebenes Fuchs-Motiv</small>
+    <aside class="mascot-card" aria-label="Freigegebenes Fuchs-Maskottchen">
+      <img
+        src="/static/branding/fuchs-maskottchen.png"
+        alt="Fuchs-Maskottchen von eBauteileFuchs"
+        width="1235"
+        height="1274"
+      >
+      <strong>Dein Lager. Schnell gefunden.</strong>
     </aside>
   </section>
 
@@ -33,7 +42,7 @@
         <span class="card-label">System</span>
         <h3>Bestand buchen</h3>
         <p>Lagere Bauteile ein oder aus und behalte jede Bewegung nachvollziehbar.</p>
-        <a class="text-link" href="/inventory/stock-in">Einlagern starten</a>
+        <a class="text-link" href="/inventory/book">Bestand direkt ändern</a>
       </article>
       <article>
         <span class="card-label">Datenschutz</span>
@@ -43,8 +52,10 @@
       <article>
         <span class="card-label">Version</span>
         <h3>{{ version }}</h3>
-        <p>Vorabversion mit dem freigegebenen Funktionsumfang von M4.</p>
+        <p>Vorabversion mit dem umgesetzten Funktionsumfang von M5.</p>
       </article>
     </div>
   </section>
+  <script src="{{ url_for('static', path='/vendor/zxing-wasm/reader.js') }}?v=3.1.3" defer></script>
+  <script src="{{ url_for('static', path='/js/barcode-scanner.js') }}?v=20260824-6" defer></script>
 {% endblock %}

@@ -8,6 +8,48 @@ Semantic Versioning.
 
 ### Added
 
+- Smartphone-Kamera-Scan für Verpackungsbarcodes auf Start- und Mouser-Suchseite;
+  erkannte Werte starten automatisch die lokale Vorprüfung und anschließend die
+  Mouser-Barcodesuche.
+- HTTP-tauglicher Foto-Barcode-Scan mit lokal mitgeliefertem ZXing-Decoder,
+  lokaler Bildauswertung und Auswahl bei mehreren Codes; Live-Scan bleibt als
+  optionale HTTPS-Komfortfunktion erhalten.
+- Würth-Verpackungscodes werden anhand ihrer Datenkennungen interpretiert:
+  `1P` wird als Produktcode gesucht, `1T` als Lotnummer und `Q` als
+  Packungsmenge erkannt; Lot und Menge gelangen nicht in die Artikelsuche.
+- Optionale HTTPS-Zertifikat-/Schlüsselkonfiguration für Kamera-Scan und PWA im
+  lokalen Netzwerk.
+- Bereits vergebene Alembic-Revision `0007_article_barcodes` als ungenutzte
+  Kompatibilitätsrevision beibehalten, damit aktualisierte Datenbanken weiterhin
+  ohne Rückstempelung starten.
+- Das Windows-Startskript öffnet bei automatischer Portausweichung zuverlässig
+  den tatsächlich gewählten Port statt einer fest konfigurierten Basis-URL.
+- M5-UND-Suche über Stammdaten, Lieferantennummern, Eigenschaften, Notizen und
+  aktuelle Lagerpfade mit Kategorie-, Bestands- und Lagerbereichsfilter.
+- Schnellsuche auf der Startseite, kompakte Trefferzeilen und auf echte
+  Lagerbereiche begrenzte Filter statt hunderter einzelner Schubladen.
+- Gemeinsame Schnellbuchung für Ein- und Auslagerung mit unmittelbar buchenden
+  Schaltflächen für `−5`, `−1`, `+1` und `+5` sowie frei eingebbarer Menge.
+- Standardmäßig eingeklappte Lagerplatzhierarchie und kompakte Checkboxen.
+- Kompaktere Desktop- und Smartphone-Oberfläche mit kleineren, sauber
+  umbrechenden Artikelüberschriften, ausgerichteter Markenleiste, konsistent
+  eingebundenem Maskottchen und der freigegebenen Originaldatei
+  `branding/e_rand_t.png` als Favicon.
+- Magazin-Assistent mit eigenständigem Magazin-Elternknoten sowie nachträgliches
+  Gruppieren ausgewählter bestehender Lagerplätze unter ein neues Magazin.
+- Rekursives, revisionssicheres Löschen ausgewählter Lagerzweige mit Vorschau
+  aller betroffenen Bauteile und den Entscheidungen „Ohne Lagerplatz“,
+  „Lagerplatz zuweisen“ oder „Bauteil vollständig löschen“.
+- Interner, in normalen Auswahllisten unsichtbarer Lagerplatz „Ohne Lagerplatz“
+  über Alembic-Revision `0006_unassigned_location`.
+- Versionsmarkierte statische Assets und Online-Aktualisierung des PWA-Caches,
+  damit Gestaltungsänderungen nicht durch einen alten Offline-Cache verdeckt werden.
+- Schnellbuchungsaktionen übertragen ihre Button-Aktion zuverlässig, bevor der
+  geklickte Button zum Schutz vor Doppelübermittlung gesperrt wird.
+- Lokale Netzwerkerkennung, validierte manuelle Basis-URL und Verbindungs-QR mit
+  Windows-Firewall-, WLAN- und DHCP-Hinweisen.
+- Installierbare PWA-App-Shell mit lokalem Manifest, Service Worker,
+  Offline-Hinweisseite und Sperre von Schreibaktionen ohne Serverbestätigung.
 - M4-Lieferantenschnittstelle mit isoliertem Mouser-HTTP-Client,
   defensiven Antwortmodellen und neutralem Produktmapper.
 - Lokale Suche vor Mouser, Scanner-/Artikelnummern-, Herstellerartikelnummern-
@@ -51,6 +93,8 @@ Semantic Versioning.
 
 ### Fixed
 
+- Die Barcode-Suche zeigt das Eingabefeld auf Smartphones in voller Breite und
+  öffnet nach einem Scan die Bildschirmtastatur nicht erneut.
 - Seitentitel verwenden auch bei langen Artikelbezeichnungen eine kompaktere,
   responsive Schriftgröße.
 - Die Einlagerung trennt Lagerbereich und buchbaren Endlagerplatz, filtert die

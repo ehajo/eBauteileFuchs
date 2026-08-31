@@ -3,6 +3,7 @@ from uuid import UUID
 
 from ebauteilefuchs.application.location_selection import (
     build_booking_location_selection,
+    build_location_scopes,
 )
 from ebauteilefuchs.application.locations import LocationDetails
 from ebauteilefuchs.domain.locations import Location, LocationType
@@ -14,6 +15,7 @@ def _details(
     *,
     parent: Location | None = None,
     children: int = 0,
+    type_code: str = "box",
 ) -> LocationDetails:
     identifier = UUID(f"00000000-0000-4000-8000-{number:012d}")
     location = Location(
@@ -31,8 +33,8 @@ def _details(
     )
     location_type = LocationType(
         id=location.location_type_id,
-        code="box",
-        name="Box",
+        code=type_code,
+        name=type_code,
         sort_order=1,
         is_system=True,
         is_active=True,
@@ -70,3 +72,37 @@ def test_explicit_parent_selection_is_preserved_for_existing_deep_link() -> None
 
     assert room in selection.locations
     assert selection.next_free == box
+
+
+def test_scope_selection_omits_hundreds_of_drawers_and_compartments() -> None:
+    room = _details(1, "RAUM", children=1, type_code="room")
+    shelf = _details(2, "REGAL", parent=room.location, children=1, type_code="shelf")
+    magazine = _details(
+        3, "MAGAZIN", parent=shelf.location, children=1, type_code="magazine"
+    )
+    drawer = _details(4, "01", parent=magazine.location, children=1, type_code="drawer")
+    compartment = _details(5, "A", parent=drawer.location, type_code="compartment")
+    mislabeled_drawer = _details(
+        6,
+        "02",
+        parent=magazine.location,
+        children=1,
+        type_code="magazine",
+    )
+    second_compartment = _details(
+        7, "B", parent=mislabeled_drawer.location, type_code="compartment"
+    )
+
+    scopes = build_location_scopes(
+        [
+            room,
+            shelf,
+            magazine,
+            drawer,
+            compartment,
+            mislabeled_drawer,
+            second_compartment,
+        ]
+    )
+
+    assert [item.location.code for item in scopes] == ["RAUM", "REGAL", "MAGAZIN"]

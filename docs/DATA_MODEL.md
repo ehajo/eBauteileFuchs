@@ -3,7 +3,9 @@
 Status: Grundsätzlich freigegeben am 23. August 2026
 
 Umsetzungsstand: Die Kapitel 3 bis 7 sowie die Integritätsregeln für Bestand und
-Journal sind mit M1 bis M4 realisiert.
+Journal sind mit M1 bis M4 realisiert. Die M5-Praxisergänzung benötigt keine neue
+Tabelle, ergänzt aber per Revision `0006_unassigned_location` einen internen
+Systemlagerplatz für revisionssicher erhaltene Bestände.
 
 ## 1. Konventionen
 
@@ -54,10 +56,15 @@ Regeln:
   verschoben werden.
 - `qr_token` ist stabil, zufällig und eindeutig. Anzeige-Code und Name dürfen sich
   ändern, ohne gedruckte Etiketten zu entwerten.
-- In M1 blockieren aktive Unterplätze die Deaktivierung. Ab M2/M3 verhindern
-  zusätzlich Artikelzuordnungen, Bestand und Historie eine Löschung; Lagerplätze
-  werden grundsätzlich nur deaktiviert.
-- Der Magazin-Assistent kann unter jeder erzeugten Schublade atomar die
+- Das sichere rekursive Löschen archiviert den gewählten Teilbaum durch
+  Deaktivierung. Bestände werden in derselben Bestandsjournal-Transaktion auf den
+  internen, in der normalen Oberfläche verborgenen Systemlagerplatz
+  `OHNE-LAGERPLATZ` oder auf einen gewählten aktiven Lagerplatz übertragen.
+  „Bauteil vollständig löschen“ bucht dessen Bestände an allen Lagerplätzen auf
+  null und deaktiviert den Artikel. Bewegungen und Transaktionen bleiben
+  unverändert erhalten.
+- Der Magazin-Assistent erzeugt zuerst einen Knoten vom Typ `magazine` und legt
+  die Schubladen darunter an. Er kann unter jeder erzeugten Schublade atomar die
   Unterfächer `A` und `B` anlegen; dafür ist keine zusätzliche Tabellenspalte
   erforderlich, weil dieselbe freie Hierarchie verwendet wird.
 
@@ -101,6 +108,14 @@ und wiederholte Leerzeichen reduzieren. Herstellerartikelnummer: Unicode
 normalisieren, trimmen, Großschreibung verwenden und Leerzeichen, Bindestriche
 sowie rein trennende Satzzeichen entfernen. Originale bleiben unverändert.
 Normalisierungsregeln werden versioniert und durch Regressionstests abgesichert.
+
+### Technische Kompatibilitätsrevision `0007_article_barcodes`
+
+Diese Revision wurde kurzzeitig bereits auf Entwicklungsdatenbanken angewendet
+und bleibt deshalb dauerhaft in der Alembic-Kette. Ihre leere Tabelle
+`article_barcode` wird von der Anwendung nicht verwendet. Verpackungsbarcodes
+werden ausschließlich unmittelbar an die Lieferantensuche übergeben und nicht
+als Artikelstammdaten gespeichert.
 
 ## 5. Lieferantenzuordnungen
 

@@ -43,6 +43,15 @@ def set_adapter(client: AsyncClient, adapter: FakeAdapter) -> None:
 
 @pytest.mark.anyio
 async def test_missing_key_and_supplier_error_statuses(client: AsyncClient) -> None:
+    page = await client.get("/suppliers/mouser")
+    assert "Verpackungsbarcode scannen" in page.text
+    assert 'data-select-value="barcode"' in page.text
+    assert "barcode-scanner.js" in page.text
+    assert 'capture="environment"' in page.text
+    assert "Foto aufnehmen" in page.text
+    initial_input = page.text.split('id="supplier-query"', 1)[1].split(">", 1)[0]
+    assert "autofocus" in initial_input
+
     missing = await client.post(
         "/api/v1/suppliers/mouser/search",
         json={"query": "unknown", "mode": "keyword"},
@@ -109,6 +118,38 @@ async def test_local_match_prevents_unrequested_external_search(
     )
     assert by_mpn.json()["local_matches"][0]["id"] == manufacturer_article.json()["id"]
     assert fake.calls == 0
+
+
+@pytest.mark.anyio
+async def test_wurth_barcode_uses_product_code_and_rejects_lot_or_quantity(
+    client: AsyncClient,
+) -> None:
+    fake = FakeAdapter()
+    set_adapter(client, fake)
+
+    product = await client.post(
+        "/api/v1/suppliers/mouser/search",
+        json={"query": "1P74404084100", "mode": "barcode"},
+    )
+    assert product.status_code == 200
+    assert product.json()["query"] == "74404084100"
+    assert fake.calls == 1
+
+    for value in ("1TLOT-240824", "Q500"):
+        rejected = await client.post(
+            "/api/v1/suppliers/mouser/search",
+            json={"query": value, "mode": "barcode"},
+        )
+        assert rejected.status_code == 422
+        assert "Würth-Produktcode" in rejected.json()["detail"]
+
+    page = await client.get(
+        "/suppliers/mouser", params={"q": "Q500", "mode": "barcode"}
+    )
+    assert "Würth-Produktcode" in page.text
+    assert '<option value="barcode" selected>' in page.text
+    result_input = page.text.split('id="supplier-query"', 1)[1].split(">", 1)[0]
+    assert "autofocus" not in result_input
 
 
 @pytest.mark.anyio

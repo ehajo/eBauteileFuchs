@@ -49,22 +49,22 @@ def search_page(request: Request) -> HTMLResponse:
     error = None
     try:
         mode = SupplierSearchMode(mode_value)
-        if query:
-            result = _service(request).search(
-                query, mode, force_external=force_external
-            )
-    except (ValueError, DomainError) as caught:
+    except ValueError:
         mode = SupplierSearchMode.PART_NUMBER
-        error = (
-            caught.message
-            if isinstance(caught, DomainError)
-            else "Ungültiger Suchmodus."
-        )
+        error = "Ungültiger Suchmodus."
+    else:
+        try:
+            if query:
+                result = _service(request).search(
+                    query, mode, force_external=force_external
+                )
+        except DomainError as caught:
+            error = caught.message
     return _render(
         request,
         "suppliers/search.html",
         {
-            "query": query,
+            "query": result.query if result else query,
             "mode": mode,
             "configured": _service(request).configured,
             "result": result,

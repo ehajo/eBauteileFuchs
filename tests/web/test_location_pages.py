@@ -42,6 +42,38 @@ async def test_location_pages_and_keyboard_friendly_form(client: AsyncClient) ->
 
 
 @pytest.mark.anyio
+async def test_location_tree_starts_collapsed(client: AsyncClient) -> None:
+    types = (await client.get("/api/v1/location-types")).json()
+    room_type = next(item for item in types if item["code"] == "room")
+    shelf_type = next(item for item in types if item["code"] == "shelf")
+    room = (
+        await client.post(
+            "/api/v1/locations",
+            json={
+                "code": "TREE-ROOM",
+                "name": "Baumraum",
+                "location_type_id": room_type["id"],
+            },
+        )
+    ).json()
+    created = await client.post(
+        "/api/v1/locations",
+        json={
+            "code": "TREE-SHELF",
+            "name": "Baumregal",
+            "location_type_id": shelf_type["id"],
+            "parent_id": room["id"],
+        },
+    )
+    assert created.status_code == 201
+
+    page = await client.get("/locations")
+    assert '<details class="tree-branch">' in page.text
+    assert '<details class="tree-branch" open>' not in page.text
+    assert "Klappe nur den benötigten Zweig auf" in page.text
+
+
+@pytest.mark.anyio
 async def test_html_form_rejects_csrf_and_shows_validation(client: AsyncClient) -> None:
     rejected = await client.post(
         "/locations",

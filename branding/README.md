@@ -11,5 +11,7 @@ eBauteileFuchs, dem eHaJo-Logo, einem späteren Fuchs-Maskottchen oder sonstigen
 ausdrücklich als Branding gekennzeichneten Grafiken. Weitere Hinweise stehen in
 `../TRADEMARKS.md`.
 
-Es existiert noch kein freigegebenes Fuchs-Maskottchen. Bis zu einer gesonderten
-Freigabe wird ausschließlich ein neutral beschrifteter Platzhalter verwendet.
+`fuchs-maskottchen.png` ist das finale freigegebene Fuchs-Maskottchen. Die in der
+Anwendung paketierte PNG-Datei ist eine unveränderte Kopie. Quadratische
+PWA-SVG-Hüllen platzieren diese Originaldatei nur auf einer Fläche und verändern
+oder zeichnen die Illustration nicht nach.

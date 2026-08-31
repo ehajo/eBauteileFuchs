@@ -6,6 +6,7 @@ from uuid import UUID
 from ebauteilefuchs.application.articles import ArticleDetails, ArticleService
 from ebauteilefuchs.application.ports.suppliers import SupplierAdapter
 from ebauteilefuchs.domain.articles import ArticleDraft, SupplierPartInput
+from ebauteilefuchs.domain.barcodes import parse_packaging_barcode
 from ebauteilefuchs.domain.errors import ValidationError
 from ebauteilefuchs.domain.suppliers import SupplierProduct, SupplierSearchMode
 
@@ -36,6 +37,19 @@ class SupplierSearchService:
         force_external: bool = False,
     ) -> SupplierSearchResult:
         cleaned = " ".join(query.split())
+        if mode is SupplierSearchMode.BARCODE:
+            packaging = parse_packaging_barcode(query)
+            if len(packaging.product_codes) > 1:
+                raise ValidationError(
+                    "Der Scan enthält mehrere Produktcodes. Bitte einen auswählen."
+                )
+            if packaging.product_codes:
+                cleaned = packaging.product_codes[0]
+            elif packaging.recognized:
+                raise ValidationError(
+                    "Der Scan enthält nur Lotnummer oder Packungsmenge. "
+                    "Bitte den Würth-Produktcode mit Kennung 1P scannen."
+                )
         if not cleaned or len(cleaned) > 160:
             raise ValidationError("Die Suche muss 1 bis 160 Zeichen enthalten.")
         exact = self._articles.find_by_supplier_number("mouser", cleaned)

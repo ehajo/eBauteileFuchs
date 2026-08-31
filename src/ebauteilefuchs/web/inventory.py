@@ -16,6 +16,7 @@ from ebauteilefuchs.web.locations import _render, _verify_csrf
 router = APIRouter(include_in_schema=False)
 
 MODE_LABELS = {
+    "book": ("Bestand ändern", "Bestand ändern"),
     "stock-in": ("Einlagern", "Bestand hinzufügen"),
     "stock-out": ("Auslagern", "Bestand entnehmen"),
     "initial": ("Initialen Bestand erfassen", "Anfangsbestand buchen"),
@@ -84,7 +85,7 @@ def _context(
         explicitly_selected_id=parsed_location_id,
     )
     free_location_message = None
-    if mode == "stock-in" and supplied("choose_free") == "1":
+    if mode in {"book", "stock-in"} and supplied("choose_free") == "1":
         if location_selection.next_free is None:
             location_id = ""
             free_location_message = (
@@ -102,10 +103,26 @@ def _context(
             positions = inventory.list_positions(article_id=UUID(article_id))
         except ValueError:
             pass
+    if mode == "book" and not location_id and positions:
+        location_id = str(positions[0].balance.location_id)
     position_location_ids = {item.balance.location_id for item in positions}
     source_locations = [
         item for item in location_results if item.location.id in position_location_ids
     ]
+    quick_locations = list(source_locations)
+    if parsed_scope_id is not None:
+        quick_locations.extend(
+            item
+            for item in location_selection.locations
+            if item.location.id not in position_location_ids
+        )
+    elif (
+        parsed_location_id is not None
+        and parsed_location_id not in position_location_ids
+    ):
+        quick_locations.extend(
+            item for item in location_results if item.location.id == parsed_location_id
+        )
     preserved = {
         "location_id": location_id,
         "location_scope_id": location_scope_id,
@@ -136,6 +153,7 @@ def _context(
         "location_scopes": location_selection.scopes,
         "free_location_message": free_location_message,
         "source_locations": source_locations,
+        "quick_locations": quick_locations,
         "positions": positions,
         "values": {
             "q": query,
@@ -176,12 +194,76 @@ def _get_form(mode: str, request: Request) -> HTMLResponse:
 
 @router.get("/inventory/stock-in", response_class=HTMLResponse)
 def stock_in_form(request: Request) -> HTMLResponse:
-    return _get_form("stock-in", request)
+    return _render(request, "inventory/book.html", _context(request, "book"))
 
 
 @router.get("/inventory/stock-out", response_class=HTMLResponse)
 def stock_out_form(request: Request) -> HTMLResponse:
-    return _get_form("stock-out", request)
+    return _render(request, "inventory/book.html", _context(request, "book"))
+
+
+@router.get("/inventory/book", response_class=HTMLResponse)
+def quick_booking_form(request: Request) -> HTMLResponse:
+    return _render(request, "inventory/book.html", _context(request, "book"))
+
+
+async def _quick_book(request: Request) -> HTMLResponse:
+    form = await request.form()
+    values = {key: str(value) for key, value in form.items()}
+    try:
+        _verify_csrf(request, values.get("csrf_token", ""))
+        inventory, _, _ = _services(request)
+        article_id = UUID(values.get("article_id", ""))
+        location_id = UUID(values.get("location_id", ""))
+        delta = values.get("delta", "")
+        operation = values.get("operation", "")
+        quantity = values.get("quantity", "")
+        if delta == "all":
+            positions = inventory.list_positions(
+                article_id=article_id, location_id=location_id
+            )
+            if not positions:
+                raise ValidationError(
+                    "An diesem Lagerplatz ist kein Bestand vorhanden."
+                )
+            operation = "stock-out"
+            quantity = str(positions[0].balance.quantity)
+        elif delta:
+            operation = "stock-out" if delta.startswith("-") else "stock-in"
+            quantity = delta.lstrip("+-")
+        if operation not in {"stock-in", "stock-out"}:
+            raise ValidationError("Wähle Hinzufügen oder Entnehmen.")
+        method = inventory.stock_in if operation == "stock-in" else inventory.stock_out
+        result = method(
+            article_id=article_id,
+            location_id=location_id,
+            quantity=quantity,
+            idempotency_key=values.get("idempotency_key", ""),
+            unit=values.get("unit", "Stück"),
+            comment=values.get("comment", ""),
+        )
+    except (DomainError, ValueError) as error:
+        message = (
+            error.message if isinstance(error, DomainError) else "Ungültige Auswahl."
+        )
+        return _render(
+            request,
+            "inventory/book.html",
+            _context(request, "book", values=values, error=message),
+            status_code=(
+                422 if isinstance(error, (ValidationError, ValueError)) else 409
+            ),
+        )
+    return _render(
+        request,
+        "inventory/book.html",
+        _context(request, "book", values=values, result=result),
+    )
+
+
+@router.post("/inventory/book", response_class=HTMLResponse)
+async def quick_book(request: Request) -> HTMLResponse:
+    return await _quick_book(request)
 
 
 @router.get("/inventory/initial", response_class=HTMLResponse)

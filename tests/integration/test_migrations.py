@@ -19,11 +19,12 @@ def test_empty_database_upgrades_and_downgrades(monkeypatch, tmp_path: Path) -> 
         revision = connection.execute(
             text("SELECT version_num FROM alembic_version")
         ).scalar_one()
-    assert revision == "0005_m4_supplier_cache"
+    assert revision == "0007_article_barcodes"
     inspector = inspect(engine)
     assert {
         "article",
         "article_attribute",
+        "article_barcode",
         "category",
         "location",
         "location_type",
@@ -38,6 +39,12 @@ def test_empty_database_upgrades_and_downgrades(monkeypatch, tmp_path: Path) -> 
     with engine.connect() as connection:
         assert (
             connection.execute(text("SELECT COUNT(*) FROM location_type")).scalar() == 8
+        )
+        assert (
+            connection.execute(
+                text("SELECT COUNT(*) FROM location WHERE code = 'OHNE-LAGERPLATZ'")
+            ).scalar()
+            == 1
         )
 
     command.downgrade(alembic_config, "base")
@@ -102,12 +109,12 @@ def test_existing_m3_database_upgrades_to_m4_and_downgrades_without_data_loss(
             connection.execute(
                 text("SELECT version_num FROM alembic_version")
             ).scalar_one()
-            == "0005_m4_supplier_cache"
+            == "0007_article_barcodes"
         )
         assert connection.execute(text("SELECT COUNT(*) FROM category")).scalar() == 10
         assert connection.execute(text("SELECT COUNT(*) FROM supplier")).scalar() == 1
         assert connection.execute(text("SELECT COUNT(*) FROM article")).scalar() == 1
-        assert connection.execute(text("SELECT COUNT(*) FROM location")).scalar() == 1
+        assert connection.execute(text("SELECT COUNT(*) FROM location")).scalar() == 2
 
     command.downgrade(alembic_config, "0004_m3_inventory")
     assert "location" in inspect(engine).get_table_names()

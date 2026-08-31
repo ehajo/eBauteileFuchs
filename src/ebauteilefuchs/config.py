@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Literal
 from urllib.parse import urlsplit
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from ebauteilefuchs.platform.paths import default_data_dir
@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     data_dir: Path | None = None
     database_url: str | None = None
     public_base_url: str | None = None
+    ssl_certfile: Path | None = None
+    ssl_keyfile: Path | None = None
     log_level: str = "INFO"
     mouser_api_key: SecretStr | None = None
     mouser_timeout_seconds: float = Field(default=8.0, ge=1.0, le=30.0)
@@ -58,6 +60,16 @@ class Settings(BaseSettings):
         if parsed.username or parsed.password:
             raise ValueError("public_base_url must not contain credentials")
         return cleaned
+
+    @model_validator(mode="after")
+    def validate_ssl_files(self) -> "Settings":
+        if bool(self.ssl_certfile) != bool(self.ssl_keyfile):
+            raise ValueError("ssl_certfile and ssl_keyfile must be configured together")
+        return self
+
+    @property
+    def url_scheme(self) -> str:
+        return "https" if self.ssl_certfile and self.ssl_keyfile else "http"
 
     @property
     def resolved_data_dir(self) -> Path:

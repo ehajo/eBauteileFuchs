@@ -13,6 +13,31 @@ class BookingLocationSelection:
     next_free: LocationDetails | None
 
 
+def build_location_scopes(
+    details: list[LocationDetails],
+) -> tuple[LocationDetails, ...]:
+    """Return useful storage areas without flooding selects with leaf drawers."""
+
+    ordered = sorted(
+        details,
+        key=lambda item: tuple(part.normalized_code for part in item.path),
+    )
+    compact_type_codes = {"drawer", "compartment"}
+    return tuple(
+        item
+        for item in ordered
+        if len(item.path) == 1
+        or (
+            item.location_type.code not in compact_type_codes
+            and any(
+                candidate.location.parent_id == item.location.id
+                and candidate.location_type.code != "compartment"
+                for candidate in ordered
+            )
+        )
+    )
+
+
 def build_booking_location_selection(
     details: list[LocationDetails],
     *,
@@ -64,7 +89,7 @@ def build_booking_location_selection(
         None,
     )
     return BookingLocationSelection(
-        scopes=tuple(ordered),
+        scopes=build_location_scopes(details),
         locations=tuple(locations),
         next_free=next_free,
     )

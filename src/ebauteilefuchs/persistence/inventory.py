@@ -94,6 +94,24 @@ class SqlAlchemyInventoryRepository:
         model = self._session.get(LocationModel, str(location_id))
         return _to_location(model) if model else None
 
+    def list_locations(self) -> list[Location]:
+        return [
+            _to_location(model)
+            for model in self._session.scalars(select(LocationModel)).all()
+        ]
+
+    def update_location(self, location: Location) -> None:
+        model = self._session.get(LocationModel, str(location.id))
+        if model is not None:
+            model.is_active = location.is_active
+            model.updated_at = location.updated_at
+
+    def update_article(self, article: Article) -> None:
+        model = self._session.get(ArticleModel, str(article.id))
+        if model is not None:
+            model.is_active = article.is_active
+            model.updated_at = article.updated_at
+
     def get_balance(
         self, article_id: UUID, location_id: UUID, unit: str
     ) -> InventoryBalance | None:

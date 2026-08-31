@@ -46,5 +46,10 @@ behalten. Es werden ausschließlich lokale Systemschriften verwendet.
 Das eHaJo-Logo darf nicht verzerrt, nachgezeichnet oder verändert werden.
 Die Anwendung soll technisch, freundlich und für Maker geeignet wirken.
 
-Ein endgültiges Fuchs-Maskottchen ist noch nicht freigegeben. Bis dahin darf nur
-ein eindeutig beschrifteter neutraler Platzhalter verwendet werden.
+Als Browser-Favicon wird ausschließlich die bereitgestellte Originaldatei
+`e_rand_t.png` verwendet. Die Wortmarke selbst wird nicht verändert.
+
+Das finale freigegebene Fuchs-Maskottchen liegt als `fuchs-maskottchen.png` vor.
+Die Originaldatei wird nicht verändert oder nachgezeichnet. Für die technische
+PWA-Integration wird sie unverändert in eine quadratische SVG-Fläche eingebettet;
+die Illustration selbst bleibt dabei vollständig unverändert.

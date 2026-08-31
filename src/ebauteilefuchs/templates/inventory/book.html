@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Bestand ändern – {{ branding.product_name }}{% endblock %}
+{% block content %}
+  <nav class="breadcrumbs" aria-label="Navigation"><a href="/inventory">Bestand</a><span aria-hidden="true">/</span><span aria-current="page">Bestand ändern</span></nav>
+  <div class="page-heading page-heading--compact"><div><p class="eyebrow">Schnellbuchung</p><h1>Bestand ändern</h1><p class="lead">Artikel und Lagerplatz wählen – danach bucht jeder Mengenknopf sofort.</p></div></div>
+
+  {% if error %}<p class="notice notice--error" role="alert">{{ error }}</p>{% endif %}
+  {% if result %}<section class="notice notice--success booking-result" role="status"><h2>{% if result.repeated %}Buchung war bereits bestätigt{% else %}Bestand geändert{% endif %}</h2>{% for movement in result.movements %}<p>{{ '+' if movement.quantity_delta > 0 else '' }}{{ movement.quantity_delta|number }} {{ movement.unit }} · jetzt <strong>{{ movement.balance_after|number }} {{ movement.unit }}</strong></p>{% endfor %}</section>{% endif %}
+
+  {% if not selected_article %}
+    <form class="search-bar quick-book-search" method="get" action="/inventory/book" role="search">
+      {% if values.location_id %}<input type="hidden" name="location_id" value="{{ values.location_id }}">{% endif %}
+      <label for="inventory-article-search">Welchen Artikel möchtest du ändern?</label>
+      <div class="search-bar__row"><input id="inventory-article-search" name="q" value="{{ values.q }}" placeholder="Name, Artikel- oder Lieferantennummer" autocomplete="off" autofocus><button class="button" type="submit">Suchen</button></div>
+    </form>
+    {% if values.q %}<section class="article-picker" aria-labelledby="article-results-heading"><h2 id="article-results-heading">Artikel auswählen</h2>{% if article_choices %}<div class="article-picker__list">{% for choice in article_choices %}<a class="article-picker__item" href="/inventory/book?q={{ values.q|urlencode }}&article_id={{ choice.details.article.id }}{% if values.location_id %}&location_id={{ values.location_id }}{% endif %}"><span><strong>{{ choice.details.article.name }}</strong><small>{% if choice.details.manufacturer %}{{ choice.details.manufacturer.name }}{% if choice.details.article.manufacturer_part_number %} · {{ choice.details.article.manufacturer_part_number }}{% endif %}{% else %}Keine Herstellerangabe{% endif %}</small></span><span class="button button--small">Auswählen</span></a>{% endfor %}</div>{% else %}<p class="notice">Keine passenden Artikel gefunden.</p>{% endif %}</section>{% endif %}
+  {% else %}
+    <section class="selected-article selected-article--booking" aria-label="Ausgewählter Artikel"><span><span class="eyebrow">Ausgewählter Artikel</span><strong>{{ selected_article.article.name }}</strong>{% if selected_article.manufacturer %}<small>{{ selected_article.manufacturer.name }}{% if selected_article.article.manufacturer_part_number %} · {{ selected_article.article.manufacturer_part_number }}{% endif %}</small>{% endif %}</span><a class="button button--ghost button--small" href="/inventory/book">Artikel wechseln</a></section>
+
+    {% if quick_locations %}
+      <form class="form-card quick-booking-form" method="post" action="/inventory/book" data-quick-booking>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="idempotency_key" value="{{ booking_token }}">
+        <input type="hidden" name="article_id" value="{{ selected_article.article.id }}">
+        <input type="hidden" name="q" value="{{ values.q }}">
+        {% if values.location_scope_id %}<input type="hidden" name="location_scope_id" value="{{ values.location_scope_id }}">{% endif %}
+        <input type="hidden" name="unit" value="{{ values.unit }}" data-booking-unit>
+        <label for="quick-location">Lagerplatz<select id="quick-location" name="location_id" required data-balance-select>{% for item in quick_locations %}<option value="{{ item.location.id }}" data-balance="{% for position in positions if position.balance.location_id == item.location.id %}{{ position.balance.quantity|number }}{% else %}0{% endfor %}" data-unit="{% for position in positions if position.balance.location_id == item.location.id %}{{ position.balance.unit }}{% else %}Stück{% endfor %}" {% if values.location_id == item.location.id|string %}selected{% endif %}>{{ item.path|map(attribute='code')|join(' / ') }} · {% for position in positions if position.balance.location_id == item.location.id %}{{ position.balance.quantity|number }} {{ position.balance.unit }}{% else %}leer{% endfor %}</option>{% endfor %}</select></label>
+        <p class="current-balance" aria-live="polite">Aktuell: <strong data-current-balance>0 Stück</strong></p>
+        <div class="instant-booking-actions" aria-label="Bestand direkt ändern">
+          <button class="button button--danger" type="submit" name="delta" value="-5">−5</button>
+          <button class="button button--danger" type="submit" name="delta" value="-1">−1</button>
+          <button class="button" type="submit" name="delta" value="1">+1</button>
+          <button class="button" type="submit" name="delta" value="5">+5</button>
+        </div>
+        <div class="custom-booking"><label for="quick-quantity">Andere Menge<input id="quick-quantity" name="quantity" inputmode="decimal" value="" placeholder="z. B. 12"></label><div class="button-row button-row--start"><button class="button button--danger" type="submit" name="operation" value="stock-out">Entnehmen</button><button class="button" type="submit" name="operation" value="stock-in">Hinzufügen</button><button class="button button--ghost" type="submit" name="delta" value="all">Alles entnehmen</button></div></div>
+        <details><summary>Optionale Notiz</summary><label for="quick-comment">Notiz oder Begründung<textarea id="quick-comment" name="comment" maxlength="1000" rows="2">{{ values.comment }}</textarea></label></details>
+      </form>
+    {% else %}
+      <p class="notice">Für diesen Artikel ist noch kein Lagerplatz belegt. Wähle zuerst einen kompakten Lagerbereich.</p>
+    {% endif %}
+
+    <details class="alternate-location" {% if not quick_locations %}open{% endif %}>
+      <summary>{% if positions %}An einem anderen Lagerplatz hinzufügen{% else %}Lagerplatz auswählen{% endif %}</summary>
+      <form method="get" action="/inventory/book" class="location-filter-form">
+        <input type="hidden" name="article_id" value="{{ selected_article.article.id }}">
+        {% if values.q %}<input type="hidden" name="q" value="{{ values.q }}">{% endif %}
+        <label for="location-scope">Raum, Regal oder Magazin<select id="location-scope" name="location_scope_id"><option value="">Bereich auswählen</option>{% for item in location_scopes %}<option value="{{ item.location.id }}" {% if values.location_scope_id == item.location.id|string %}selected{% endif %}>{{ item.path|map(attribute='code')|join(' / ') }} · {{ item.location.name }}</option>{% endfor %}</select></label>
+        <div class="button-row button-row--start"><button class="button button--secondary" type="submit">Plätze anzeigen</button><button class="button" type="submit" name="choose_free" value="1">Nächster freier Platz</button></div>
+      </form>
+      {% if free_location_message %}<p class="notice" role="status">{{ free_location_message }}</p>{% endif %}
+    </details>
+  {% endif %}
+  <script src="{{ url_for('static', path='/js/quick-booking.js') }}" defer></script>
+{% endblock %}

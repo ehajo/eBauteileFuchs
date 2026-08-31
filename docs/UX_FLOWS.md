@@ -27,6 +27,20 @@ werden nur für irreversible beziehungsweise risikoreiche Bestätigungen verwend
   erklären den nächsten möglichen Schritt.
 - Escape bietet Abbruch beziehungsweise Rückkehr, ohne bereits bestätigte
   Buchungen rückgängig zu machen.
+- „Verpackungsbarcode scannen“ bietet auf dem Smartphone immer **Foto
+  aufnehmen** an. Das Bild wird lokal ausgewertet und danach verworfen. Bei
+  mehreren erkannten Codes wählt der Nutzer die passende Nummer.
+- Bei Würth-Etiketten wird `1P` automatisch als Produktcode eingeordnet. `1T`
+  wird als Lotnummer und `Q` als Packungsmenge angezeigt, aber nicht als
+  Suchbegriff angeboten. Fehlt der `1P`-Code, fordert die Oberfläche ein neues
+  Foto des Produktcodes an.
+- Mit sicherer HTTPS-Verbindung startet zusätzlich das laufende Live-Kamerabild.
+  Der erkannte Wert startet den Lieferantensuchmodus `barcode`: lokal bekannte
+  Nummern werden zuerst geprüft, andernfalls folgt die konfigurierte Mouser-
+  Suche.
+- Fehlt HTTPS, die Kamerafreigabe oder Browserunterstützung für das Live-Bild,
+  bleiben Foto-Scan, manuelle Eingabe und ein tastaturartiger Bluetooth-/USB-
+  Scanner verfügbar.
 
 ## 3. Einlagern
 
@@ -43,17 +57,17 @@ Artikel scannen
   -> Erfolg; Fokus zurück auf Artikelscan
 ```
 
-Die Menge startet nicht automatisch bei 1, sofern dies nicht später als
-Nutzereinstellung freigegeben wird. Ein abweichender Lagerplatz ist immer
-erkennbar auswählbar.
+Ein- und Auslagern verwenden eine gemeinsame Schnellbuchung. Bei einem bereits
+gewählten Artikel werden weder Artikelsuche noch ein großer Lagerfilter erneut
+angezeigt. Vorhandene Artikelpositionen stehen direkt zur Auswahl; `−5`, `−1`,
+`+1` und `+5` erzeugen unmittelbar eine idempotente Buchung. Andere Mengen
+werden mit **Entnehmen** oder **Hinzufügen** direkt bestätigt.
 
-Die Einlagerungsmaske trennt die Hierarchienavigation von der eigentlichen
-Buchungsauswahl: Zuerst kann ein Raum, Regal, Magazin oder anderer Teilbaum als
-Bereich gewählt werden. Danach enthält die Lagerplatzauswahl regulär nur aktive
-Endlagerplätze dieses Bereichs. „Nächster freier Platz“ wählt darin den ersten
-Endlagerplatz ohne aktuellen Bestand deterministisch nach Lagerpfad aus. Ein
-explizit über einen bestehenden QR- oder Direktlink vorgewählter übergeordneter
-Platz bleibt weiterhin auswählbar.
+Nur für einen zusätzlichen oder noch unbelegten Lagerplatz wird die eingeklappte
+Bereichsauswahl geöffnet. Sie enthält Räume, Schränke, Regale und Magazine, aber
+nicht hunderte einzelne Schubladen oder Unterfächer. Danach erscheinen nur die
+aktiven Endlagerplätze dieses Bereichs. „Nächster freier Platz“ wählt darin den
+ersten unbelegten Endlagerplatz deterministisch nach Lagerpfad aus.
 
 ### 3.2 Unbekannter Artikel
 
@@ -138,11 +152,12 @@ Dublettenwarnungen sind responsive umgesetzt. Artikeldetails zeigen zusätzlich
 Gesamtbestand je Einheit, Lagerplätze, letzte Bewegungen und direkte Aktionen für
 Einlagern, Auslagern und Umlagern.
 
-Die Ein-, Aus-, Um- und Korrekturabläufe aus den Kapiteln 2 bis 4 sind mit M3 als
-serverseitige Formulare umgesetzt. Suchfelder verarbeiten Enter eines
-USB-Scanners, jede Formularinstanz besitzt einen Buchungsschlüssel und eine
-erneute Übermittlung erzeugt keine zweite Bewegung. Auf Smartphones bleiben
-Auswahl, Mengenfeld, Vorschau und Hauptaktion linear angeordnet.
+Die Ein- und Auslagerung ist als gemeinsame Schnellbuchung umgesetzt; Um- und
+Korrekturbuchungen bleiben getrennte serverseitige Formulare. Suchfelder
+verarbeiten Enter eines USB-Scanners, jede Buchungsinstanz besitzt einen
+einmaligen Schlüssel und eine erneute Übermittlung erzeugt keine zweite
+Bewegung. Auf Smartphones bleiben Auswahl, Schnellmengen und Hauptaktionen
+linear beziehungsweise in einem kompakten Zweispaltenraster angeordnet.
 
 ### Globale Suche
 
@@ -158,10 +173,19 @@ Ein Ergebnis führt zur Artikeldetailseite mit:
 - Lieferantenzuordnungen;
 - Bestand je Lagerplatz und Gesamtbestand;
 - letzten Bestandsbewegungen;
-- Aktionen Einlagern, Auslagern und Bearbeiten.
+- Aktionen Bestand ändern, Umlagern und Bearbeiten.
 
 Änderungen an identitätsbildenden Feldern lösen vor dem Speichern erneut die
 Dublettenerkennung aus.
+
+**M5-Stand:** Die globale Suche ist unter **Suchen** umgesetzt. Alle eingegebenen
+Wörter müssen gemeinsam in Stammdaten, Lieferantennummern, Eigenschaften,
+Notizen oder aktuellen Lagerpfaden vorkommen. Kategorie, „mit Bestand“ und ein
+grober Bereich der Lagerhierarchie sind kombinierbare Filter; einzelne
+Schubladen und Unterfächer überladen die Bereichsauswahl nicht. Die Suche steht
+zusätzlich direkt auf der Startseite. Ergebnisse erscheinen als kompakte Zeilen
+mit Kernattributen, Gesamtbestand, primärem Lagerpfad und direkter
+Bestandsänderung.
 
 ## 6. Lagerplätze
 
@@ -171,26 +195,39 @@ Smartphone zugleich als eingerückte Pfadübersicht; Detailseiten zeigen einen
 expliziten navigierbaren Brotkrumenpfad.
 
 Aus der Detailseite kann ein Unterplatz mit bereits ausgewähltem Elternknoten
-angelegt werden. Der Magazin-Assistent kann jede Schublade zusätzlich atomar in
-Unterfach A und B gliedern. Für 60er-Kleinteilemagazine steht neben dem
+angelegt werden. Der Magazin-Assistent legt ein eigenständiges Magazin an und
+kann jede darin erzeugte Schublade zusätzlich atomar in Unterfach A und B
+gliedern. Für 60er-Kleinteilemagazine steht neben dem
 Standardetikett ein reduziertes 35 × 13-mm-QR-Etikett bereit.
 
 ### Hierarchie verwalten
 
-Die Standardansicht zeigt einen aufklappbaren Baum und auf kleinen Bildschirmen
-einen navigierbaren Pfad. Anlegen geschieht im Kontext des Elternknotens. Vor dem
+Die Standardansicht zeigt einen zunächst geschlossenen, aufklappbaren Baum und
+auf kleinen Bildschirmen einen navigierbaren Pfad. Dadurch werden auch Magazine
+mit mehreren hundert Fächern erst bei Bedarf aufgeklappt. Anlegen geschieht im
+Kontext des Elternknotens. Vor dem
 Verschieben zeigt eine Vorschau alten und neuen Pfad. Zyklen und doppelte
 Geschwisterkennungen werden direkt erklärt.
 
 ### Magazin-Assistent
 
-1. Elternlagerplatz und Kindtyp wählen.
-2. Anzahl, Startnummer, Stellenzahl, Kennungs- und Namensmuster eingeben.
+1. Elternlagerplatz sowie Kennung und Bezeichnung des neuen Magazins wählen.
+2. Anzahl, Startnummer, Stellenzahl, Kennungs- und Namensmuster der Schubladen eingeben.
 3. Vorschau aller erzeugten Schubladen prüfen.
 4. Konflikte werden markiert; es wird nichts teilweise angelegt.
 5. Einmal bestätigen; danach Zusammenfassung und optional QR-Sammel-PDF öffnen.
 
 Voreinstellung für 60 Schubladen: Start 1, zwei Stellen, Kennungen `01` bis `60`.
+
+### Gruppieren und sicher löschen
+
+Ausgewählte Geschwisterknoten können nach einer kompakten Vorschau unter ein
+neues Magazin verschoben werden. Beim Löschen werden die ausgewählten Zweige
+einschließlich aller Unterplätze zunächst vollständig ermittelt. Eine Vorschau
+listet jeden betroffenen Artikel mit Menge und bisherigem Pfad. Für jeden Artikel
+wird „Ohne Lagerplatz erhalten“, „Lagerplatz zuweisen“ oder „Bauteil vollständig
+löschen“ gewählt. Erst die Bestätigung schreibt eine idempotente
+Bestandsjournal-Transaktion und deaktiviert anschließend den gesamten Teilbaum.
 
 ### QR-Etiketten
 
@@ -199,8 +236,8 @@ Logo, Produktname, Lagerplatzkennung/-name, optional vollständigem Pfad und QR.
 Papierformat und Etikettenraster werden aus freigegebenen V1-Vorgaben gewählt.
 
 Mit M3 zeigt das QR-Ziel zusätzlich die enthaltenen Artikel, Mengen und letzten
-Bewegungen. „Hier einlagern“ und „Hier auslagern“ übernehmen den Lagerplatz in
-den mobilen Buchungsablauf; bestehende QR-Pfade und Tokens bleiben unverändert.
+Bewegungen. „Bestand hier ändern“ übernimmt den Lagerplatz in den gemeinsamen
+mobilen Buchungsablauf; bestehende QR-Pfade und Tokens bleiben unverändert.
 
 ## 7. Verbindung
 
@@ -210,6 +247,13 @@ als sicher korrekt behauptet. Der Nutzer kann eine Adresse auswählen oder eine
 manuell konfigurierte Basis-URL verwenden. Hinweise: Smartphone im selben Netz,
 gegebenenfalls Windows-Firewall freigeben, für dauerhafte Ausdrucke feste IP oder
 DHCP-Reservierung verwenden.
+
+**M5-Stand:** Die Verbindungsseite ist über den Systemstatus in der Kopfzeile
+erreichbar. Erkannte Adressen können ausgewählt oder durch eine validierte
+manuelle HTTP(S)-Basis-URL ersetzt werden. Der QR zeigt ausschließlich diese URL.
+Die installierbare App-Shell zeigt Verbindungsverlust sichtbar an und sperrt
+Schreibaktionen, bis der Health-Check wieder erfolgreich ist; fachliche Daten und
+Buchungen werden nicht offline gespeichert.
 
 ## 8. Einstellungen, Export und Backup
 
@@ -235,8 +279,9 @@ abbrechen – aber keine erfundenen Ersatzdaten.
 
 Die dunkle Gestaltung verwendet die freigegebenen eHaJo-Farben als zentral
 definierte Tokens. Das unveränderte Logo erscheint in Navigation, Start,
-Verbindungsseite und Druckansicht. Der Maskottchenbereich bleibt bis zur Freigabe
-ein neutraler Platzhalter. Browser-Titel, Manifest, Footer und Terminalausgabe
-verwenden die festgelegten Texte. Fokus, Fehler und Erfolg sind zusätzlich zu
-Farbe durch Rahmen, Icon und Text erkennbar; Bewegung respektiert reduzierte
-Bewegungspräferenzen.
+Verbindungsseite und Druckansicht. Das finale freigegebene Fuchs-Maskottchen wird
+auf der Startseite unverändert verwendet; quadratische PWA-SVG-Rahmen platzieren
+dasselbe Original ohne es nachzuzeichnen. Browser-Titel, Manifest, Footer und
+Terminalausgabe verwenden die festgelegten Texte. Fokus, Fehler und Erfolg sind
+zusätzlich zu Farbe durch Rahmen, Icon und Text erkennbar; Bewegung respektiert
+reduzierte Bewegungspräferenzen.

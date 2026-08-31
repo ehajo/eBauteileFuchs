@@ -7,7 +7,9 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="form-grid">
       <label>Übergeordneter Lagerplatz <span class="required">Pflichtfeld</span><select name="parent_id" required autofocus><option value="">Bitte wählen</option>{% for parent in parents %}<option value="{{ parent.location.id }}" {% if values.get('parent_id') == parent.location.id|string %}selected{% endif %}>{{ parent.path | map(attribute='code') | join(' / ') }}</option>{% endfor %}</select></label>
-      <label>Typ <span class="required">Pflichtfeld</span><select name="location_type_id" required><option value="">Bitte wählen</option>{% for type in types %}<option value="{{ type.id }}" {% if values.get('location_type_id') == type.id|string %}selected{% endif %}>{{ type.name }}</option>{% endfor %}</select></label>
+      <label>Magazinkennung <span class="required">Pflichtfeld</span><input name="magazine_code" maxlength="64" required value="{{ values.get('magazine_code', '') }}" placeholder="z. B. MAG-01"></label>
+      <label>Magazinbezeichnung <span class="required">Pflichtfeld</span><input name="magazine_name" maxlength="120" required value="{{ values.get('magazine_name', '') }}" placeholder="z. B. Kleinteilemagazin 01"></label>
+      <label>Unterelemente <select name="location_type_id" required>{% for type in types %}<option value="{{ type.id }}" {% if values.get('location_type_id') == type.id|string %}selected{% endif %}>{{ type.name }}</option>{% endfor %}</select><small>Das Magazin wird automatisch darüber angelegt.</small></label>
       <label>Anzahl<input name="count" type="number" min="1" max="200" required value="{{ values.get('count', 60) }}"></label>
       <label>Startnummer<input name="start_number" type="number" min="0" max="999999" required value="{{ values.get('start_number', 1) }}"></label>
       <label>Stellenzahl<input name="padding" type="number" min="1" max="6" required value="{{ values.get('padding', 2) }}"></label>
@@ -18,9 +20,9 @@
     <button class="button" type="submit">Vorschau prüfen</button>
   </form>
   {% if preview %}
-    <section class="panel preview-panel"><div class="panel__heading"><div><h2>Vorschau</h2><p>{{ preview.items|length }} Schubladen{% if preview.specification.split_into_compartments %} mit jeweils zwei Unterfächern ({{ preview.items|length * 3 }} Lagerplätze insgesamt){% endif %} · {% if preview.has_conflicts %}Konflikte gefunden{% else %}bereit zum Anlegen{% endif %}</p></div></div>
+    <section class="panel preview-panel"><div class="panel__heading"><div><h2>Vorschau</h2><p>1 Magazin + {{ preview.items|length }} Schubladen{% if preview.specification.split_into_compartments %} mit jeweils zwei Unterfächern ({{ 1 + preview.items|length * 3 }} Lagerplätze insgesamt){% endif %} · {% if preview.has_conflicts %}Konflikte gefunden{% else %}bereit zum Anlegen{% endif %}</p></div></div>
       <div class="table-scroll"><table><thead><tr><th>Kennung</th><th>Bezeichnung</th><th>Prüfung</th></tr></thead><tbody>{% for item in preview.items %}<tr><td>{{ item.draft.code }}</td><td>{{ item.draft.name }}</td><td>{% if item.conflict %}<span class="error-text">{{ item.conflict }}</span>{% else %}<span class="success-text">Frei</span>{% endif %}</td></tr>{% endfor %}</tbody></table></div>
-      {% if not preview.has_conflicts %}<form method="post" action="/locations/magazine/create"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">{% for key, value in values.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}<button class="button" type="submit">{% if preview.specification.split_into_compartments %}{{ preview.items|length * 3 }} Lagerplätze{% else %}{{ preview.items|length }} Lagerplätze{% endif %} anlegen</button></form>{% endif %}
+      {% if not preview.has_conflicts %}<form method="post" action="/locations/magazine/create"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">{% for key, value in values.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}<button class="button" type="submit">{% if preview.specification.split_into_compartments %}{{ 1 + preview.items|length * 3 }} Lagerplätze{% else %}{{ 1 + preview.items|length }} Lagerplätze{% endif %} anlegen</button></form>{% endif %}
     </section>
   {% endif %}
 {% endblock %}

@@ -12,7 +12,7 @@ Jinja, SQLAlchemy oder Mouser zu verschmelzen.
 ## 2. Bausteine und Abhängigkeitsrichtung
 
 ```text
-Browser / USB-Scanner / PWA
+Browser / USB-Scanner / Smartphone-Foto und -Kamera / PWA
           |
           v
 Web-Seiten (Jinja + HTMX)      interne REST-API
@@ -111,6 +111,12 @@ In M4 ergänzt wurden `/suppliers/mouser/status`, `/suppliers/mouser/search`,
 verwenden denselben `SupplierSearchService`; Mouser-HTTP, Mouser-Schema, Mapper
 und neutrale Domainprodukte bleiben getrennte Adapterbausteine.
 
+In M5 ergänzen `/search` und `/connection` die interne API. Der
+`GlobalSearchService` verbindet die vorhandenen normalisierten Artikeltexte mit
+aktuellen Lagerpfaden und wendet eine portable In-Memory-/SQLite-kompatible
+UND-Strategie an. Die Plattform-Netzwerkerkennung liefert nur geeignete lokale
+IPv4-Kandidaten; URL-Validierung und Auswahl liegen im Application-Layer.
+
 HTML-spezifische HTMX-Fragmente liegen nicht unter `/api`. OpenAPI dokumentiert
 die API, gilt vor Version 1.0 aber als intern. Schreibzugriffe sind im lokalen Netz
 ohne Benutzerkonten trotzdem gegen Cross-Site Requests, versehentliche
@@ -160,6 +166,19 @@ derselben Transaktion aktualisiert.
 - Der Service Worker liefert eine App-Shell und statische Assets, aber keine
   offline Bestandsbuchungen. Dadurch entstehen nach Verbindungsabbrüchen keine
   schwer auflösbaren Synchronisationskonflikte.
+
+Mit M5 cached der Service Worker ausschließlich CSS, lokales JavaScript,
+Brandingassets, Manifest und Offline-Hinweisseite. Navigation verwendet das Netz
+und fällt nur auf den Hinweis zurück. REST-Antworten und Schreibanforderungen
+werden nie gecached; Browser-Schreibformulare werden ohne erfolgreichen
+Health-Check gesperrt. Statische Ressourcen werden online aus dem Netz
+aktualisiert und nur bei Verbindungsverlust aus dem Cache gelesen; versionsmarkierte
+Asset-URLs verhindern veraltete Gestaltung nach einem Update.
+
+Das rekursive Archivieren von Lagerzweigen liegt im Bestandsservice: Salden,
+unveränderliche Bewegungen, Artikeldeaktivierung und Lagerplatzdeaktivierung
+werden innerhalb derselben SQLite-Schreibtransaktion abgeschlossen. Die
+Web-Routen bereiten lediglich Vorschau und validierte Benutzerentscheidungen auf.
 
 ## 9. Konfiguration und Pfade
 

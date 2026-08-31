@@ -11,6 +11,7 @@ from ebauteilefuchs.domain.errors import ValidationError
 
 WHITESPACE = re.compile(r"\s+")
 ALLOWED_PATTERN_FIELDS = {"number", "number_padded", "index"}
+UNASSIGNED_LOCATION_ID = UUID("10000000-0000-4000-8000-000000000099")
 
 
 def normalize_location_code(value: str) -> str:
@@ -90,6 +91,8 @@ class BatchSpecification:
     code_pattern: str = "{number_padded}"
     name_pattern: str = "Schublade {number_padded}"
     split_into_compartments: bool = False
+    magazine_code: str | None = None
+    magazine_name: str | None = None
 
     def validate(self) -> None:
         if not 1 <= self.count <= 200:
@@ -100,6 +103,13 @@ class BatchSpecification:
             raise ValidationError("Die Stellenzahl muss zwischen 1 und 6 liegen.")
         self._validate_pattern(self.code_pattern, "Kennungsmuster")
         self._validate_pattern(self.name_pattern, "Namensmuster")
+        if (self.magazine_code is None) != (self.magazine_name is None):
+            raise ValidationError(
+                "Kennung und Bezeichnung des Magazins müssen gemeinsam angegeben werden."
+            )
+        if self.magazine_code is not None:
+            clean_required_text(self.magazine_code, "Magazinkennung", 64)
+            clean_required_text(self.magazine_name or "", "Magazinbezeichnung", 120)
 
     @staticmethod
     def _validate_pattern(pattern: str, field_name: str) -> None:

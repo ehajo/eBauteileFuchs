@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}In Magazin gruppieren – {{ branding.product_name }}{% endblock %}
+{% block content %}
+  <div class="page-heading"><div><p class="eyebrow">Lagerstruktur</p><h1>In Magazin gruppieren</h1><p class="lead">Die ausgewählten Lagerplätze werden unter einem neuen Magazin zusammengefasst.</p></div></div>
+  {% if error %}<p class="notice notice--error" role="alert">{{ error }}</p>{% endif %}
+  <section class="panel compact-panel">
+    <h2>{{ locations|length }} Lagerplätze ausgewählt</h2>
+    <ul class="compact-list">{% for item in locations %}<li><strong>{{ item.location.code }}</strong> {{ item.location.name }}</li>{% endfor %}</ul>
+    <form method="post" action="/locations/group" class="form-grid">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      {% for location_id in location_ids %}<input type="hidden" name="location_ids" value="{{ location_id }}">{% endfor %}
+      <label>Magazinkennung <span class="required">Pflichtfeld</span><input name="code" maxlength="64" required autofocus placeholder="z. B. MAG-01"></label>
+      <label>Bezeichnung <span class="required">Pflichtfeld</span><input name="name" maxlength="120" required placeholder="z. B. Kleinteilemagazin 01"></label>
+      <div class="form-field--wide button-row"><button class="button" type="submit">Magazin anlegen und gruppieren</button><a class="button button--secondary" href="/locations">Abbrechen</a></div>
+    </form>
+  </section>
+{% endblock %}

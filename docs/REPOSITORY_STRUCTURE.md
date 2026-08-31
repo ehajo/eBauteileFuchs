@@ -28,6 +28,7 @@ eBauteileFuchs/
 │   ├── ARCHITECTURE.md
 │   ├── API.md
 │   ├── MANUAL_TEST_M3.md
+│   ├── MANUAL_TEST_M5.md
 │   ├── MOUSER.md
 │   ├── DATA_MODEL.md
 │   ├── UX_FLOWS.md
@@ -185,5 +186,25 @@ Zusatzabhängigkeit nötig ist.
 - `persistence/supplier_cache.py` sowie Revision `0005_m4_supplier_cache`
   implementieren den allgemeinen Cachevertrag; Mouser-Schreibzugriffe bleiben
   aus Vertragsgründen deaktiviert.
+- Revision `0006_unassigned_location` ergänzt den internen Systemlagerplatz für
+  revisionssicher archivierte Lagerzweige; er erscheint nicht in normalen
+  Lagerplatzbäumen oder Zielauswahlen.
 - `api/v1/suppliers.py`, `web/suppliers.py` und `templates/suppliers/` bilden
   REST-, Scan-, Auswahl-, Prüf- und Importabläufe ab.
+
+## In M5 realisierte Ergänzungen
+
+- `application/search.py` führt die portable globale UND-Suche aus;
+  `api/v1/search.py`, `web/search.py` und `templates/search/` stellen sie bereit.
+- `platform/network.py` erkennt lokale IPv4-Adressen; `application/connection.py`,
+  `web/connection.py` und `templates/connection/` bilden URL-Auswahl und
+  Verbindungs-QR ab.
+- `static/manifest.webmanifest`, `static/service-worker.js`, `static/js/pwa.js`
+  und `templates/offline.html` bilden die App-Shell ohne Offline-Fachdaten.
+- `static/js/barcode-scanner.js` kapselt Foto- und Live-Kamera-Scan für die
+  Verpackungsbarcode-Suche bei Mouser. Der fest versionierte Decoder unter
+  `static/vendor/zxing-wasm/` wertet Fotos lokal aus; Herkunft und Lizenz stehen
+  in `THIRD_PARTY_NOTICES.md`.
+- Revision `0007_article_barcodes` bleibt ausschließlich als Kompatibilitäts-
+  revision für bereits aktualisierte Entwicklungsdatenbanken erhalten; ihre
+  Tabelle wird fachlich nicht verwendet.

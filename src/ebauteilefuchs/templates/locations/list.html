@@ -2,17 +2,14 @@
 
 {% macro render_node(node) %}
   <li class="tree-node{% if not node.details.location.is_active %} is-inactive{% endif %}">
-    <div class="tree-row">
-      <label class="label-choice">
-        <input type="checkbox" name="location_ids" value="{{ node.details.location.id }}">
-        <span class="tree-code">{{ node.details.location.code }}</span>
-      </label>
-      <a href="/locations/{{ node.details.location.id }}">{{ node.details.location.name }}</a>
-      <span class="type-pill">{{ node.details.location_type.name }}</span>
-      {% if not node.details.location.is_active %}<span class="inactive-pill">deaktiviert</span>{% endif %}
-    </div>
     {% if node.children %}
-      <ul>{% for child in node.children %}{{ render_node(child) }}{% endfor %}</ul>
+      <details class="tree-branch">
+        <summary><span class="tree-code">{{ node.details.location.code }}</span><span class="tree-name">{{ node.details.location.name }}</span><span class="type-pill">{{ node.details.location_type.name }}</span>{% if not node.details.location.is_active %}<span class="inactive-pill">deaktiviert</span>{% endif %}</summary>
+        <div class="tree-node-tools"><label class="tree-select"><input type="checkbox" name="location_ids" value="{{ node.details.location.id }}"><span>Auswählen</span></label><a href="/locations/{{ node.details.location.id }}">Lagerplatz öffnen</a></div>
+        <ul>{% for child in node.children %}{{ render_node(child) }}{% endfor %}</ul>
+      </details>
+    {% else %}
+      <div class="tree-row"><label class="tree-select tree-select--compact"><input type="checkbox" name="location_ids" value="{{ node.details.location.id }}"><span class="visually-hidden">Auswählen</span></label><span class="tree-code">{{ node.details.location.code }}</span><a href="/locations/{{ node.details.location.id }}">{{ node.details.location.name }}</a><span class="type-pill">{{ node.details.location_type.name }}</span>{% if not node.details.location.is_active %}<span class="inactive-pill">deaktiviert</span>{% endif %}</div>
     {% endif %}
   </li>
 {% endmacro %}
@@ -27,12 +24,13 @@
     </div>
   </div>
   {% if created %}<p class="notice notice--success" role="status">{{ created }} Lagerplätze wurden angelegt.</p>{% endif %}
+  {% if archived %}<p class="notice notice--success" role="status">{{ archived }} Lagerplätze wurden sicher archiviert.</p>{% endif %}
   <form method="post" action="/locations/labels.pdf">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <section class="panel" aria-labelledby="tree-title">
       <div class="panel__heading">
-        <div><h2 id="tree-title">Hierarchie</h2><p>Vom Raum bis zum kleinsten Fach.</p></div>
-        {% if tree %}<button class="button button--small" type="submit">Auswahl als PDF</button>{% endif %}
+        <div><h2 id="tree-title">Hierarchie</h2><p>Bereiche sind zunächst geschlossen. Klappe nur den benötigten Zweig auf.</p></div>
+        {% if tree %}<div class="button-row selection-actions"><button class="button button--small" type="submit">Etiketten-PDF</button><button class="button button--secondary button--small" type="submit" formaction="/locations/group/preview">In Magazin gruppieren</button><button class="button button--danger button--small" type="submit" formaction="/locations/archive/preview">Auswahl löschen</button></div>{% endif %}
       </div>
       {% if tree %}
         <ul class="location-tree">{% for node in tree %}{{ render_node(node) }}{% endfor %}</ul>

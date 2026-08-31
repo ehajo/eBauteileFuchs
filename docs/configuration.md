@@ -13,6 +13,8 @@ ausgeschlossen.
 | `EBAUTEILEFUCHS_DATA_DIR` | plattformabhängig | Datenbank- und späterer Dateipfad |
 | `EBAUTEILEFUCHS_DATABASE_URL` | lokale SQLite-URL | optionale vollständige SQLAlchemy-URL |
 | `EBAUTEILEFUCHS_PUBLIC_BASE_URL` | aktuelle Anfrage-URL | vollständige HTTP(S)-Basis-URL für Lagerplatz-QR-Codes |
+| `EBAUTEILEFUCHS_SSL_CERTFILE` | leer | Pfad zu einem lokal vertrauenswürdigen HTTPS-Zertifikat |
+| `EBAUTEILEFUCHS_SSL_KEYFILE` | leer | Pfad zum zugehörigen privaten Schlüssel |
 | `EBAUTEILEFUCHS_LOG_LEVEL` | `INFO` | `DEBUG` bis `CRITICAL` |
 | `EBAUTEILEFUCHS_MOUSER_API_KEY` | leer | persönlicher Schlüssel für die optionale Mouser Search API |
 | `EBAUTEILEFUCHS_MOUSER_TIMEOUT_SECONDS` | `8` | Zeitlimit je Mouser-Anfrage in Sekunden (1–30) |
@@ -48,3 +50,19 @@ EBAUTEILEFUCHS_PUBLIC_BASE_URL=http://192.168.1.42:8008
 
 Erlaubt sind ausschließlich vollständige HTTP- oder HTTPS-URLs ohne eingebettete
 Zugangsdaten. Eine öffentliche Internetfreigabe ist nicht vorgesehen.
+
+Unter `/connection` können erkannte lokale Adressen und eine manuelle URL
+unverbindlich geprüft werden. Diese Auswahl verändert keine Konfiguration. Soll
+dieselbe Adresse nach Neustarts für gedruckte Lagerplatz-QRs gelten, wird sie
+weiterhin ausdrücklich über `EBAUTEILEFUCHS_PUBLIC_BASE_URL` gesetzt.
+
+## Optionales HTTPS für Live-Kamera und PWA
+
+Zertifikat und Schlüssel müssen immer gemeinsam konfiguriert werden. Der private
+Schlüssel bleibt außerhalb des Repositorys; `.pem`- und `.key`-Dateien sind
+zusätzlich ignoriert. Das Zertifikat muss zur verwendeten lokalen IP-Adresse
+oder zum Hostnamen passen und seine ausstellende lokale Zertifizierungsstelle
+muss auf dem Smartphone vertraut sein. Danach werden Verbindungsadressen mit
+`https://` erzeugt und Live-Kamera sowie vollständige PWA-Funktionen stehen dem
+Browser zur Verfügung. Der lokale Foto-Barcode-Scan benötigt diese Einrichtung
+nicht und funktioniert auch beim HTTP-Aufruf im privaten LAN.

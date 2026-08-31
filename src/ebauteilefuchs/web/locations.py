@@ -9,6 +9,11 @@ from fastapi import APIRouter, Form, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
 from ebauteilefuchs.api.dependencies import request_base_url
+from ebauteilefuchs.application.inventory import (
+    ArchiveAction,
+    ArchiveResolution,
+    InventoryService,
+)
 from ebauteilefuchs.application.locations import LocationService
 from ebauteilefuchs.application.ports.labels import LabelSheetLayout
 from ebauteilefuchs.domain.errors import DomainError, ValidationError
@@ -19,6 +24,10 @@ router = APIRouter(include_in_schema=False)
 
 def _service(request: Request) -> LocationService:
     return request.app.state.location_service_factory()
+
+
+def _inventory_service(request: Request) -> InventoryService:
+    return request.app.state.inventory_service_factory()
 
 
 def _location_detail_context(
@@ -86,6 +95,10 @@ def _optional_uuid(value: str) -> UUID | None:
     return UUID(value) if value else None
 
 
+def _drawer_types(service: LocationService) -> list:
+    return [item for item in service.list_types() if item.code == "drawer"]
+
+
 @router.get("/locations", response_class=HTMLResponse)
 def locations(request: Request) -> HTMLResponse:
     service = _service(request)
@@ -93,8 +106,9 @@ def locations(request: Request) -> HTMLResponse:
         request,
         "locations/list.html",
         {
-            "tree": service.list_tree(include_inactive=True),
+            "tree": service.list_tree(include_inactive=False),
             "created": request.query_params.get("created"),
+            "archived": request.query_params.get("archived"),
         },
     )
 
@@ -175,7 +189,7 @@ def new_magazine(request: Request) -> HTMLResponse:
         request,
         "locations/batch.html",
         {
-            "types": service.list_types(),
+            "types": _drawer_types(service),
             "parents": service.list_details(include_inactive=False),
             "values": {},
             "preview": None,
@@ -187,6 +201,8 @@ def new_magazine(request: Request) -> HTMLResponse:
 def _batch_spec(
     parent_id: str,
     location_type_id: str,
+    magazine_code: str,
+    magazine_name: str,
     count: int,
     start_number: int,
     padding: int,
@@ -197,6 +213,8 @@ def _batch_spec(
     return BatchSpecification(
         parent_id=UUID(parent_id),
         location_type_id=UUID(location_type_id),
+        magazine_code=magazine_code,
+        magazine_name=magazine_name,
         count=count,
         start_number=start_number,
         padding=padding,
@@ -216,6 +234,8 @@ def preview_magazine(
     csrf_token: str = Form(),
     parent_id: str = Form(),
     location_type_id: str = Form(),
+    magazine_code: str = Form(),
+    magazine_name: str = Form(),
     count: int = Form(default=60),
     start_number: int = Form(default=1),
     padding: int = Form(default=2),
@@ -228,6 +248,8 @@ def preview_magazine(
     values = _batch_values(
         parent_id=parent_id,
         location_type_id=location_type_id,
+        magazine_code=magazine_code,
+        magazine_name=magazine_name,
         count=count,
         start_number=start_number,
         padding=padding,
@@ -245,7 +267,7 @@ def preview_magazine(
         request,
         "locations/batch.html",
         {
-            "types": service.list_types(),
+            "types": _drawer_types(service),
             "parents": service.list_details(include_inactive=False),
             "values": values,
             "preview": preview,
@@ -261,6 +283,8 @@ def create_magazine(
     csrf_token: str = Form(),
     parent_id: str = Form(),
     location_type_id: str = Form(),
+    magazine_code: str = Form(),
+    magazine_name: str = Form(),
     count: int = Form(),
     start_number: int = Form(),
     padding: int = Form(),
@@ -273,6 +297,8 @@ def create_magazine(
     values = _batch_values(
         parent_id=parent_id,
         location_type_id=location_type_id,
+        magazine_code=magazine_code,
+        magazine_name=magazine_name,
         count=count,
         start_number=start_number,
         padding=padding,
@@ -290,7 +316,7 @@ def create_magazine(
             request,
             "locations/batch.html",
             {
-                "types": service.list_types(),
+                "types": _drawer_types(service),
                 "parents": service.list_details(include_inactive=False),
                 "values": values,
                 "preview": None,
@@ -299,6 +325,138 @@ def create_magazine(
             status_code=422,
         )
     return RedirectResponse(f"/locations?created={len(created)}", status_code=303)
+
+
+@router.post("/locations/group/preview", response_class=HTMLResponse)
+def preview_group_locations(
+    request: Request,
+    location_ids: Annotated[list[UUID], Form()],
+    csrf_token: str = Form(),
+) -> HTMLResponse:
+    _verify_csrf(request, csrf_token)
+    service = _service(request)
+    return _render(
+        request,
+        "locations/group.html",
+        {
+            "locations": [service.get(item) for item in location_ids],
+            "location_ids": location_ids,
+            "error": None,
+        },
+    )
+
+
+@router.post("/locations/group", response_class=HTMLResponse)
+def group_locations(
+    request: Request,
+    location_ids: Annotated[list[UUID], Form()],
+    csrf_token: str = Form(),
+    code: str = Form(),
+    name: str = Form(),
+) -> Response:
+    _verify_csrf(request, csrf_token)
+    service = _service(request)
+    try:
+        magazine = service.group_into_magazine(location_ids, code=code, name=name)
+    except DomainError as error:
+        return _render(
+            request,
+            "locations/group.html",
+            {
+                "locations": [service.get(item) for item in location_ids],
+                "location_ids": location_ids,
+                "error": error.message,
+            },
+            status_code=422,
+        )
+    return RedirectResponse(f"/locations/{magazine.location.id}", status_code=303)
+
+
+def _archive_context(request: Request, location_ids: list[UUID]) -> dict:
+    location_service = _service(request)
+    preview = _inventory_service(request).preview_location_archive(location_ids)
+    articles: dict[UUID, dict] = {}
+    for position in preview.positions:
+        entry = articles.setdefault(
+            position.balance.article_id,
+            {
+                "id": position.balance.article_id,
+                "name": position.article_name,
+                "positions": [],
+            },
+        )
+        entry["positions"].append(position)
+    subtree = set(preview.location_ids)
+    targets = [
+        item
+        for item in location_service.list_details(include_inactive=False)
+        if item.location.id not in subtree and item.children_count == 0
+    ]
+    return {
+        "selected": [location_service.get(item) for item in location_ids],
+        "location_ids": location_ids,
+        "subtree_count": len(preview.location_ids),
+        "articles": sorted(articles.values(), key=lambda item: item["name"].casefold()),
+        "targets": targets,
+        "idempotency_key": secrets.token_urlsafe(24),
+        "error": None,
+    }
+
+
+@router.post("/locations/archive/preview", response_class=HTMLResponse)
+def preview_archive_locations(
+    request: Request,
+    location_ids: Annotated[list[UUID], Form()],
+    csrf_token: str = Form(),
+) -> HTMLResponse:
+    _verify_csrf(request, csrf_token)
+    return _render(
+        request,
+        "locations/archive.html",
+        _archive_context(request, location_ids),
+    )
+
+
+@router.post("/locations/archive", response_class=HTMLResponse)
+async def archive_locations(request: Request) -> Response:
+    form = await request.form()
+    _verify_csrf(request, str(form.get("csrf_token", "")))
+    try:
+        location_ids = [UUID(str(item)) for item in form.getlist("location_ids")]
+        preview = _inventory_service(request).preview_location_archive(location_ids)
+        article_ids = {item.balance.article_id for item in preview.positions}
+        resolutions: list[ArchiveResolution] = []
+        for article_id in article_ids:
+            action = ArchiveAction(str(form.get(f"action_{article_id}", "")))
+            target_value = str(form.get(f"target_{article_id}", ""))
+            resolutions.append(
+                ArchiveResolution(
+                    article_id=article_id,
+                    action=action,
+                    target_location_id=UUID(target_value) if target_value else None,
+                )
+            )
+        result = _inventory_service(request).archive_locations(
+            location_ids=location_ids,
+            resolutions=resolutions,
+            idempotency_key=str(form.get("idempotency_key", "")),
+        )
+    except (DomainError, ValueError) as error:
+        context = _archive_context(
+            request, location_ids if "location_ids" in locals() else []
+        )
+        context["error"] = (
+            error.message if isinstance(error, DomainError) else "Prüfe alle Auswahlen."
+        )
+        return _render(
+            request,
+            "locations/archive.html",
+            context,
+            status_code=422,
+        )
+    return RedirectResponse(
+        f"/locations?archived={len(result.archived_location_ids)}", status_code=303
+    )
 
 
 @router.post("/locations/labels.pdf")

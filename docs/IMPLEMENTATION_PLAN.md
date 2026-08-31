@@ -1,7 +1,7 @@
 # Implementierungsplan – eBauteileFuchs
 
-Status: M0 bis M3 sind umgesetzt und lokal abgenommen. M4 wurde ausdrücklich
-freigegeben und am 24. August 2026 umgesetzt; die lokale Abnahme steht aus. M5
+Status: M0 bis M4 sind umgesetzt und lokal abgenommen. M5 wurde ausdrücklich
+freigegeben und am 24. August 2026 umgesetzt; die lokale Abnahme steht aus. M6
 und spätere Meilensteine bleiben gesperrt.
 
 ## 1. Vorgehensmodell
@@ -77,7 +77,7 @@ QR-Einstieg und `/api/v1/inventory` sind implementiert. Revision
 Stammdaten. SQLite-Schreiber werden vor der Saldenprüfung mit `BEGIN IMMEDIATE`
 serialisiert; Konflikte werden fachlich gemeldet.
 
-### M4 – Mouser-Integration (umgesetzt am 24. August 2026, Abnahme ausstehend)
+### M4 – Mouser-Integration (umgesetzt und abgenommen am 24. August 2026)
 
 - Supplier Port, offizieller Mouser-Adapter, Timeout/Retry-Grenzen und Cache.
 - Suchmodi, kein/ein/mehrere Treffer und bearbeitbare Importprüfung.
@@ -96,7 +96,7 @@ implementiert. Der allgemeine Cache und seine Revision `0005_m4_supplier_cache`
 sind vorhanden; Mouser-Inhalte werden wegen des ausdrücklichen Cacheverbots in
 den veröffentlichten Mouser-API-Bedingungen nicht hineingeschrieben.
 
-### M5 – Suche, Verbindung und PWA
+### M5 – Suche, Verbindung und PWA (umgesetzt am 24. August 2026, Abnahme ausstehend)
 
 - Globale UND-Suche über Stammdaten, Supplier-Nummern, Eigenschaften, Notizen und
   Lagerpfade; portable Fallbackstrategie für SQLite.
@@ -105,6 +105,21 @@ den veröffentlichten Mouser-API-Bedingungen nicht hineingeschrieben.
 - Windows-Firewall- und DHCP-Hinweise.
 
 Abnahmekriterien: 4 bis 6 und 17; reale Smartphone-Prüfung im lokalen Netz.
+
+Umsetzungsstand: Die portable globale UND-Suche kombiniert vorhandene
+normalisierte Artikeltexte mit aktuellen Lagerpfaden und unterstützt Kategorie-,
+Bestands- und Hierarchiefilter. Netzwerkerkennung, validierte manuelle URL,
+Verbindungs-QR, responsive Verbindungsseite, Manifest, App-Shell, Offline-Status
+und ein ausschließlich statische Ressourcen nutzender Service Worker sind
+implementiert. Es gibt bewusst keine Offline-Schreibsynchronisation.
+Die anschließende M5-Praxisrückmeldung ergänzt eine kompaktere responsive
+Oberfläche, einen echten Magazin-Elternknoten, das Gruppieren bestehender
+Schubladen und das revisionssichere Archivieren kompletter Lagerzweige. Diese
+Ergänzungen ziehen keine Funktionen aus M6 oder M7 vor. Zusätzlich kann die
+lokale Mouser-Suche Verpackungsbarcodes per lokal ausgewertetem Smartphone-Foto
+auch über HTTP erfassen; unter HTTPS steht ergänzend ein Live-Kamerabild bereit.
+Der Scan startet die vorhandene lokale Vorprüfung und anschließend bei Bedarf den
+Mouser-Suchmodus `barcode`.
 
 ### M6 – Export, Backup und Restore
 

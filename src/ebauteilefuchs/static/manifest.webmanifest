@@ -1,0 +1,25 @@
+{
+  "name": "eBauteileFuchs – Clever finden statt lange suchen.",
+  "short_name": "eBauteileFuchs",
+  "description": "Lokale Lagerverwaltung für Elektronikbauteile und Bastellager",
+  "lang": "de",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b1118",
+  "theme_color": "#0b1118",
+  "icons": [
+    {
+      "src": "/static/branding/app-icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/branding/app-icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

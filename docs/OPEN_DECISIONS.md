@@ -146,7 +146,17 @@ gesonderte Freigabe.
 
 ### B8. PWA-Umfang und Browserunterstützung (vor M5)
 
-**Übernommen:** installierbare App-Shell ohne Offline-Buchungen.
+**Abgeschlossen für M5:** installierbare App-Shell ohne Offline-Buchungen. Der
+Service Worker cached ausschließlich statische Shell-Ressourcen und die
+Offline-Hinweisseite. Schreibformulare werden ohne erfolgreichen Serverkontakt
+gesperrt; fachliche Daten gelangen nicht in den Browsercache.
+
+Die nachträgliche Praxisergänzung nutzt für Verpackungsbarcode-Suchen bei Mouser
+ausschließlich lokale Browsererkennung. Ein lokal mitgelieferter Foto-Decoder
+funktioniert im privaten LAN auch über HTTP; das laufende Live-Kamerabild bleibt
+eine optionale HTTPS-Komfortfunktion. Bei fehlender Browserunterstützung stehen
+Eingabe oder Tastaturscanner bereit. Bilder werden weder hochgeladen noch
+gespeichert.
 
 **Vorschlag:** aktuelle stabile Versionen von Chrome/Edge/Firefox und Safari auf
 iOS; installierbare App-Shell, aber keine offline Buchungen. Eine verlorene
@@ -177,7 +187,8 @@ werden, wenn die Produktabsicht abweicht:
   Netz und keine öffentliche Internetfreigabe;
 - keine offline Bestandsbuchungen in der PWA;
 - nur Mouser als Lieferantenadapter;
-- kein endgültiges Maskottchen ohne freigegebenes Asset;
+- das bereitgestellte Fuchs-Maskottchen ist für die konsistente Verwendung in der
+  Anwendung freigegeben; Logo und Illustration bleiben unverändert;
 - deutsche UI/Dokumentation, englische Code- und API-Bezeichner.
 
 ## D. Später, nicht blockierend für Version 1
@@ -193,6 +204,12 @@ werden, wenn die Produktabsicht abweicht:
 
 ## Freigabestatus
 
-M0 bis M3 sind abgenommen. M4 wurde ausdrücklich freigegeben und umgesetzt; die
-lokale Abnahme steht aus. M5 und spätere Meilensteine benötigen weiterhin eine
-ausdrückliche Freigabe. Für M4 sind keine Entscheidungen mehr offen.
+M0 bis M4 sind abgenommen. M5 wurde ausdrücklich freigegeben und umgesetzt; die
+lokale Abnahme steht aus. M6 und spätere Meilensteine benötigen weiterhin eine
+ausdrückliche Freigabe. Für M5 sind keine Entscheidungen mehr offen.
+
+Die Praxisentscheidung zum Löschen hierarchischer Lagerplätze ist abgeschlossen:
+referenzierte Knoten werden nicht hart gelöscht, sondern verborgen archiviert.
+Bestände bleiben wahlweise auf dem internen Systemlagerplatz „Ohne Lagerplatz“
+oder werden nachvollziehbar umgebucht; vollständig gelöschte Artikel werden nach
+Ausbuchung deaktiviert. Das unveränderliche Journal bleibt in allen Fällen erhalten.

@@ -5,14 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="dark">
     <meta name="theme-color" content="{{ branding.theme_color }}">
+    <meta name="application-name" content="{{ branding.product_name }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>{% block title %}{{ branding.product_name }}{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/design-tokens.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/design-tokens.css') }}?v=20260824-6">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}?v=20260824-7">
+    <link rel="manifest" href="{{ url_for('static', path='/manifest.webmanifest') }}">
+    <link rel="icon" href="{{ url_for('static', path='/branding/e_rand_t.png') }}?v=20260824-6" type="image/png">
+    <script src="{{ url_for('static', path='/js/pwa.js') }}?v=20260824-6" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Zum Inhalt springen</a>
     <header class="site-header">
       <a class="brand" href="/" aria-label="{{ branding.product_name }} Startseite">
+        <img class="brand__mascot" src="{{ url_for('static', path='/branding/fuchs-maskottchen.png') }}" alt="" width="44" height="46">
         <img
           class="brand__logo"
           src="{{ url_for('static', path='/branding/ehajo-logo.svg') }}"
@@ -23,15 +30,15 @@
         <span class="brand__product">{{ branding.product_name }}</span>
       </a>
       <nav class="main-nav" aria-label="Hauptnavigation">
-        <a href="/inventory/stock-in">Einlagern</a>
-        <a href="/inventory/stock-out">Auslagern</a>
+        <a href="/inventory/book">Bestand ändern</a>
         <a href="/inventory">Bestand</a>
-        <a href="/suppliers/mouser">Suchen</a>
+        <a href="/search">Suchen</a>
         <a href="/articles">Artikel</a>
         <a href="/locations">Lagerplätze</a>
       </nav>
-      <span class="milestone-badge">Mouser-Import M4</span>
+      <a class="milestone-badge" href="/connection">Verbindung · M5</a>
     </header>
+    <div class="connection-status" data-connection-status hidden role="status"></div>
     <main id="main-content" class="page-shell">
       {% block content %}{% endblock %}
     </main>

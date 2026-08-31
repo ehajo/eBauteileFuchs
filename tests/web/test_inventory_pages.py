@@ -41,36 +41,58 @@ async def test_inventory_pages_and_qr_entry_show_mobile_booking_actions(
         params={"article_id": article["id"], "location_id": location["id"]},
     )
     assert form.status_code == 200
-    assert "USB-Scanner" in form.text
+    assert "Schnellbuchung" in form.text
+    assert "−5" in form.text
+    assert "−1" in form.text
+    assert "+1" in form.text
+    assert "+5" in form.text
     assert 'name="idempotency_key"' in form.text
     assert 'inputmode="decimal"' in form.text
     csrf = re.search(r'name="csrf_token" value="([^"]+)"', form.text).group(1)
     booking = re.search(r'name="idempotency_key" value="([^"]+)"', form.text).group(1)
     booked = await client.post(
-        "/inventory/stock-in",
+        "/inventory/book",
         data={
             "csrf_token": csrf,
             "idempotency_key": booking,
             "article_id": article["id"],
             "location_id": location["id"],
             "quantity": "100",
+            "operation": "stock-in",
             "unit": "Stück",
         },
     )
     assert booked.status_code == 200, booked.text
-    assert "Buchung erfolgreich" in booked.text
+    assert "Bestand geändert" in booked.text
     assert "+100 Stück" in booked.text
     assert "1E+2" not in booked.text
-    assert "neuer Bestand" in booked.text
+    assert "jetzt" in booked.text
+
+    next_booking = re.search(
+        r'name="idempotency_key" value="([^"]+)"', booked.text
+    ).group(1)
+    removed = await client.post(
+        "/inventory/book",
+        data={
+            "csrf_token": csrf,
+            "idempotency_key": next_booking,
+            "article_id": article["id"],
+            "location_id": location["id"],
+            "delta": "-5",
+            "unit": "Stück",
+        },
+    )
+    assert removed.status_code == 200
+    assert "-5 Stück" in removed.text
+    assert "jetzt <strong>95 Stück</strong>" in removed.text
 
     article_page = await client.get(f"/articles/{article['id']}")
-    assert "100" in article_page.text
+    assert "95" in article_page.text
     assert "1E+2" not in article_page.text
     assert "Umlagern" in article_page.text
     qr_entry = await client.get(location["qr_path"], follow_redirects=True)
     assert "Synthetisches Scanbauteil" in qr_entry.text
-    assert "Hier einlagern" in qr_entry.text
-    assert "Hier auslagern" in qr_entry.text
+    assert "Bestand hier ändern" in qr_entry.text
 
 
 @pytest.mark.anyio
@@ -142,9 +164,9 @@ async def test_inventory_search_preserves_location_and_stock_out_filters_locatio
         },
     )
     assert search.status_code == 200
-    assert "Passenden Artikel auswählen" in search.text
+    assert "Artikel auswählen" in search.text
     choice_match = re.search(
-        rf'href="([^"]*article_id={article["id"]}[^"]*)"',
+        rf'href="([^"]*inventory/book[^"]*article_id={article["id"]}[^"]*)"',
         search.text,
     )
     assert choice_match is not None
@@ -159,11 +181,16 @@ async def test_inventory_search_preserves_location_and_stock_out_filters_locatio
     )
 
     stock_out = await client.get(
-        "/inventory/stock-out", params={"article_id": article["id"]}
+        "/inventory/book", params={"article_id": article["id"]}
     )
     assert stock_out.status_code == 200
-    assert "BESTAND-01" in stock_out.text
-    assert "LEER-01" not in stock_out.text
+    quick_select = re.search(
+        r'<select id="quick-location" name="location_id".*?</select>',
+        stock_out.text,
+        re.DOTALL,
+    ).group(0)
+    assert "BESTAND-01" in quick_select
+    assert "LEER-01" not in quick_select
 
     start_page = await client.get("/")
     assert 'href="/inventory"' in start_page.text
@@ -219,7 +246,7 @@ async def test_stock_in_filters_leaf_locations_and_selects_next_free_in_scope(
     assert booked.status_code == 201
 
     page = await client.get(
-        "/inventory/stock-in",
+        "/inventory/book",
         params={
             "article_id": article["id"],
             "location_scope_id": room["id"],
@@ -229,7 +256,9 @@ async def test_stock_in_filters_leaf_locations_and_selects_next_free_in_scope(
     assert page.status_code == 200
     assert "Nächster freier Platz vorausgewählt" in page.text
     select = re.search(
-        r'<select name="location_id".*?</select>', page.text, re.DOTALL
+        r'<select id="quick-location" name="location_id".*?</select>',
+        page.text,
+        re.DOTALL,
     ).group(0)
     assert occupied["id"] in select
     assert free["id"] in select

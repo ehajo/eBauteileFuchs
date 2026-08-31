@@ -2,7 +2,6 @@
 
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from pathlib import Path
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI
@@ -16,16 +15,19 @@ from ebauteilefuchs.api.v1.articles import router as articles_api_router
 from ebauteilefuchs.api.v1.health import router as health_router
 from ebauteilefuchs.api.v1.inventory import router as inventory_api_router
 from ebauteilefuchs.api.v1.locations import router as locations_api_router
+from ebauteilefuchs.api.v1.search import router as search_api_router
 from ebauteilefuchs.api.v1.suppliers import router as suppliers_api_router
 from ebauteilefuchs.application.articles import ArticleService
 from ebauteilefuchs.application.inventory import InventoryService
 from ebauteilefuchs.application.locations import LocationService
+from ebauteilefuchs.application.search import GlobalSearchService
 from ebauteilefuchs.application.supplier_search import SupplierSearchService
 from ebauteilefuchs.branding import BRANDING
 from ebauteilefuchs.config import Settings, get_settings
 from ebauteilefuchs.domain.errors import DomainError
 from ebauteilefuchs.labels import ReportLabLabelRenderer
 from ebauteilefuchs.logging_config import configure_logging
+from ebauteilefuchs.main_paths import PACKAGE_DIR
 from ebauteilefuchs.persistence.articles import SqlAlchemyArticleUnitOfWork
 from ebauteilefuchs.persistence.database import (
     create_database_engine,
@@ -37,13 +39,13 @@ from ebauteilefuchs.persistence.supplier_cache import SqlAlchemySupplierCache
 from ebauteilefuchs.suppliers.mouser import MouserAdapter
 from ebauteilefuchs.suppliers.mouser.client import MouserHttpClient
 from ebauteilefuchs.web.articles import router as articles_web_router
+from ebauteilefuchs.web.connection import router as connection_web_router
 from ebauteilefuchs.web.inventory import router as inventory_web_router
 from ebauteilefuchs.web.locations import router as locations_web_router
 from ebauteilefuchs.web.presentation import format_decimal
 from ebauteilefuchs.web.routes import router as web_router
+from ebauteilefuchs.web.search import router as search_web_router
 from ebauteilefuchs.web.suppliers import router as suppliers_web_router
-
-PACKAGE_DIR = Path(__file__).resolve().parent
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -76,6 +78,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.inventory_service_factory = lambda: InventoryService(
         lambda: SqlAlchemyInventoryUnitOfWork(session_factory)
     )
+    app.state.global_search_service_factory = lambda: GlobalSearchService(
+        app.state.article_service_factory(),
+        app.state.inventory_service_factory(),
+        app.state.location_service_factory(),
+    )
+    app.state.qr_renderer = label_renderer
     mouser_key = (
         runtime_settings.mouser_api_key.get_secret_value()
         if runtime_settings.mouser_api_key
@@ -109,11 +117,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(articles_web_router)
     app.include_router(inventory_web_router)
     app.include_router(suppliers_web_router)
+    app.include_router(search_web_router)
+    app.include_router(connection_web_router)
     app.include_router(health_router, prefix="/api/v1")
     app.include_router(locations_api_router, prefix="/api/v1")
     app.include_router(articles_api_router, prefix="/api/v1")
     app.include_router(inventory_api_router, prefix="/api/v1")
     app.include_router(suppliers_api_router, prefix="/api/v1")
+    app.include_router(search_api_router, prefix="/api/v1")
     app.add_exception_handler(DomainError, domain_error_response)
 
     @app.middleware("http")
