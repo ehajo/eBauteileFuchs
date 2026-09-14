@@ -10,7 +10,9 @@ ausgeschlossen.
 | `EBAUTEILEFUCHS_APP_ENV` | `development` | `development`, `production` oder `test` |
 | `EBAUTEILEFUCHS_HOST` | `0.0.0.0` | Bind-Adresse des Webservers |
 | `EBAUTEILEFUCHS_PORT` | `8008` | TCP-Port 1–65535 |
-| `EBAUTEILEFUCHS_DATA_DIR` | plattformabhängig | Datenbank- und späterer Dateipfad |
+| `EBAUTEILEFUCHS_DATA_DIR` | plattformabhängig | Datenbank, temporäre Exporte und Restore-Ablage |
+| `EBAUTEILEFUCHS_BACKUP_DIR` | `<Datenordner>/backups` | lokale ZIP-Sicherungsablage |
+| `EBAUTEILEFUCHS_RESTORE_UPLOAD_LIMIT_MB` | `512` | maximale Restore-Dateigröße, 1–4096 MB |
 | `EBAUTEILEFUCHS_DATABASE_URL` | lokale SQLite-URL | optionale vollständige SQLAlchemy-URL |
 | `EBAUTEILEFUCHS_PUBLIC_BASE_URL` | aktuelle Anfrage-URL | vollständige HTTP(S)-Basis-URL für Lagerplatz-QR-Codes |
 | `EBAUTEILEFUCHS_SSL_CERTFILE` | leer | Pfad zu einem lokal vertrauenswürdigen HTTPS-Zertifikat |
@@ -37,6 +39,11 @@ Mouser-Suche wird deaktiviert. Einzelheiten stehen in [MOUSER.md](MOUSER.md).
 SQLite verwendet Foreign Keys, WAL und einen Busy-Timeout von fünf Sekunden.
 Migrationen werden bewusst mit `python -m alembic upgrade head` ausgeführt und
 nicht stillschweigend beim Import der Anwendung.
+
+Sicherungen liegen standardmäßig in `backups`; kurzlebige Restore-Dateien liegen
+während der Prüfung in `restore-staging` und werden danach entfernt. Beide
+Verzeichnisse enthalten persönliche Lagerdaten und gehören nicht ins Repository.
+Einzelheiten stehen in [BACKUP_RESTORE.md](BACKUP_RESTORE.md).
 
 ## Basis-URL für Lagerplatz-QR-Codes
 

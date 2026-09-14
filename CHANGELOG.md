@@ -8,6 +8,22 @@ Semantic Versioning.
 
 ### Added
 
+- Lagerzweige mit vielen Schubladen lassen sich in der Hierarchie mit einer
+  Aktion vollständig auswählen oder wieder abwählen; die Anzeige nennt die
+  Anzahl ausgewählter Lagerplätze vor der Löschvorschau.
+- Umschaltbare grafische Lagerkarte mit klaren Raum-, Regal-, Magazin- und
+  Fachrastern sowie einer Hervorhebungssuche für den schnellen physischen Zugriff.
+- Optionale Rasterangaben (Spalten und Reihen) je Lagerplatz für eine exakt
+  passende grafische Fachanordnung; bestehende Plätze bleiben automatisch flexibel.
+- Die grafische Lagerkarte zeigt je Fach bis zu fünf enthaltene Bauteile mit
+  Mengen und kennzeichnet leere Fächer; weitere Inhalte werden gezählt angezeigt.
+
+- M6-Datenverwaltung mit dokumentierten UTF-8-CSV-Exporten für Artikel,
+  Eigenschaften, Lagerplätze und Bestände.
+- Versionierte konsistente SQLite-ZIP-Sicherung mit JSON-Manifest,
+  Schemaversion und SHA-256 sowie validierter, größenbegrenzter
+  Wiederherstellung mit automatischer Vorsicherung und atomarem Austausch.
+
 - Smartphone-Kamera-Scan für Verpackungsbarcodes auf Start- und Mouser-Suchseite;
   erkannte Werte starten automatisch die lokale Vorprüfung und anschließend die
   Mouser-Barcodesuche.

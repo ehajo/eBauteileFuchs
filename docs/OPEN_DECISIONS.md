@@ -135,7 +135,8 @@ Installationsskripte dürfen vorhandene Datenpfade nie ungefragt überschreiben.
 
 ### B7. Backupformat und Verschlüsselung (vor M6)
 
-**Übernommen:** versioniertes ZIP mit Manifest und Prüfsumme; keine eigene
+**Abgeschlossen für M6:** versioniertes ZIP mit konsistenter SQLite-Kopie,
+strengem JSON-Manifest, SHA-256 und automatischer Vorsicherung; keine eigene
 Backupverschlüsselung in V1.
 
 **Vorschlag:** versioniertes ZIP-Archiv mit konsistenter SQLite-Kopie,
@@ -204,9 +205,9 @@ werden, wenn die Produktabsicht abweicht:
 
 ## Freigabestatus
 
-M0 bis M4 sind abgenommen. M5 wurde ausdrücklich freigegeben und umgesetzt; die
-lokale Abnahme steht aus. M6 und spätere Meilensteine benötigen weiterhin eine
-ausdrückliche Freigabe. Für M5 sind keine Entscheidungen mehr offen.
+M0 bis M5 sind abgenommen. M6 wurde ausdrücklich freigegeben und umgesetzt; die
+lokale Abnahme steht aus. M7 und spätere Meilensteine benötigen weiterhin eine
+ausdrückliche Freigabe. Für M6 sind keine Entscheidungen mehr offen.
 
 Die Praxisentscheidung zum Löschen hierarchischer Lagerplätze ist abgeschlossen:
 referenzierte Knoten werden nicht hart gelöscht, sondern verborgen archiviert.

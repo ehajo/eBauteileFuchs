@@ -9,9 +9,9 @@ für Elektronikbauteile, Kleinteile und private Bastellager.
 
 ## Projektstatus
 
-M0 bis M4 sind lokal abgenommen. M5 ergänzt die globale UND-Suche,
-Netzwerkerkennung mit Verbindungs-QR und eine installierbare PWA-App-Shell ohne
-Offline-Buchungen. Die lokale M5-Abnahme steht aus.
+M0 bis M5 sind lokal abgenommen. M6 ergänzt dokumentierte CSV-Exporte,
+versionierte ZIP-Sicherungen und eine validierte Wiederherstellung mit
+automatischer Vorsicherung. Die lokale M6-Abnahme steht aus.
 
 ## Schnellstart unter Windows
 
@@ -61,6 +61,7 @@ Nach dem Start:
 - Globale Suche: <http://127.0.0.1:8008/search>
 - Mouser-Suche: <http://127.0.0.1:8008/suppliers/mouser>
 - Smartphone verbinden: <http://127.0.0.1:8008/connection>
+- Daten exportieren/sichern: <http://127.0.0.1:8008/data>
 - Health-Check: <http://127.0.0.1:8008/api/v1/health>
 - OpenAPI: <http://127.0.0.1:8008/docs>
 
@@ -116,7 +117,7 @@ python -m alembic upgrade head
 python -m ebauteilefuchs
 ```
 
-`requirements.lock` und `requirements-dev.lock` halten die für M5 geprüften
+`requirements.lock` und `requirements-dev.lock` halten die für M6 geprüften
 Abhängigkeiten reproduzierbar fest.
 
 ## Mouser-Suche und Import
@@ -209,6 +210,16 @@ Basis-URL, QR-Code sowie Hinweise zu privater Windows-Firewall, gleichem WLAN un
 DHCP-Reservierung bereit. Details enthält die
 [M5-Testanleitung](docs/MANUAL_TEST_M5.md).
 
+## Export, Sicherung und Wiederherstellung
+
+Unter **Daten** stehen UTF-8-CSV-Dateien für Artikel, Eigenschaften,
+Lagerplätze und Bestände bereit. Eine vollständige Sicherung erzeugt eine
+versionierte ZIP-Datei mit konsistenter SQLite-Kopie, Manifest und
+SHA-256-Prüfsumme. Vor einer validierten Wiederherstellung wird automatisch eine
+Vorsicherung angelegt. Format und Notfallablauf beschreibt
+[Sicherung und Wiederherstellung](docs/BACKUP_RESTORE.md); für die lokale Abnahme
+gilt die [M6-Testanleitung](docs/MANUAL_TEST_M6.md).
+
 ## Lagerplätze und Etiketten
 
 Unter **Lagerplätze** können Räume, Schränke, Regale, Magazine, Schubladen,
@@ -218,6 +229,18 @@ Schubladen (`01` bis `60`) erst nach einer konfliktfreien Vorschau atomar. Dabei
 wird zuerst ein eigenständiges Magazin angelegt und die Schubladen werden darin
 einsortiert. Bereits vorhandene Schubladen derselben Ebene lassen sich in der
 Baumansicht auswählen und nachträglich unter einem neuen Magazin gruppieren.
+
+Die grafische Übersicht bildet Räume und größere Lagerbereiche als Gruppen und
+Magazine beziehungsweise Schubladen als kompaktes Fachraster ab. Eine lokale
+Hervorhebungssuche zeigt schnell den passenden Pfad; jedes Fach führt direkt zur
+Detailseite. Für Pflege, Sammelauswahl und Löschen kann zur kompakten
+Verwaltungsansicht gewechselt werden. Dort lassen sich alle Unterplätze eines
+Zweigs mit einer Aktion markieren.
+
+Für einen Bereich mit festem Aufbau können im Formular **Spalten** und **Reihen**
+(je 1–50) hinterlegt werden. Die grafische Karte übernimmt diese Angaben direkt;
+beide Felder müssen gemeinsam ausgefüllt werden. Bestehende Lagerplätze ohne
+Rasterangabe bleiben automatisch angeordnet.
 
 Die Detailseite bietet ein universelles Einzeletikett. In der Baumansicht können
 mehrere Lagerplätze für einen A4-Sammelbogen ausgewählt werden. Das Standardraster
@@ -261,6 +284,8 @@ Lokale Einstellungen können aus `.env.example` in eine nicht versionierte
 - [Manuelle M3-Abnahme](docs/MANUAL_TEST_M3.md)
 - [Mouser-Einrichtung und manuelle M4-Abnahme](docs/MOUSER.md)
 - [Manuelle M5-Abnahme](docs/MANUAL_TEST_M5.md)
+- [CSV, Sicherung und Wiederherstellung](docs/BACKUP_RESTORE.md)
+- [Manuelle M6-Abnahme](docs/MANUAL_TEST_M6.md)
 
 Version 1 ist als responsive lokale Webanwendung für Raspberry Pi, Linux und
 Windows vorgesehen. Kerntechnologien sind Python 3.12, FastAPI, SQLAlchemy,

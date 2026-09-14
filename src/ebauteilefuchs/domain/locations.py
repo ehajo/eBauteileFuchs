@@ -66,6 +66,8 @@ class Location:
     qr_token: str
     created_at: datetime
     updated_at: datetime
+    grid_columns: int | None = None
+    grid_rows: int | None = None
 
     @property
     def qr_short_code(self) -> str:
@@ -79,6 +81,8 @@ class LocationDraft:
     location_type_id: UUID
     parent_id: UUID | None
     description: str | None = None
+    grid_columns: int | None = None
+    grid_rows: int | None = None
 
 
 @dataclass(frozen=True, slots=True)

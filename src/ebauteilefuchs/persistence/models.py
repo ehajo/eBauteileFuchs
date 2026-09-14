@@ -72,6 +72,8 @@ class LocationModel(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
     )
+    grid_columns: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    grid_rows: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 
 class ManufacturerModel(Base):

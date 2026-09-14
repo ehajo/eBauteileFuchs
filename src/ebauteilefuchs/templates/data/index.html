@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Daten · {{ branding.product_name }}{% endblock %}
+{% block content %}
+<section class="page-heading compact-heading">
+  <div><p class="eyebrow">M6 · Datensicherheit</p><h1>Daten verwalten</h1>
+  <p>Exportiere lesbare Tabellen oder erstelle eine vollständige Sicherung.</p></div>
+</section>
+{% if error %}<div class="notice notice--error" role="alert">{{ error }}</div>{% endif %}
+<div class="card-grid data-grid">
+  <section class="panel"><h2>CSV-Exporte</h2>
+    <p>UTF-8-Dateien für Tabellenprogramme. Eigenschaften, Werte und Einheiten bleiben getrennt.</p>
+    <div class="button-row">
+      <a class="button button--secondary" href="/data/exports/articles">Artikel</a>
+      <a class="button button--secondary" href="/data/exports/article-properties">Eigenschaften</a>
+      <a class="button button--secondary" href="/data/exports/locations">Lagerplätze</a>
+      <a class="button button--secondary" href="/data/exports/inventory">Bestände</a>
+    </div>
+  </section>
+  <section class="panel"><h2>Vollständige Sicherung</h2>
+    <p>Erzeugt eine konsistente ZIP-Datei mit Datenbank, Versionsangaben und SHA-256-Prüfsumme.</p>
+    <form method="post" action="/data/backups"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="button" type="submit">Vollständige Sicherung erstellen</button>
+    </form>
+    {% if backup_dir %}<p class="form-hint">Zusätzliche lokale Kopie: <code>{{ backup_dir }}</code></p>{% endif %}
+  </section>
+  <section class="panel"><h2>Sicherung wiederherstellen</h2>
+    <p>Die Datei wird zuerst vollständig geprüft. Vor dem Austausch entsteht automatisch eine Vorsicherung des aktuellen Stands.</p>
+    <form method="post" action="/data/restore/preview" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label for="backup-file">Sicherungsdatei (ZIP, höchstens {{ upload_limit_mb|default(512) }} MB)</label>
+      <input id="backup-file" name="backup_file" type="file" accept=".zip,application/zip" required>
+      <button class="button button--danger" type="submit">Datei prüfen</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

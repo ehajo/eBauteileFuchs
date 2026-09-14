@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Wiederherstellung prüfen · {{ branding.product_name }}{% endblock %}
+{% block content %}
+<section class="page-heading compact-heading"><div><p class="eyebrow">M6 · Sicherheitsprüfung</p><h1>Wiederherstellung bestätigen</h1></div></section>
+{% if error %}<div class="notice notice--error" role="alert">{{ error }}</div>{% endif %}
+{% if preview %}
+<section class="panel"><h2>Geprüfte Sicherung</h2><dl class="detail-list">
+  <dt>Erstellt</dt><dd>{{ preview.created_at }}</dd><dt>Programmversion</dt><dd>{{ preview.app_version }}</dd>
+  <dt>Datenbankstand</dt><dd><code>{{ preview.schema_revision }}</code></dd><dt>Datenbankgröße</dt><dd>{{ preview.database_size }} Byte</dd>
+  <dt>SHA-256</dt><dd><code class="break-anywhere">{{ preview.sha256 }}</code></dd></dl>
+<div class="notice notice--warning"><strong>Achtung:</strong> Die aktuelle Datenbank wird ersetzt. Direkt davor wird automatisch eine Vorsicherung erstellt.</div>
+<form method="post" action="/data/restore">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="restore_token" value="{{ preview.token }}">
+  <label for="confirmation">Zur Bestätigung WIEDERHERSTELLEN eingeben</label><input id="confirmation" name="confirmation" autocomplete="off" required>
+  <div class="button-row button-row--start restore-actions"><button class="button button--danger" type="submit">Jetzt wiederherstellen</button><a class="button button--secondary" href="/data">Abbrechen</a></div>
+</form></section>
+{% else %}<p>Die Vorschau ist nicht mehr verfügbar. <a href="/data">Datei erneut prüfen</a>.</p>{% endif %}
+{% endblock %}

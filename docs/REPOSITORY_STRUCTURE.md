@@ -208,3 +208,16 @@ Zusatzabhängigkeit nötig ist.
 - Revision `0007_article_barcodes` bleibt ausschließlich als Kompatibilitäts-
   revision für bereits aktualisierte Entwicklungsdatenbanken erhalten; ihre
   Tabelle wird fachlich nicht verwendet.
+
+## In M6 realisierte Ergänzungen
+
+- `application/data_management.py` definiert Dienst, sichere Fehler und
+  Backup-/Restore-Ergebnisse.
+- `persistence/data_management.py` erzeugt CSV und konsistente SQLite-
+  Sicherungen, prüft ZIP/Manifest und tauscht validierte Daten atomar aus.
+- `web/data_management.py` und `templates/data/` bilden Export, Sicherung,
+  Prüfvorschau und ausdrücklich bestätigte Wiederherstellung ab.
+- `docs/BACKUP_RESTORE.md` dokumentiert CSV-Verträge, Format und Notfallablauf;
+  `docs/MANUAL_TEST_M6.md` beschreibt die Windows-Abnahme.
+- Revision `0008_location_grid` speichert optionale Spalten-/Reihenangaben für
+  die grafische Lagerübersicht und ist vorwärts sowie rückwärts ausführbar.

@@ -202,9 +202,13 @@ Standardetikett ein reduziertes 35 × 13-mm-QR-Etikett bereit.
 
 ### Hierarchie verwalten
 
-Die Standardansicht zeigt einen zunächst geschlossenen, aufklappbaren Baum und
-auf kleinen Bildschirmen einen navigierbaren Pfad. Dadurch werden auch Magazine
-mit mehreren hundert Fächern erst bei Bedarf aufgeklappt. Anlegen geschieht im
+Die Lagerplatzseite öffnet standardmäßig eine grafische Übersicht mit Räumen,
+Bereichen und kompakten Fachrastern. Eine lokale Hervorhebungssuche markiert
+Treffer samt übergeordnetem Lagerpfad. Für Pflege und Sammelauswahl steht eine
+separate, zunächst geschlossene Baumansicht bereit. Dadurch werden auch Magazine
+mit mehreren hundert Fächern erst bei Bedarf aufgeklappt. Für feste Schränke,
+Regale und Magazine können Spalten und Reihen (1–50) hinterlegt werden; ohne
+Angabe ordnet die grafische Ansicht automatisch an. Anlegen geschieht im
 Kontext des Elternknotens. Vor dem
 Verschieben zeigt eine Vorschau alten und neuen Pfad. Zyklen und doppelte
 Geschwisterkennungen werden direkt erklärt.

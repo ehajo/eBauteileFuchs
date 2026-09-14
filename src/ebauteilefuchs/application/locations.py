@@ -208,6 +208,7 @@ class LocationService:
 
     def create(self, draft: LocationDraft) -> LocationDetails:
         code, normalized_code, name, description = self._clean_draft(draft)
+        grid_columns, grid_rows = self._clean_grid(draft.grid_columns, draft.grid_rows)
         with self._uow_factory() as uow:
             self._validate_type_and_parent(uow, draft.location_type_id, draft.parent_id)
             self._ensure_unique(uow, draft.parent_id, normalized_code)
@@ -224,6 +225,8 @@ class LocationService:
                 qr_token=self._new_qr_token(uow),
                 created_at=now,
                 updated_at=now,
+                grid_columns=grid_columns,
+                grid_rows=grid_rows,
             )
             uow.locations.add(location)
             uow.commit()
@@ -239,11 +242,14 @@ class LocationService:
         parent_id: UUID | None,
         description: str | None,
         is_active: bool | None = None,
+        grid_columns: int | None = None,
+        grid_rows: int | None = None,
     ) -> LocationDetails:
         cleaned_code = clean_required_text(code, "Kennung", 64)
         normalized_code = normalize_location_code(cleaned_code)
         cleaned_name = clean_required_text(name, "Bezeichnung", 120)
         cleaned_description = clean_description(description)
+        cleaned_columns, cleaned_rows = self._clean_grid(grid_columns, grid_rows)
 
         with self._uow_factory() as uow:
             location = self._require_location(uow.locations.get(location_id))
@@ -263,6 +269,8 @@ class LocationService:
                 description=cleaned_description,
                 is_active=target_active,
                 updated_at=datetime.now(UTC),
+                grid_columns=cleaned_columns,
+                grid_rows=cleaned_rows,
             )
             uow.locations.update(updated)
             uow.commit()
@@ -554,6 +562,20 @@ class LocationService:
             clean_required_text(draft.name, "Bezeichnung", 120),
             clean_description(draft.description),
         )
+
+    @staticmethod
+    def _clean_grid(
+        columns: int | None, rows: int | None
+    ) -> tuple[int | None, int | None]:
+        if columns is None and rows is None:
+            return None, None
+        if columns is None or rows is None:
+            raise ValidationError(
+                "Spalten und Reihen müssen gemeinsam angegeben werden."
+            )
+        if not 1 <= columns <= 50 or not 1 <= rows <= 50:
+            raise ValidationError("Spalten und Reihen müssen zwischen 1 und 50 liegen.")
+        return columns, rows
 
     @staticmethod
     def _require_location(

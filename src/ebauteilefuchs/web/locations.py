@@ -102,11 +102,18 @@ def _drawer_types(service: LocationService) -> list:
 @router.get("/locations", response_class=HTMLResponse)
 def locations(request: Request) -> HTMLResponse:
     service = _service(request)
+    positions = _inventory_service(request).list_positions()
+    inventory_by_location: dict[str, list] = {}
+    for position in positions:
+        inventory_by_location.setdefault(str(position.balance.location_id), []).append(
+            position
+        )
     return _render(
         request,
         "locations/list.html",
         {
             "tree": service.list_tree(include_inactive=False),
+            "inventory_by_location": inventory_by_location,
             "created": request.query_params.get("created"),
             "archived": request.query_params.get("archived"),
         },
@@ -141,6 +148,8 @@ def create_location(
     location_type_id: str = Form(),
     parent_id: str = Form(default=""),
     description: str = Form(default=""),
+    grid_columns: int | None = Form(default=None),
+    grid_rows: int | None = Form(default=None),
 ) -> Response:
     _verify_csrf(request, csrf_token)
     service = _service(request)
@@ -150,6 +159,8 @@ def create_location(
         "location_type_id": location_type_id,
         "parent_id": parent_id,
         "description": description,
+        "grid_columns": grid_columns,
+        "grid_rows": grid_rows,
     }
     try:
         created = service.create(
@@ -159,6 +170,8 @@ def create_location(
                 location_type_id=UUID(location_type_id),
                 parent_id=_optional_uuid(parent_id),
                 description=description,
+                grid_columns=grid_columns,
+                grid_rows=grid_rows,
             )
         )
     except (DomainError, ValueError) as error:
@@ -569,6 +582,8 @@ def edit_location(location_id: UUID, request: Request) -> HTMLResponse:
                 "location_type_id": str(location.location_type_id),
                 "parent_id": str(location.parent_id or ""),
                 "description": location.description or "",
+                "grid_columns": location.grid_columns,
+                "grid_rows": location.grid_rows,
             },
             "error": None,
         },
@@ -585,6 +600,8 @@ def update_location(
     location_type_id: str = Form(),
     parent_id: str = Form(default=""),
     description: str = Form(default=""),
+    grid_columns: int | None = Form(default=None),
+    grid_rows: int | None = Form(default=None),
 ) -> Response:
     _verify_csrf(request, csrf_token)
     service = _service(request)
@@ -594,6 +611,8 @@ def update_location(
         "location_type_id": location_type_id,
         "parent_id": parent_id,
         "description": description,
+        "grid_columns": grid_columns,
+        "grid_rows": grid_rows,
     }
     try:
         service.update(
@@ -603,6 +622,8 @@ def update_location(
             location_type_id=UUID(location_type_id),
             parent_id=_optional_uuid(parent_id),
             description=description,
+            grid_columns=grid_columns,
+            grid_rows=grid_rows,
         )
     except (DomainError, ValueError) as error:
         message = (

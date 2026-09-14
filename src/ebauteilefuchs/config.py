@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = Field(default=8008, ge=1, le=65535)
     data_dir: Path | None = None
+    backup_dir: Path | None = None
+    restore_upload_limit_mb: int = Field(default=512, ge=1, le=4096)
     database_url: str | None = None
     public_base_url: str | None = None
     ssl_certfile: Path | None = None
@@ -81,6 +83,14 @@ class Settings(BaseSettings):
             return self.database_url
         database_path = (self.resolved_data_dir / "ebauteilefuchs.db").as_posix()
         return f"sqlite+pysqlite:///{database_path}"
+
+    @property
+    def resolved_backup_dir(self) -> Path:
+        return (
+            (self.backup_dir or self.resolved_data_dir / "backups")
+            .expanduser()
+            .resolve()
+        )
 
 
 @lru_cache

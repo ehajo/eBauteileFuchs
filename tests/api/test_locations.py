@@ -215,6 +215,39 @@ async def test_custom_type_and_controlled_invalid_input(client: AsyncClient) -> 
 
 
 @pytest.mark.anyio
+async def test_location_grid_layout_can_be_created_and_updated(
+    client: AsyncClient,
+) -> None:
+    created = await client.post(
+        "/api/v1/locations",
+        json={
+            "code": "GRID-01",
+            "name": "Rastermagazin",
+            "location_type_id": await _type_id(client, "magazine"),
+            "grid_columns": 10,
+            "grid_rows": 6,
+        },
+    )
+    assert created.status_code == 201, created.text
+    assert created.json()["grid_columns"] == 10
+    assert created.json()["grid_rows"] == 6
+
+    updated = await client.patch(
+        f"/api/v1/locations/{created.json()['id']}",
+        json={"grid_columns": 5, "grid_rows": 12},
+    )
+    assert updated.status_code == 200
+    assert updated.json()["grid_columns"] == 5
+    assert updated.json()["grid_rows"] == 12
+
+    invalid = await client.patch(
+        f"/api/v1/locations/{created.json()['id']}",
+        json={"grid_columns": 5, "grid_rows": None},
+    )
+    assert invalid.status_code == 422
+
+
+@pytest.mark.anyio
 async def test_cross_origin_write_is_rejected(client: AsyncClient) -> None:
     response = await client.post(
         "/api/v1/location-types",

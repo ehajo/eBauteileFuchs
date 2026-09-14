@@ -47,6 +47,8 @@ class LocationResponse(BaseModel):
     qr_short_code: str
     created_at: datetime
     updated_at: datetime
+    grid_columns: int | None
+    grid_rows: int | None
 
 
 class LocationTreeResponse(BaseModel):
@@ -60,6 +62,8 @@ class LocationCreateRequest(BaseModel):
     location_type_id: UUID
     parent_id: UUID | None = None
     description: str | None = Field(default=None, max_length=1_000)
+    grid_columns: int | None = Field(default=None, ge=1, le=50)
+    grid_rows: int | None = Field(default=None, ge=1, le=50)
 
 
 class LocationUpdateRequest(BaseModel):
@@ -69,6 +73,8 @@ class LocationUpdateRequest(BaseModel):
     parent_id: UUID | None = None
     description: str | None = Field(default=None, max_length=1_000)
     is_active: bool | None = None
+    grid_columns: int | None = Field(default=None, ge=1, le=50)
+    grid_rows: int | None = Field(default=None, ge=1, le=50)
 
     @model_validator(mode="after")
     def reject_null_required_fields(self) -> "LocationUpdateRequest":

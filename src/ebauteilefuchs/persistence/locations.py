@@ -46,6 +46,8 @@ def _to_location(model: LocationModel) -> Location:
         qr_token=model.qr_token,
         created_at=_aware(model.created_at),
         updated_at=_aware(model.updated_at),
+        grid_columns=model.grid_columns,
+        grid_rows=model.grid_rows,
     )
 
 
@@ -160,6 +162,8 @@ class SqlAlchemyLocationRepository:
                 qr_token=location.qr_token,
                 created_at=location.created_at,
                 updated_at=location.updated_at,
+                grid_columns=location.grid_columns,
+                grid_rows=location.grid_rows,
             )
         )
 
@@ -178,6 +182,8 @@ class SqlAlchemyLocationRepository:
         model.description = location.description
         model.is_active = location.is_active
         model.updated_at = location.updated_at
+        model.grid_columns = location.grid_columns
+        model.grid_rows = location.grid_rows
 
     def flush(self) -> None:
         self._session.flush()

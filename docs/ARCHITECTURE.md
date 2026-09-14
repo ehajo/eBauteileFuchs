@@ -206,6 +206,8 @@ festgelegt.
   geschrieben.
 - Backup-Uploads erhalten serverseitige Namen, Größenlimit, Format- und
   Integritätsprüfung; Restore verhindert Pfadtraversal.
+- Während des atomaren Restore-Austauschs lässt eine lokale Wartungssperre
+  laufende Schreibzugriffe fertig werden und weist neue kontrolliert ab.
 - QR-Codes gelten als Identifikatoren, nicht als Berechtigungsnachweis.
 - Lokaler Netzbetrieb bietet keine Benutzertrennung. Diese bewusste V1-Grenze wird
   deutlich dokumentiert; öffentliche Portfreigaben werden ausdrücklich abgeraten.

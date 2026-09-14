@@ -62,6 +62,8 @@ def _location_response(details: LocationDetails) -> LocationResponse:
         qr_short_code=location.qr_short_code,
         created_at=location.created_at,
         updated_at=location.updated_at,
+        grid_columns=location.grid_columns,
+        grid_rows=location.grid_rows,
     )
 
 
@@ -167,6 +169,8 @@ def create_location(
                 location_type_id=payload.location_type_id,
                 parent_id=payload.parent_id,
                 description=payload.description,
+                grid_columns=payload.grid_columns,
+                grid_rows=payload.grid_rows,
             )
         )
     )
@@ -235,6 +239,10 @@ def update_location(
             if "description" in fields
             else current.description,
             is_active=payload.is_active if "is_active" in fields else None,
+            grid_columns=payload.grid_columns
+            if "grid_columns" in fields
+            else current.grid_columns,
+            grid_rows=payload.grid_rows if "grid_rows" in fields else current.grid_rows,
         )
     )
 

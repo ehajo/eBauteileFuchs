@@ -10,7 +10,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>{% block title %}{{ branding.product_name }}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='/css/design-tokens.css') }}?v=20260824-6">
-    <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}?v=20260824-7">
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/app.css') }}?v=20260831-3">
     <link rel="manifest" href="{{ url_for('static', path='/manifest.webmanifest') }}">
     <link rel="icon" href="{{ url_for('static', path='/branding/e_rand_t.png') }}?v=20260824-6" type="image/png">
     <script src="{{ url_for('static', path='/js/pwa.js') }}?v=20260824-6" defer></script>
@@ -35,6 +35,7 @@
         <a href="/search">Suchen</a>
         <a href="/articles">Artikel</a>
         <a href="/locations">Lagerplätze</a>
+        <a href="/data">Daten</a>
       </nav>
       <a class="milestone-badge" href="/connection">Verbindung · M5</a>
     </header>
@@ -46,5 +47,6 @@
       <span>{{ branding.footer }}</span>
       <a href="{{ branding.website }}" rel="external">www.ehajo.de</a>
     </footer>
+    {% block scripts %}{% endblock %}
   </body>
 </html>

@@ -19,7 +19,7 @@ def test_empty_database_upgrades_and_downgrades(monkeypatch, tmp_path: Path) -> 
         revision = connection.execute(
             text("SELECT version_num FROM alembic_version")
         ).scalar_one()
-    assert revision == "0007_article_barcodes"
+    assert revision == "0008_location_grid"
     inspector = inspect(engine)
     assert {
         "article",
@@ -109,7 +109,7 @@ def test_existing_m3_database_upgrades_to_m4_and_downgrades_without_data_loss(
             connection.execute(
                 text("SELECT version_num FROM alembic_version")
             ).scalar_one()
-            == "0007_article_barcodes"
+            == "0008_location_grid"
         )
         assert connection.execute(text("SELECT COUNT(*) FROM category")).scalar() == 10
         assert connection.execute(text("SELECT COUNT(*) FROM supplier")).scalar() == 1

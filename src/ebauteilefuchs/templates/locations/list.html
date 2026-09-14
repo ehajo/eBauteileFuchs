@@ -5,13 +5,29 @@
     {% if node.children %}
       <details class="tree-branch">
         <summary><span class="tree-code">{{ node.details.location.code }}</span><span class="tree-name">{{ node.details.location.name }}</span><span class="type-pill">{{ node.details.location_type.name }}</span>{% if not node.details.location.is_active %}<span class="inactive-pill">deaktiviert</span>{% endif %}</summary>
-        <div class="tree-node-tools"><label class="tree-select"><input type="checkbox" name="location_ids" value="{{ node.details.location.id }}"><span>Auswählen</span></label><a href="/locations/{{ node.details.location.id }}">Lagerplatz öffnen</a></div>
+        <div class="tree-node-tools"><div class="tree-node-selection"><label class="tree-select"><input type="checkbox" name="location_ids" value="{{ node.details.location.id }}"><span>Diesen Lagerplatz auswählen</span></label><button class="button button--ghost button--small" type="button" data-select-descendants aria-pressed="false">Alle Unterplätze auswählen</button></div><a href="/locations/{{ node.details.location.id }}">Lagerplatz öffnen</a></div>
         <ul>{% for child in node.children %}{{ render_node(child) }}{% endfor %}</ul>
       </details>
     {% else %}
       <div class="tree-row"><label class="tree-select tree-select--compact"><input type="checkbox" name="location_ids" value="{{ node.details.location.id }}"><span class="visually-hidden">Auswählen</span></label><span class="tree-code">{{ node.details.location.code }}</span><a href="/locations/{{ node.details.location.id }}">{{ node.details.location.name }}</a><span class="type-pill">{{ node.details.location_type.name }}</span>{% if not node.details.location.is_active %}<span class="inactive-pill">deaktiviert</span>{% endif %}</div>
     {% endif %}
   </li>
+{% endmacro %}
+
+{% macro render_map_node(node) %}
+  {% set type_code = node.details.location_type.code %}
+  {% set search_text = ((node.details.path|map(attribute='code')|join(' ')) ~ ' ' ~ (node.details.path|map(attribute='name')|join(' ')))|lower %}
+  {% if node.children %}
+    <article class="storage-node storage-group storage-group--{{ type_code }}" data-location-search="{{ search_text }}">
+      <header class="storage-group__header"><a href="/locations/{{ node.details.location.id }}"><strong>{{ node.details.location.code }}</strong><span>{{ node.details.location.name }}</span></a><span class="type-pill">{{ node.details.location_type.name }}</span></header>
+      <div class="storage-children{% if node.children|length > 20 %} storage-children--dense{% endif %}{% if node.details.location.grid_columns %} storage-children--custom-grid{% endif %}"{% if node.details.location.grid_columns %} style="--storage-grid-columns: {{ node.details.location.grid_columns }}; --storage-grid-rows: {{ node.details.location.grid_rows }};"{% endif %}>{% for child in node.children %}{{ render_map_node(child) }}{% endfor %}</div>
+    </article>
+  {% else %}
+    {% set contents = inventory_by_location.get(node.details.location.id|string, []) %}
+    <a class="storage-node storage-slot storage-slot--{{ type_code }}" href="/locations/{{ node.details.location.id }}" data-location-search="{{ search_text }}" title="{{ node.details.path|map(attribute='code')|join(' / ') }}">
+      <strong>{{ node.details.location.code }}</strong><span>{{ node.details.location.name }}</span><small>{{ node.details.location_type.name }}</small><span class="storage-slot__contents">{% if contents %}{% for item in contents[:5] %}<span class="storage-content"><span>{{ item.article_name }}</span><strong>{{ item.balance.quantity|number }} {{ item.balance.unit }}</strong></span>{% endfor %}{% if contents|length > 5 %}<small>+ {{ contents|length - 5 }} weitere Bauteile</small>{% endif %}{% else %}<small class="storage-slot__empty">leer</small>{% endif %}</span>
+    </a>
+  {% endif %}
 {% endmacro %}
 
 {% block title %}Lagerplätze – {{ branding.product_name }}{% endblock %}
@@ -25,12 +41,23 @@
   </div>
   {% if created %}<p class="notice notice--success" role="status">{{ created }} Lagerplätze wurden angelegt.</p>{% endif %}
   {% if archived %}<p class="notice notice--success" role="status">{{ archived }} Lagerplätze wurden sicher archiviert.</p>{% endif %}
-  <form method="post" action="/locations/labels.pdf">
+  {% if tree %}
+    <div class="location-view-switch" role="tablist" aria-label="Darstellung der Lagerplätze">
+      <button class="button button--small" type="button" role="tab" aria-selected="true" data-location-view="map">Grafische Übersicht</button>
+      <button class="button button--secondary button--small" type="button" role="tab" aria-selected="false" data-location-view="tree">Verwalten und auswählen</button>
+    </div>
+    <section class="panel location-view-panel" data-location-panel="map" aria-label="Grafische Lagerübersicht">
+      <div class="panel__heading storage-map-heading"><div><h2>Wo liegt was?</h2><p>Räume, Regale und Magazine bilden die tatsächliche Lagerstruktur ab. Ein Fach öffnet direkt seine Detailseite.</p></div></div>
+      <div class="storage-map-search"><label for="storage-map-query">Lagerplatz hervorheben<input id="storage-map-query" type="search" placeholder="z. B. Raum 1, Magazin oder Fach 34 B" autocomplete="off" data-storage-map-query></label><button class="button button--secondary button--small" type="button" data-storage-map-reset>Zurücksetzen</button><span data-storage-map-result aria-live="polite"></span></div>
+      <div class="storage-map">{% for node in tree %}{{ render_map_node(node) }}{% endfor %}</div>
+    </section>
+  {% endif %}
+  <form method="post" action="/locations/labels.pdf" data-location-panel="tree"{% if tree %} hidden{% endif %}>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <section class="panel" aria-labelledby="tree-title">
       <div class="panel__heading">
-        <div><h2 id="tree-title">Hierarchie</h2><p>Bereiche sind zunächst geschlossen. Klappe nur den benötigten Zweig auf.</p></div>
-        {% if tree %}<div class="button-row selection-actions"><button class="button button--small" type="submit">Etiketten-PDF</button><button class="button button--secondary button--small" type="submit" formaction="/locations/group/preview">In Magazin gruppieren</button><button class="button button--danger button--small" type="submit" formaction="/locations/archive/preview">Auswahl löschen</button></div>{% endif %}
+        <div><h2 id="tree-title">Verwalten und auswählen</h2><p>Ein Elternknoten löscht seinen gesamten Zweig. Mit „Alle Unterplätze auswählen“ bleibt der Elternknoten erhalten.</p></div>
+        {% if tree %}<div class="button-row selection-actions"><span class="selection-count" data-location-selection-count aria-live="polite">0 ausgewählt</span><button class="button button--small" type="submit">Etiketten-PDF</button><button class="button button--secondary button--small" type="submit" formaction="/locations/group/preview">In Magazin gruppieren</button><button class="button button--danger button--small" type="submit" formaction="/locations/archive/preview">Auswahl löschen</button></div>{% endif %}
       </div>
       {% if tree %}
         <ul class="location-tree">{% for node in tree %}{{ render_node(node) }}{% endfor %}</ul>
@@ -40,3 +67,4 @@
     </section>
   </form>
 {% endblock %}
+{% block scripts %}<script src="{{ url_for('static', path='/js/location-tree.js') }}?v=20260831-2" defer></script>{% endblock %}

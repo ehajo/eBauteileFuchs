@@ -96,7 +96,7 @@ implementiert. Der allgemeine Cache und seine Revision `0005_m4_supplier_cache`
 sind vorhanden; Mouser-Inhalte werden wegen des ausdrücklichen Cacheverbots in
 den veröffentlichten Mouser-API-Bedingungen nicht hineingeschrieben.
 
-### M5 – Suche, Verbindung und PWA (umgesetzt am 24. August 2026, Abnahme ausstehend)
+### M5 – Suche, Verbindung und PWA (umgesetzt und lokal abgenommen)
 
 - Globale UND-Suche über Stammdaten, Supplier-Nummern, Eigenschaften, Notizen und
   Lagerpfade; portable Fallbackstrategie für SQLite.
@@ -121,7 +121,7 @@ auch über HTTP erfassen; unter HTTPS steht ergänzend ein Live-Kamerabild berei
 Der Scan startet die vorhandene lokale Vorprüfung und anschließend bei Bedarf den
 Mouser-Suchmodus `barcode`.
 
-### M6 – Export, Backup und Restore
+### M6 – Export, Backup und Restore (umgesetzt, lokale Abnahme ausstehend)
 
 - Dokumentierte UTF-8-CSV-Schemata und Exporte.
 - Konsistentes versioniertes Backup mit Manifest, Prüfsumme und sicherer Ablage.
@@ -130,6 +130,13 @@ Mouser-Suchmodus `barcode`.
 
 Abnahmekriterien: 18 bis 20; Restore wird auf einer frischen Installation sowie
 über eine unterstützte Schemaversion getestet.
+
+Umsetzungsstand: Vier feste UTF-8-CSV-Schemata, eine konsistente SQLite-ZIP-
+Sicherung mit strengem Manifest und SHA-256 sowie eine validierte,
+größenbegrenzte Wiederherstellung mit automatischer Vorsicherung und atomarem
+Datenbankaustausch sind implementiert. Datenpfade, Betrieb und manueller
+Windows-Test sind dokumentiert. Die spätere Rasterergänzung verwendet die
+vorwärts und rückwärts ausführbare Revision `0008_location_grid`.
 
 ### M7 – Installation und Veröffentlichungsreife
 

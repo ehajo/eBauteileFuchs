@@ -70,7 +70,54 @@ async def test_location_tree_starts_collapsed(client: AsyncClient) -> None:
     page = await client.get("/locations")
     assert '<details class="tree-branch">' in page.text
     assert '<details class="tree-branch" open>' not in page.text
-    assert "Klappe nur den benötigten Zweig auf" in page.text
+    assert "Ein Elternknoten löscht seinen gesamten Zweig" in page.text
+    assert "Alle Unterplätze auswählen" in page.text
+    assert "data-location-selection-count" in page.text
+    assert "/static/js/location-tree.js?v=20260831-2" in page.text
+    assert "Grafische Übersicht" in page.text
+    assert "Wo liegt was?" in page.text
+    assert 'data-location-search="tree-room tree-shelf baumraum baumregal"' in page.text
+    assert 'data-location-panel="tree" hidden' in page.text
+    assert "storage-slot__contents" in page.text
+    assert "storage-slot__empty" in page.text
+
+
+@pytest.mark.anyio
+async def test_location_grid_is_saved_from_edit_form(client: AsyncClient) -> None:
+    room_type = next(
+        item
+        for item in (await client.get("/api/v1/location-types")).json()
+        if item["code"] == "room"
+    )
+    created = await client.post(
+        "/api/v1/locations",
+        json={
+            "code": "GRID-FORM",
+            "name": "Raster",
+            "location_type_id": room_type["id"],
+        },
+    )
+    assert created.status_code == 201
+    edit = await client.get(f"/locations/{created.json()['id']}/edit")
+    token = re.search(r'name="csrf_token" value="([^"]+)"', edit.text)
+    assert token is not None
+    saved = await client.post(
+        f"/locations/{created.json()['id']}/edit",
+        data={
+            "csrf_token": token.group(1),
+            "code": "GRID-FORM",
+            "name": "Raster",
+            "location_type_id": room_type["id"],
+            "parent_id": "",
+            "description": "",
+            "grid_columns": "10",
+            "grid_rows": "6",
+        },
+    )
+    assert saved.status_code == 303
+    details = await client.get(f"/api/v1/locations/{created.json()['id']}")
+    assert details.json()["grid_columns"] == 10
+    assert details.json()["grid_rows"] == 6
 
 
 @pytest.mark.anyio

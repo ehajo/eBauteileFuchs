@@ -230,6 +230,17 @@ Alembic bleibt führend für die Schemaversion. Ein Backupmanifest enthält
 Anwendungsversion, Schemaversion, Erstellzeit, Prüfsumme und Formatversion, aber
 keine Geheimnisse.
 
+Die Revision `0008_location_grid` ergänzt optionale Rastermetadaten
+`location.grid_columns` und `location.grid_rows` (je 1–50, gemeinsam oder beide
+leer) für die grafische Lagerübersicht.
+
+M6 verwendet `format=ebauteilefuchs-backup`, `format_version=1` und genau die
+ZIP-Mitglieder `manifest.json` und `database.sqlite3`. Das Manifest enthält
+`app_version`, `schema_revision`, `created_at`, `database_file`,
+`database_size` und `database_sha256`. Unterstützt wird derzeit Revision
+`0008_location_grid`; Sicherungen des vorherigen unterstützten Standes werden
+beim Restore auf diesen Stand angehoben.
+
 ## 9. Integritätsregeln und Nebenläufigkeit
 
 - Fremdschlüssel werden bei jeder SQLite-Verbindung aktiviert.

@@ -18,6 +18,7 @@ from ebauteilefuchs.api.v1.locations import router as locations_api_router
 from ebauteilefuchs.api.v1.search import router as search_api_router
 from ebauteilefuchs.api.v1.suppliers import router as suppliers_api_router
 from ebauteilefuchs.application.articles import ArticleService
+from ebauteilefuchs.application.data_management import DataManagementService
 from ebauteilefuchs.application.inventory import InventoryService
 from ebauteilefuchs.application.locations import LocationService
 from ebauteilefuchs.application.search import GlobalSearchService
@@ -29,6 +30,10 @@ from ebauteilefuchs.labels import ReportLabLabelRenderer
 from ebauteilefuchs.logging_config import configure_logging
 from ebauteilefuchs.main_paths import PACKAGE_DIR
 from ebauteilefuchs.persistence.articles import SqlAlchemyArticleUnitOfWork
+from ebauteilefuchs.persistence.data_management import (
+    DatabaseWriteGate,
+    SqliteDataManagementGateway,
+)
 from ebauteilefuchs.persistence.database import (
     create_database_engine,
     create_session_factory,
@@ -40,6 +45,7 @@ from ebauteilefuchs.suppliers.mouser import MouserAdapter
 from ebauteilefuchs.suppliers.mouser.client import MouserHttpClient
 from ebauteilefuchs.web.articles import router as articles_web_router
 from ebauteilefuchs.web.connection import router as connection_web_router
+from ebauteilefuchs.web.data_management import router as data_management_web_router
 from ebauteilefuchs.web.inventory import router as inventory_web_router
 from ebauteilefuchs.web.locations import router as locations_web_router
 from ebauteilefuchs.web.presentation import format_decimal
@@ -104,6 +110,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.article_service_factory(), app.state.supplier_adapter
     )
     app.state.supplier_cache = SqlAlchemySupplierCache(session_factory)
+    app.state.database_write_gate = DatabaseWriteGate()
+    app.state.data_management_service = DataManagementService(
+        SqliteDataManagementGateway(
+            runtime_settings, database_engine, app.state.database_write_gate
+        )
+    )
     app.state.templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
     app.state.templates.env.filters["number"] = format_decimal
 
@@ -119,6 +131,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(suppliers_web_router)
     app.include_router(search_web_router)
     app.include_router(connection_web_router)
+    app.include_router(data_management_web_router)
     app.include_router(health_router, prefix="/api/v1")
     app.include_router(locations_api_router, prefix="/api/v1")
     app.include_router(articles_api_router, prefix="/api/v1")
@@ -129,7 +142,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.middleware("http")
     async def reject_cross_origin_writes(request, call_next):
-        if request.method not in {"GET", "HEAD", "OPTIONS"}:
+        is_write = request.method not in {"GET", "HEAD", "OPTIONS"}
+        if is_write:
             origin = request.headers.get("origin")
             if origin:
                 parsed = urlsplit(origin)
@@ -139,7 +153,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                         {"detail": "Die Anfrage stammt von einer fremden Website."},
                         status_code=403,
                     )
-        return await call_next(request)
+            if not app.state.database_write_gate.enter_write():
+                return JSONResponse(
+                    {
+                        "detail": "Die Datenbank wird gerade wiederhergestellt. "
+                        "Versuche es nach dem Neustart erneut."
+                    },
+                    status_code=503,
+                )
+        try:
+            return await call_next(request)
+        finally:
+            if is_write:
+                app.state.database_write_gate.leave_write()
 
     return app
 
