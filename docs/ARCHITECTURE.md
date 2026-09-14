@@ -220,6 +220,16 @@ Health-Endpunkt prüft Prozess und Datenbank. Startausgabe zeigt Branding,
 Datenpfad, Schema-Version und erreichbare URLs. Keine Telemetrie verlässt das
 Gerät.
 
+Der optionale Docker-Betrieb besitzt ein gemeinsames Basisimage und getrennte
+Ziele `production` und `test`. Das Produktionsziel enthält ausschließlich
+Laufzeitabhängigkeiten, läuft als eigener nicht privilegierter Benutzer und
+führt im Entrypoint zuerst `alembic upgrade head` aus. Schlägt die Migration
+fehl, endet der Container vor dem Webstart. Danach ersetzt `exec` das
+Startskript durch den Uvicorn-Prozess, damit Stop-Signale korrekt verarbeitet
+werden. Das benannte Compose-Volume wird bei `/data` eingehängt; der
+Test-Service ist über das Profil `test` isoliert und erhält weder `.env` noch
+das Produktivvolume.
+
 ## 12. Architekturentscheidungen (ADR-Bedarf)
 
 Vor Implementierung werden mindestens folgende Entscheidungen als kurze ADRs

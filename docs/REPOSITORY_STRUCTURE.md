@@ -221,3 +221,7 @@ Zusatzabhängigkeit nötig ist.
   `docs/MANUAL_TEST_M6.md` beschreibt die Windows-Abnahme.
 - Revision `0008_location_grid` speichert optionale Spalten-/Reihenangaben für
   die grafische Lagerübersicht und ist vorwärts sowie rückwärts ausführbar.
+- `Dockerfile` besitzt die getrennten Ziele `production` und `test`;
+  `packaging/docker/entrypoint.sh` führt die kontrollierte Migration vor dem
+  Produktionsstart aus. `compose.yaml` verbindet nur den App-Service mit dem
+  persistenten Volume und aktiviert Tests ausschließlich über das Profil `test`.

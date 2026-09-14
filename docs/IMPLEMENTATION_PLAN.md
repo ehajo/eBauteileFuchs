@@ -1,8 +1,9 @@
 # Implementierungsplan – eBauteileFuchs
 
-Status: M0 bis M4 sind umgesetzt und lokal abgenommen. M5 wurde ausdrücklich
-freigegeben und am 24. August 2026 umgesetzt; die lokale Abnahme steht aus. M6
-und spätere Meilensteine bleiben gesperrt.
+Status: M0 bis M5 sind umgesetzt und lokal abgenommen. M6 ist technisch
+vollständig umgesetzt; CSV, Sicherung, Wiederherstellung und die grafische
+Lagerübersicht wurden praktisch geprüft. Die vollständige lokale M6-Abnahme für
+den Docker-Betrieb steht aus. M7 und spätere Meilensteine bleiben gesperrt.
 
 ## 1. Vorgehensmodell
 
@@ -127,6 +128,8 @@ Mouser-Suchmodus `barcode`.
 - Konsistentes versioniertes Backup mit Manifest, Prüfsumme und sicherer Ablage.
 - Validierter Restore mit automatischer Vorsicherung und Integritätsprüfung.
 - Datenpfad- und Betriebsdokumentation.
+- Optionaler Docker-Betrieb für ARM64 und x86-64 mit getrennten Produktions- und
+  Testzielen, persistentem Volume, Healthcheck und Migrationsstart.
 
 Abnahmekriterien: 18 bis 20; Restore wird auf einer frischen Installation sowie
 über eine unterstützte Schemaversion getestet.
@@ -135,16 +138,17 @@ Umsetzungsstand: Vier feste UTF-8-CSV-Schemata, eine konsistente SQLite-ZIP-
 Sicherung mit strengem Manifest und SHA-256 sowie eine validierte,
 größenbegrenzte Wiederherstellung mit automatischer Vorsicherung und atomarem
 Datenbankaustausch sind implementiert. Datenpfade, Betrieb und manueller
-Windows-Test sind dokumentiert. Die spätere Rasterergänzung verwendet die
-vorwärts und rückwärts ausführbare Revision `0008_location_grid`.
+Windows-Test sind dokumentiert. Docker verwendet ein mehrstufiges Image mit
+den Zielen `production` und `test`; das Produktionsziel enthält keine
+Testwerkzeuge, führt Migrationen vor dem Webstart aus und speichert Daten im
+benannten Volume. Die spätere Rasterergänzung verwendet die vorwärts und
+rückwärts ausführbare Revision `0008_location_grid`.
 
 ### M7 – Installation und Veröffentlichungsreife
 
 - Native Raspberry-Pi-/Linux-Installation, systemd-Unit und Updatepfad.
-- Multi-Arch-Dockerfile/Compose für ARM64 und x86-64 mit persistentem Volume.
 - Windows-Startskript mit Browseröffnung; Vorbereitung eines entpackbaren
   Programmpakets ohne V1-Zwang zu einem Installer.
-- README, Plattformanleitungen, CONTRIBUTING, SECURITY und CHANGELOG vervollständigen.
 - GitHub Actions, Releasecheckliste, semantische Versionierung, Screenshots und
   Demo-Modus mit synthetischen Daten.
 - Manuelle Abnahmematrix auf ARM64-Linux, x86-64-Linux und Windows.

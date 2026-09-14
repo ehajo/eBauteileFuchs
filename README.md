@@ -11,7 +11,8 @@ für Elektronikbauteile, Kleinteile und private Bastellager.
 
 M0 bis M5 sind lokal abgenommen. M6 ergänzt dokumentierte CSV-Exporte,
 versionierte ZIP-Sicherungen und eine validierte Wiederherstellung mit
-automatischer Vorsicherung. Die lokale M6-Abnahme steht aus.
+automatischer Vorsicherung sowie einen optionalen Docker-Betrieb. Die lokale
+M6-Abnahme steht aus.
 
 ## Schnellstart unter Windows
 
@@ -43,11 +44,25 @@ chmod +x scripts/start-dev.sh
 
 ## Docker
 
-Docker ist optional; Daten bleiben in einem benannten Volume erhalten.
+Docker ist eine zusätzliche Betriebsform; der native Windows-Start bleibt
+vollständig unterstützt. Für Docker Desktop, Raspberry Pi und Linux zuerst die
+Beispielkonfiguration kopieren und die LAN-Adresse eintragen:
 
-```text
-docker compose up --build
+```bash
+cp .env.example .env
+# In .env mindestens EBAUTEILEFUCHS_PUBLIC_BASE_URL auf die LAN-Adresse setzen.
+docker compose up -d --build
 ```
+
+Die SQLite-Datenbank, Sicherungen und die Laufzeitablage liegen ausschließlich
+im benannten Volume `ebauteilefuchs-data` unter `/data`. `docker compose down`
+stoppt die Anwendung ohne Datenverlust. **`docker compose down -v` löscht dieses
+Volume und damit die produktiven Daten unwiderruflich.**
+
+Weitere Befehle, der isolierte Testcontainer und die Einrichtungsanleitungen
+stehen unter [Docker](docs/installation/docker.md),
+[Raspberry Pi](docs/installation/raspberry-pi.md) und
+[Linux](docs/installation/linux.md).
 
 ## Browser und Systemstatus
 
@@ -286,6 +301,10 @@ Lokale Einstellungen können aus `.env.example` in eine nicht versionierte
 - [Manuelle M5-Abnahme](docs/MANUAL_TEST_M5.md)
 - [CSV, Sicherung und Wiederherstellung](docs/BACKUP_RESTORE.md)
 - [Manuelle M6-Abnahme](docs/MANUAL_TEST_M6.md)
+- [Docker-Betrieb](docs/installation/docker.md)
+- [Raspberry Pi](docs/installation/raspberry-pi.md)
+- [Linux](docs/installation/linux.md)
+- [Windows](docs/installation/windows.md)
 
 Version 1 ist als responsive lokale Webanwendung für Raspberry Pi, Linux und
 Windows vorgesehen. Kerntechnologien sind Python 3.12, FastAPI, SQLAlchemy,

@@ -205,8 +205,9 @@ werden, wenn die Produktabsicht abweicht:
 
 ## Freigabestatus
 
-M0 bis M5 sind abgenommen. M6 wurde ausdrücklich freigegeben und umgesetzt; die
-lokale Abnahme steht aus. M7 und spätere Meilensteine benötigen weiterhin eine
+M0 bis M5 sind abgenommen. M6 ist umgesetzt; CSV, Sicherung, Wiederherstellung
+und die grafische Lagerübersicht sind praktisch geprüft. Die Docker-Abnahme
+steht lokal noch aus. M7 und spätere Meilensteine benötigen weiterhin eine
 ausdrückliche Freigabe. Für M6 sind keine Entscheidungen mehr offen.
 
 Die Praxisentscheidung zum Löschen hierarchischer Lagerplätze ist abgeschlossen:

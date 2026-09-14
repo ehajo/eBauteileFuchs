@@ -1,0 +1,31 @@
+# Local Python and tooling state
+.git
+.github
+.venv
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime data, backups and temporary output
+/data/
+/backups/
+/exports/
+/output/
+/tmp/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.zip
+*.pdf
+
+# Documentation and branding remain available to the isolated test image. The
+# production target copies neither directory into its image.

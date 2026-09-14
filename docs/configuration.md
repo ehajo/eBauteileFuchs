@@ -45,6 +45,16 @@ während der Prüfung in `restore-staging` und werden danach entfernt. Beide
 Verzeichnisse enthalten persönliche Lagerdaten und gehören nicht ins Repository.
 Einzelheiten stehen in [BACKUP_RESTORE.md](BACKUP_RESTORE.md).
 
+## Docker
+
+Der Compose-App-Service setzt `EBAUTEILEFUCHS_APP_ENV=production` und
+`EBAUTEILEFUCHS_DATA_DIR=/data`. Der in `.env` konfigurierte Port wird sowohl
+im Container als auch für die Portfreigabe verwendet. `DATABASE_URL` sollte im
+Standardbetrieb leer bleiben, damit SQLite im persistenten `/data`-Volume liegt.
+Eine Compose-Datei enthält keinen Mouser-Schlüssel; Docker liest ihn ausschließlich
+aus der lokalen, nicht eingebauten `.env`. Die vollständige Betriebsanleitung
+steht unter [installation/docker.md](installation/docker.md).
+
 ## Basis-URL für Lagerplatz-QR-Codes
 
 Ohne Konfiguration verwendet ein erzeugtes Etikett die Basis-URL der aktuellen

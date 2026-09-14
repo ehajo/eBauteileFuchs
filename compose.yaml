@@ -1,15 +1,35 @@
 services:
-  ebauteilefuchs:
-    build: .
-    ports:
-      - "8008:8008"
+  app:
+    build:
+      context: .
+      target: production
+    env_file:
+      - .env
     environment:
       EBAUTEILEFUCHS_APP_ENV: production
       EBAUTEILEFUCHS_DATA_DIR: /data
-      EBAUTEILEFUCHS_LOG_LEVEL: INFO
+    ports:
+      - "${EBAUTEILEFUCHS_PORT:-8008}:${EBAUTEILEFUCHS_PORT:-8008}"
     volumes:
       - ebauteilefuchs-data:/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import os, urllib.request; port = os.environ.get('EBAUTEILEFUCHS_PORT', '8008'); urllib.request.urlopen(f'http://127.0.0.1:{port}/api/v1/health', timeout=3)\""]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+  test:
+    profiles: ["test"]
+    build:
+      context: .
+      target: test
+    environment:
+      EBAUTEILEFUCHS_APP_ENV: test
+      EBAUTEILEFUCHS_DATA_DIR: /tmp/ebauteilefuchs
+    tmpfs:
+      - /tmp/ebauteilefuchs
 
 volumes:
   ebauteilefuchs-data:

@@ -8,6 +8,15 @@ Semantic Versioning.
 
 ### Added
 
+- Optionaler Docker-Betrieb mit getrennten Produktions- und Test-Build-Zielen,
+  nicht privilegiertem Produktionsprozess, Migrationsprüfung vor dem Start,
+  Healthcheck und persistentem benannten Datenvolume.
+- Das Docker-Testziel enthält nun den bereinigten vollständigen
+  Repository-Kontext für Dokumentations-, Branding- und Docker-Vertragstests;
+  die Produktionsschicht bleibt davon getrennt.
+- Docker-, Raspberry-Pi-, Linux- und Windows-Betriebsanleitungen einschließlich
+  sicherer Update-, Backup- und Wiederherstellungsabläufe.
+
 - Lagerzweige mit vielen Schubladen lassen sich in der Hierarchie mit einer
   Aktion vollständig auswählen oder wieder abwählen; die Anzeige nennt die
   Anzahl ausgewählter Lagerplätze vor der Löschvorschau.

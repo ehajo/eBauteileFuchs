@@ -1,17 +1,31 @@
+# Local Python and tooling state
 .git
 .github
 .venv
-__pycache__
-.pytest_cache
-.ruff_cache
+__pycache__/
+.pytest_cache/
+.ruff_cache/
 .coverage
-htmlcov
-data
-backups
-exports
+htmlcov/
+
+# Local configuration and secrets
 .env
+.env.*
+!.env.example
+
+# Runtime data, backups and temporary output
+/data/
+/backups/
+/exports/
+/output/
+/tmp/
 *.db
-*.sqlite*
-tests
-docs
-branding/ehajo-logo.png
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite3-*
+*.zip
+*.pdf
+
+# Documentation and branding remain available to the isolated test image. The
+# production target copies neither directory into its image.

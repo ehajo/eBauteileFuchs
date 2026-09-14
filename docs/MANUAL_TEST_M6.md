@@ -26,5 +26,32 @@ beenden und den produktiven Datenordner nicht verändern.
 11. Browser auf Smartphonebreite ziehen. Karten, Dateiauswahl, Prüfsumme und
     Bestätigung müssen ohne horizontales Seitenrollen bedienbar sein.
 
-M6 enthält keine Docker-, systemd-, Raspberry-Pi-, Paketierungs-, Release- oder
-Updatefunktion; diese Punkte beginnen ausdrücklich erst mit M7.
+## Docker-Abnahme unter Windows
+
+Docker Desktop ist optional. Falls es installiert ist, die normale native
+Anwendung beenden und in einer eigenen Testkopie des Repositorys prüfen:
+
+1. `.env.example` nach `.env` kopieren, eine Test-LAN-Adresse eintragen und
+   keinen echten Mouser-Schlüssel verwenden.
+2. `docker compose config` ausführen und kontrollieren, dass `app` das Ziel
+   `production` und `test` das Profil `test` mit Ziel `test` verwendet.
+3. `docker compose up -d --build`, `docker compose ps` und
+   `http://127.0.0.1:8008/api/v1/health` prüfen. Der App-Service muss
+   `healthy` werden; Startseite, Artikel, Lagerplätze und Bestand öffnen.
+4. Einen eindeutig erkennbaren Testartikel anlegen, dann
+   `docker compose restart app` ausführen und die Daten erneut prüfen.
+5. `docker compose down` und anschließend `docker compose up -d --build`
+   ausführen. Die Daten müssen weiterhin vorhanden sein.
+6. `docker compose --profile test run --rm test pytest` ausführen. Der Lauf
+   darf nicht auf die Produktivdaten zugreifen.
+7. Mit folgendem Befehl kontrollieren, dass beide Werkzeuge im
+   Produktionsimage nicht installiert sind:
+
+   ```powershell
+   docker compose exec app python -c "import importlib.util; assert importlib.util.find_spec('pytest') is None; assert importlib.util.find_spec('ruff') is None"
+   ```
+8. Zum Abschluss `docker compose down` ausführen. **Nicht** `down -v`
+   verwenden; dieses würde das Testvolume samt Daten löschen.
+
+Systemd, Windows-Paketierung, GitHub-Release, Git-Tag und automatische
+Veröffentlichung bleiben ausdrücklich M7 oder später vorbehalten.

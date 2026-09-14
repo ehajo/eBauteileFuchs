@@ -270,6 +270,9 @@ Einstellungen gruppieren Verbindung, Mouser-Status (Schlüssel nur als
   Version anzeigen, Warnung bestätigen, automatische Vorsicherung, Restore,
   Integritätsprüfung und Neustarthinweis. Fehlgeschlagene Prüfung verändert
   niemals die aktive Datenbank.
+- Im Docker-Betrieb bleiben Daten und Sicherungen bei Containerneustarts im
+  benannten Volume erhalten. Die Oberfläche unterscheidet diesen normalen
+  Neustart klar von einer ausdrücklich destruktiven Volume-Löschung.
 
 ## 9. Leere, Lade- und Fehlerzustände
 

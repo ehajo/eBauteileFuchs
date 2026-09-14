@@ -54,3 +54,8 @@ mit `EBAUTEILEFUCHS_RESTORE_UPLOAD_LIMIT_MB` angepasst werden.
 Die neue Installation zuerst bis zum aktuellen Alembic-Stand starten, dann die
 Wiederherstellung über **Daten** ausführen. ZIP-Inhalte nicht manuell in den
 Datenordner kopieren. Die Vorsicherung aufbewahren, bis alle Daten geprüft sind.
+
+Im Docker-Betrieb liegt die Sicherung im persistenten Volume unter `/data`.
+Auch dort erfolgt die Wiederherstellung ausschließlich über **Daten**; ein
+direkter Kopiervorgang einer laufenden SQLite-Datei aus dem Container ist nicht
+sicher.
