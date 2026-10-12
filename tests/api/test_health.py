@@ -10,6 +10,6 @@ async def test_health_reports_application_and_database(client: AsyncClient) -> N
     assert response.json() == {
         "status": "ok",
         "service": "eBauteileFuchs",
-        "version": "0.1.0.dev0",
+        "version": "0.1.0",
         "database": "ok",
     }

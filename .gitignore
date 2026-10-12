@@ -33,6 +33,8 @@ desktop.ini
 .env
 .env.*
 !.env.example
+.envrc
+.direnv/
 *.pem
 *.key
 
@@ -48,8 +50,13 @@ data/*
 *.sqlite3
 *.sqlite3-shm
 *.sqlite3-wal
+*.sqlite3-journal
+*.db-journal
 backups/
 exports/
+output/
+compose.json
+tmp/
 
 # Local logs
 *.log

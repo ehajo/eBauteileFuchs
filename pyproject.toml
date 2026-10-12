@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ebauteilefuchs"
-version = "0.1.0.dev0"
+dynamic = ["version"]
 description = "Lokale Lagerverwaltung für Elektronikbauteile und Bastellager"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -12,10 +12,15 @@ license = "Apache-2.0"
 authors = [{ name = "eHaJo" }]
 keywords = ["inventory", "electronics", "maker", "fastapi", "sqlite"]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
+  "Development Status :: 4 - Beta",
   "Framework :: FastAPI",
+  "Intended Audience :: End Users/Desktop",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
   "Programming Language :: Python :: 3.12",
+  "Topic :: Office/Business :: Inventory",
 ]
+
 dependencies = [
   "alembic>=1.16,<2",
   "fastapi>=0.116,<1",
@@ -29,6 +34,12 @@ dependencies = [
   "uvicorn[standard]>=0.35,<1",
 ]
 
+[project.urls]
+Homepage = "https://github.com/eHaJo/eBauteileFuchs"
+Documentation = "https://github.com/eHaJo/eBauteileFuchs#readme"
+Repository = "https://github.com/eHaJo/eBauteileFuchs"
+Issues = "https://github.com/eHaJo/eBauteileFuchs/issues"
+
 [project.optional-dependencies]
 dev = [
   "httpx>=0.28,<1",
@@ -40,6 +51,9 @@ dev = [
 
 [project.scripts]
 ebauteilefuchs = "ebauteilefuchs.__main__:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "ebauteilefuchs.__version__" }
 
 [tool.setuptools.packages.find]
 where = ["src"]

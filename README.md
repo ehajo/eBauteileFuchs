@@ -9,10 +9,31 @@ für Elektronikbauteile, Kleinteile und private Bastellager.
 
 ## Projektstatus
 
-M0 bis M5 sind lokal abgenommen. M6 ergänzt dokumentierte CSV-Exporte,
-versionierte ZIP-Sicherungen und eine validierte Wiederherstellung mit
-automatischer Vorsicherung sowie einen optionalen Docker-Betrieb. Die lokale
-M6-Abnahme steht aus.
+M0 bis M6 sind abgeschlossen und geprüft. M7 bereitet die erste öffentliche
+Vorabversion **0.1.0** vor; es wird noch kein Release, Tag oder Paket
+veröffentlicht. eBauteileFuchs ist für private Bastellager, Werkstätten und
+Repair-Cafés im vertrauenswürdigen lokalen Netzwerk gedacht.
+
+## Wichtigste Funktionen
+
+- hierarchische Lagerplätze, QR-Etiketten und grafische Magazinübersicht;
+- Artikel, technische Eigenschaften, Einheiten und Dublettenwarnungen;
+- revisionssichere Ein-, Aus-, Um- und Korrekturbuchungen;
+- lokale Suche, Smartphone-Verbindung, PWA und Verpackungsbarcode-Scan;
+- optionale Mouser-Suche mit kontrolliertem Import;
+- CSV-Export sowie geprüfte ZIP-Sicherung und Wiederherstellung.
+
+## Unterstützte Plattformen
+
+- Windows mit nativem PowerShell-Start oder Docker Desktop;
+- Linux und Raspberry Pi OS (ARM64) nativ mit systemd oder per Docker;
+- x86-64-Linux per Docker.
+
+## Screenshots
+
+Vor einer öffentlichen Veröffentlichung werden ausschließlich Screenshots mit
+synthetischen Daten ergänzt. Reale Lagerbestände, QR-Codes, Adressen und
+Zugangsdaten gehören nicht in Screenshots.
 
 ## Schnellstart unter Windows
 
@@ -42,6 +63,9 @@ chmod +x scripts/start-dev.sh
 ./scripts/start-dev.sh
 ```
 
+Für eine dauerhafte native Linux- oder Raspberry-Pi-Installation mit systemd
+steht die [Linux-Anleitung](docs/installation/linux.md) bereit.
+
 ## Docker
 
 Docker ist eine zusätzliche Betriebsform; der native Windows-Start bleibt
@@ -63,6 +87,10 @@ Weitere Befehle, der isolierte Testcontainer und die Einrichtungsanleitungen
 stehen unter [Docker](docs/installation/docker.md),
 [Raspberry Pi](docs/installation/raspberry-pi.md) und
 [Linux](docs/installation/linux.md).
+
+Für den normalen Docker-Start können auch die sicheren Hilfsskripte verwendet
+werden: `scripts/start-docker.sh` und nach einer Sicherung
+`scripts/update-docker.sh`.
 
 ## Browser und Systemstatus
 
@@ -128,9 +156,16 @@ Nach Aktivierung einer Python-3.12-Umgebung:
 ```text
 python -m pip install -r requirements.lock -r requirements-dev.lock
 python -m pip install --no-deps --no-build-isolation -e .
-python -m alembic upgrade head
+python scripts/verify-migrations.py
 python -m ebauteilefuchs
 ```
+
+`scripts/verify-migrations.py` ist ausschließlich für Entwicklungs- und
+CI-Prüfungen: Es legt eine zufällig benannte SQLite-Datei im System-Tempordner
+an, testet Upgrade und Downgrade und entfernt sie anschließend. Es öffnet nie
+die in `.env` konfigurierte Nutzdatenbank. Für den normalen Anwendungsstart
+führt das Startskript weiterhin ausschließlich das vorwärts gerichtete Upgrade
+der eigenen Nutzdatenbank aus.
 
 `requirements.lock` und `requirements-dev.lock` halten die für M6 geprüften
 Abhängigkeiten reproduzierbar fest.
@@ -301,10 +336,12 @@ Lokale Einstellungen können aus `.env.example` in eine nicht versionierte
 - [Manuelle M5-Abnahme](docs/MANUAL_TEST_M5.md)
 - [CSV, Sicherung und Wiederherstellung](docs/BACKUP_RESTORE.md)
 - [Manuelle M6-Abnahme](docs/MANUAL_TEST_M6.md)
+- [Manuelle M7-Abnahme](docs/MANUAL_TEST_M7.md)
 - [Docker-Betrieb](docs/installation/docker.md)
 - [Raspberry Pi](docs/installation/raspberry-pi.md)
 - [Linux](docs/installation/linux.md)
 - [Windows](docs/installation/windows.md)
+- [Releaseprozess](docs/release-process.md)
 
 Version 1 ist als responsive lokale Webanwendung für Raspberry Pi, Linux und
 Windows vorgesehen. Kerntechnologien sind Python 3.12, FastAPI, SQLAlchemy,
@@ -317,6 +354,11 @@ gewährt keine Rechte an eHaJo, eBauteileFuchs, Logo, einem späteren
 Fuchs-Maskottchen oder anderen Brandingbestandteilen. Es gelten die Hinweise in
 [TRADEMARKS.md](TRADEMARKS.md). Das vorhandene eHaJo-Logo darf nicht verändert
 oder nachgezeichnet werden.
+
+Details zu eingebundenen Komponenten und Assetherkunft stehen in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Mitwirken ist unter
+[CONTRIBUTING.md](CONTRIBUTING.md) beschrieben. Sicherheitslücken bitte gemäß
+[SECURITY.md](SECURITY.md) vertraulich melden.
 
 Hinweise und Lizenztexte der lokal mitgelieferten Barcode-Komponente stehen in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

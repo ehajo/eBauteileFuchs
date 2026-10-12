@@ -205,10 +205,10 @@ werden, wenn die Produktabsicht abweicht:
 
 ## Freigabestatus
 
-M0 bis M5 sind abgenommen. M6 ist umgesetzt; CSV, Sicherung, Wiederherstellung
-und die grafische Lagerübersicht sind praktisch geprüft. Die Docker-Abnahme
-steht lokal noch aus. M7 und spätere Meilensteine benötigen weiterhin eine
-ausdrückliche Freigabe. Für M6 sind keine Entscheidungen mehr offen.
+M0 bis M6 sind abgenommen. M7 ist für die Veröffentlichungsvorbereitung
+ausdrücklich freigegeben; Git-Tag, GitHub-Release und Veröffentlichung bleiben
+weiterhin gesondert freigabepflichtig. Für M6 und M7 sind keine neuen
+Fachentscheidungen offen.
 
 Die Praxisentscheidung zum Löschen hierarchischer Lagerplätze ist abgeschlossen:
 referenzierte Knoten werden nicht hart gelöscht, sondern verborgen archiviert.

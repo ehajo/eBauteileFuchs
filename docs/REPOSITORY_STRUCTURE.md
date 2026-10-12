@@ -9,7 +9,9 @@ eBauteileFuchs/
 ├── README.md
 ├── LICENSE                         # erst nach Lizenzfreigabe
 ├── TRADEMARKS.md                   # getrennte Marken-/Asset-Regeln
+├── THIRD_PARTY_NOTICES.md
 ├── CONTRIBUTING.md
+├── CODE_OF_CONDUCT.md
 ├── SECURITY.md
 ├── CHANGELOG.md
 ├── .env.example
@@ -29,6 +31,7 @@ eBauteileFuchs/
 │   ├── API.md
 │   ├── MANUAL_TEST_M3.md
 │   ├── MANUAL_TEST_M5.md
+│   ├── MANUAL_TEST_M7.md
 │   ├── MOUSER.md
 │   ├── DATA_MODEL.md
 │   ├── UX_FLOWS.md
@@ -101,11 +104,17 @@ eBauteileFuchs/
 │   └── conftest.py
 ├── scripts/
 │   ├── install-linux.sh
+│   ├── install-systemd.sh
+│   ├── update-linux.sh
+│   ├── start-docker.sh
+│   ├── update-docker.sh
 │   ├── start-dev.ps1
 │   ├── backup.py
 │   └── restore.py
 ├── packaging/
 │   ├── systemd/
+│   │   ├── ebauteilefuchs.service
+│   │   └── ebauteilefuchs.env.example
 │   ├── windows/
 │   └── docker/
 ├── examples/
@@ -225,3 +234,14 @@ Zusatzabhängigkeit nötig ist.
   `packaging/docker/entrypoint.sh` führt die kontrollierte Migration vor dem
   Produktionsstart aus. `compose.yaml` verbindet nur den App-Service mit dem
   persistenten Volume und aktiviert Tests ausschließlich über das Profil `test`.
+
+## In M7 realisierte Ergänzungen
+
+- `packaging/systemd/` enthält den unprivilegierten systemd-Dienst und eine
+  sichere Beispiel-Environment-Datei; `scripts/` enthält idempotente Linux-,
+  systemd- und Dockerhilfen sowie administrative Backup-/Restore-Programme.
+- `.github/workflows/ci.yml` prüft Python, Migrationen, Dokumentation,
+  Lizenz-/Brandingverträge sowie Produktions- und Testcontainer.
+- `docs/release-process.md` trennt die vorbereitete Version `0.1.0` klar von
+  Tag und Veröffentlichung; rechtliche Veröffentlichungstexte liegen im
+  Repository-Stamm.

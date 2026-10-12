@@ -230,6 +230,13 @@ werden. Das benannte Compose-Volume wird bei `/data` eingehängt; der
 Test-Service ist über das Profil `test` isoliert und erhält weder `.env` noch
 das Produktivvolume.
 
+Für die native Linux-Installation führt systemd dieselbe Prozessform unter dem
+unprivilegierten Benutzer `ebauteilefuchs` aus. Die Unit wartet auf
+`network-online.target`, liest eine geschützte Datei unter `/etc/ebauteilefuchs`
+und verwendet `/var/lib/ebauteilefuchs` als alleinigen Schreibpfad. Die
+Migrationsprüfung liegt als `ExecStartPre` vor dem Webprozess; ihre Fehler
+verhindern den Start.
+
 ## 12. Architekturentscheidungen (ADR-Bedarf)
 
 Vor Implementierung werden mindestens folgende Entscheidungen als kurze ADRs

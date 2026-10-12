@@ -59,5 +59,6 @@ COPY . .
 # ihren erwarteten Pfaden verfügbar.
 COPY packaging/docker/test-repository-context/Dockerfile /app/Dockerfile
 COPY packaging/docker/test-repository-context/dockerignore /app/.dockerignore
+COPY packaging/docker/test-repository-context/ci.yml /app/.github/workflows/ci.yml
 
 CMD ["pytest"]

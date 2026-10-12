@@ -1,5 +1,6 @@
 """Small presentation helpers shared by the server-rendered UI."""
 
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
 UNIT_CHOICES_BY_CANONICAL: dict[str, tuple[str, ...]] = {
@@ -43,3 +44,9 @@ def format_decimal(value: object) -> str:
     if "." in rendered:
         rendered = rendered.rstrip("0").rstrip(".")
     return "0" if rendered in {"-0", ""} else rendered
+
+
+def format_local_datetime(value: datetime) -> str:
+    """Render a UTC timestamp in the browser host's local timezone."""
+
+    return value.astimezone().strftime("%d.%m.%Y, %H:%M Uhr")

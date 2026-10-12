@@ -3,6 +3,7 @@ import sqlite3
 import zipfile
 from contextlib import closing
 from pathlib import Path
+from uuid import uuid4
 
 import pytest
 from alembic import command
@@ -15,28 +16,36 @@ from ebauteilefuchs.persistence.data_management import (
     SqliteDataManagementGateway,
 )
 from ebauteilefuchs.persistence.database import create_database_engine
+from ebauteilefuchs.testing.migration_safety import (
+    MigrationTestDatabase,
+    migration_test_environment,
+)
 
 
-def _migrated_gateway(monkeypatch, tmp_path: Path) -> SqliteDataManagementGateway:
-    database = tmp_path / "m6.db"
-    monkeypatch.setenv(
-        "EBAUTEILEFUCHS_DATABASE_URL", f"sqlite+pysqlite:///{database.as_posix()}"
+def _migrated_gateway(tmp_path: Path) -> tuple[SqliteDataManagementGateway, Path]:
+    normal_settings = Settings()
+    database = tmp_path / f"ebauteilefuchs-migration-test-{uuid4().hex}.sqlite3"
+    migration_database = MigrationTestDatabase(
+        directory=tmp_path,
+        path=database,
+        url=f"sqlite+pysqlite:///{database.as_posix()}",
     )
-    monkeypatch.setenv("EBAUTEILEFUCHS_APP_ENV", "test")
-    config = Config("alembic.ini")
-    command.upgrade(config, "head")
+    with migration_test_environment(migration_database, normal_settings):
+        command.upgrade(Config("alembic.ini"), "head")
     settings = Settings(
         app_env="test",
         data_dir=tmp_path,
         database_url=f"sqlite+pysqlite:///{database.as_posix()}",
     )
-    return SqliteDataManagementGateway(settings, create_database_engine(settings))
+    return SqliteDataManagementGateway(
+        settings, create_database_engine(settings)
+    ), database
 
 
 def test_csv_exports_are_utf8_bom_and_keep_values_and_units_separate(
-    monkeypatch, tmp_path: Path
+    tmp_path: Path,
 ) -> None:
-    gateway = _migrated_gateway(monkeypatch, tmp_path)
+    gateway, _ = _migrated_gateway(tmp_path)
     path, filename = gateway.create_csv_export("article-properties")
     assert filename == "artikel-eigenschaften.csv"
     assert path.read_bytes().startswith(b"\xef\xbb\xbf")
@@ -47,11 +56,8 @@ def test_csv_exports_are_utf8_bom_and_keep_values_and_units_separate(
     assert "kanonischer_wert" in headers
 
 
-def test_backup_manifest_checksum_and_restore_with_safety_copy(
-    monkeypatch, tmp_path: Path
-) -> None:
-    gateway = _migrated_gateway(monkeypatch, tmp_path)
-    database = tmp_path / "m6.db"
+def test_backup_manifest_checksum_and_restore_with_safety_copy(tmp_path: Path) -> None:
+    gateway, database = _migrated_gateway(tmp_path)
     with closing(sqlite3.connect(database)) as connection:
         connection.execute(
             "UPDATE category SET name='Vor Sicherung' WHERE code='other'"
@@ -80,8 +86,8 @@ def test_backup_manifest_checksum_and_restore_with_safety_copy(
     assert "vorsicherung" in result.safety_backup.filename
 
 
-def test_restore_rejects_modified_archive(monkeypatch, tmp_path: Path) -> None:
-    gateway = _migrated_gateway(monkeypatch, tmp_path)
+def test_restore_rejects_modified_archive(tmp_path: Path) -> None:
+    gateway, _ = _migrated_gateway(tmp_path)
     backup = gateway.create_backup()
     damaged = tmp_path / "damaged.zip"
     damaged.write_bytes(backup.path.read_bytes()[:-20] + b"not-a-valid-end")
@@ -89,24 +95,24 @@ def test_restore_rejects_modified_archive(monkeypatch, tmp_path: Path) -> None:
         gateway.stage_restore(damaged)
 
 
-def test_backup_restores_into_fresh_installation(monkeypatch, tmp_path: Path) -> None:
+def test_backup_restores_into_fresh_installation(tmp_path: Path) -> None:
     source_dir = tmp_path / "source"
     source_dir.mkdir()
-    source = _migrated_gateway(monkeypatch, source_dir)
-    with closing(sqlite3.connect(source_dir / "m6.db")) as connection:
+    source, source_database = _migrated_gateway(source_dir)
+    with closing(sqlite3.connect(source_database)) as connection:
         connection.execute("UPDATE category SET name='Aus Quelle' WHERE code='other'")
         connection.commit()
     backup = source.create_backup()
 
     target_dir = tmp_path / "fresh"
     target_dir.mkdir()
-    target = _migrated_gateway(monkeypatch, target_dir)
+    target, target_database = _migrated_gateway(target_dir)
     upload = target_dir / "fresh-restore.zip"
     upload.write_bytes(backup.path.read_bytes())
     preview = target.stage_restore(upload)
     target.restore(preview.token)
 
-    with closing(sqlite3.connect(target_dir / "m6.db")) as connection:
+    with closing(sqlite3.connect(target_database)) as connection:
         name = connection.execute(
             "SELECT name FROM category WHERE code='other'"
         ).fetchone()[0]

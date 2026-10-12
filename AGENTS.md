@@ -94,8 +94,7 @@ oder einen lokalen Fake ersetzt.
 
 ## Freigabestatus
 
-Die Planung sowie M0 bis M5 wurden umgesetzt und lokal abgenommen. M6 wurde
-ausdrücklich freigegeben und umgesetzt; seine lokale Abnahme steht aus. M7 und
-alle späteren Meilensteine bleiben bis zu einer weiteren ausdrücklichen Freigabe
-gesperrt. Maßgeblich sind `docs/IMPLEMENTATION_PLAN.md` und
-`docs/OPEN_DECISIONS.md`.
+Die Planung sowie M0 bis M6 wurden umgesetzt und geprüft. M7 ist ausdrücklich
+freigegeben und wird als Veröffentlichungsvorbereitung umgesetzt. Spätere
+Meilensteine bleiben bis zu einer weiteren ausdrücklichen Freigabe gesperrt.
+Maßgeblich sind `docs/IMPLEMENTATION_PLAN.md` und `docs/OPEN_DECISIONS.md`.

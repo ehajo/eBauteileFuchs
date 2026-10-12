@@ -194,6 +194,28 @@ class ArticleModel(Base):
     )
 
 
+class ArticleBarcodeCompatibilityModel(Base):
+    """Persisted M5 compatibility table; no application feature reads it."""
+
+    __tablename__ = "article_barcode"
+    __table_args__ = (
+        UniqueConstraint(
+            "normalized_value", name="uq_article_barcode_normalized_value"
+        ),
+        Index("ix_article_barcode_article_id", "article_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    article_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("article.id", ondelete="CASCADE"), nullable=False
+    )
+    value: Mapped[str] = mapped_column(String(200), nullable=False)
+    normalized_value: Mapped[str] = mapped_column(String(200), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
+
+
 class ArticleAttributeModel(Base):
     __tablename__ = "article_attribute"
     __table_args__ = (

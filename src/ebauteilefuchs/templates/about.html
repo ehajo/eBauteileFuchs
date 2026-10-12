@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Über {{ branding.product_name }}{% endblock %}
+{% block content %}
+<section class="page-heading">
+  <p class="eyebrow">Information</p>
+  <h1>Über {{ branding.product_name }}</h1>
+  <p class="lead">{{ branding.tagline }}</p>
+</section>
+<section class="panel">
+  <dl class="detail-list">
+    <dt>Version</dt><dd>{{ version }}</dd>
+    <dt>Projekt</dt><dd>{{ branding.attribution }}</dd>
+    <dt>Betrieb</dt><dd>Lokal im vertrauenswürdigen privaten Netzwerk</dd>
+  </dl>
+  <p>eBauteileFuchs ist für private Bastellager, Werkstätten und Repair-Cafés gedacht. Es überträgt keine Telemetrie und benötigt für die Kernfunktionen keine Cloud.</p>
+  <p>Der Programmcode steht unter Apache-2.0. Name und Branding-Assets sind davon ausgenommen.</p>
+</section>
+{% endblock %}

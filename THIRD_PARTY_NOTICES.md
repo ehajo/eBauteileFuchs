@@ -1,5 +1,14 @@
 # Hinweise zu Drittkomponenten
 
+## Branding-Assets
+
+Die Dateien `branding/ehajo-logo.svg`, `branding/ehajo-logo.png`,
+`branding/e_rand_t.png` und `branding/fuchs-maskottchen.png` stammen aus dem
+eHaJo-Projektbestand und werden unverändert in die Anwendung kopiert. Eine
+separate Dritt- oder Open-Source-Lizenz wurde für diese Dateien nicht
+bereitgestellt. Sie sind daher keine Drittkomponenten im Apache-2.0-Sinn und
+unterliegen den Regeln in [TRADEMARKS.md](TRADEMARKS.md).
+
 eBauteileFuchs liefert folgende Drittkomponente lokal aus:
 
 ## zxing-wasm reader 3.1.3

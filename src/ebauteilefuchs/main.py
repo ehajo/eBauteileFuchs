@@ -48,7 +48,7 @@ from ebauteilefuchs.web.connection import router as connection_web_router
 from ebauteilefuchs.web.data_management import router as data_management_web_router
 from ebauteilefuchs.web.inventory import router as inventory_web_router
 from ebauteilefuchs.web.locations import router as locations_web_router
-from ebauteilefuchs.web.presentation import format_decimal
+from ebauteilefuchs.web.presentation import format_decimal, format_local_datetime
 from ebauteilefuchs.web.routes import router as web_router
 from ebauteilefuchs.web.search import router as search_web_router
 from ebauteilefuchs.web.suppliers import router as suppliers_web_router
@@ -118,6 +118,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     app.state.templates = Jinja2Templates(directory=PACKAGE_DIR / "templates")
     app.state.templates.env.filters["number"] = format_decimal
+    app.state.templates.env.filters["local_datetime"] = format_local_datetime
 
     app.mount(
         "/static",

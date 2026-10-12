@@ -1,9 +1,8 @@
 # Implementierungsplan – eBauteileFuchs
 
-Status: M0 bis M5 sind umgesetzt und lokal abgenommen. M6 ist technisch
-vollständig umgesetzt; CSV, Sicherung, Wiederherstellung und die grafische
-Lagerübersicht wurden praktisch geprüft. Die vollständige lokale M6-Abnahme für
-den Docker-Betrieb steht aus. M7 und spätere Meilensteine bleiben gesperrt.
+Status: M0 bis M6 sind umgesetzt und geprüft. M7 ist als lokale
+Veröffentlichungsvorbereitung umgesetzt; die abschließende Plattformabnahme und
+eine ausdrückliche Veröffentlichungsfreigabe stehen noch aus.
 
 ## 1. Vorgehensmodell
 
@@ -144,7 +143,7 @@ Testwerkzeuge, führt Migrationen vor dem Webstart aus und speichert Daten im
 benannten Volume. Die spätere Rasterergänzung verwendet die vorwärts und
 rückwärts ausführbare Revision `0008_location_grid`.
 
-### M7 – Installation und Veröffentlichungsreife
+### M7 – Installation und Veröffentlichungsreife (umgesetzt, Freigabe ausstehend)
 
 - Native Raspberry-Pi-/Linux-Installation, systemd-Unit und Updatepfad.
 - Windows-Startskript mit Browseröffnung; Vorbereitung eines entpackbaren
@@ -152,6 +151,16 @@ rückwärts ausführbare Revision `0008_location_grid`.
 - GitHub Actions, Releasecheckliste, semantische Versionierung, Screenshots und
   Demo-Modus mit synthetischen Daten.
 - Manuelle Abnahmematrix auf ARM64-Linux, x86-64-Linux und Windows.
+
+Umsetzungsstand: Apache-2.0-Lizenz, getrennte Branding- und Drittkomponenten-
+hinweise, Verhaltenskodex, Mitwirk- und Sicherheitsrichtlinie sind vorhanden.
+Die maßgebliche Vorabversion ist `0.1.0`; Health-Endpunkt und Über-Seite zeigen
+sie an. Die systemd-Vorlage startet als unprivilegierter Benutzer, lädt eine
+geschützte Environment-Datei und führt Migrationen vor dem Webstart aus. CI
+prüft Python, Migrationen, Dokumentation, Lizenz-/Brandingverträge sowie beide
+Dockerziele und den Testcontainer. Releaseprozess und Plattformanleitungen sind
+dokumentiert; Tag und GitHub-Release werden erst nach ausdrücklicher Freigabe
+erstellt.
 
 Abnahmekriterien: 1 bis 3 und 21 sowie vollständige Wiederholung der Kriterien
 4 bis 20 auf den jeweils relevanten Plattformen.

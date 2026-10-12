@@ -8,6 +8,7 @@ from sqlalchemy import engine_from_config, pool
 from ebauteilefuchs.config import Settings
 from ebauteilefuchs.persistence import models as _models  # noqa: F401
 from ebauteilefuchs.persistence.database import Base, ensure_sqlite_parent
+from ebauteilefuchs.testing.migration_safety import assert_guarded_migration_environment
 
 config = context.config
 
@@ -15,6 +16,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 settings = Settings()
+assert_guarded_migration_environment(settings)
 ensure_sqlite_parent(settings.resolved_database_url)
 config.set_main_option(
     "sqlalchemy.url", settings.resolved_database_url.replace("%", "%%")

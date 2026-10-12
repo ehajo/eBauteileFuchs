@@ -8,6 +8,18 @@ Semantic Versioning.
 
 ### Added
 
+- Die Startseite ist jetzt eine kompakte Lagerzentrale mit Suche, Barcode-Scan,
+  Schnellaktionen, echten Lagerkennzahlen und den letzten Bestandsbewegungen.
+- Migrations- und CI-Prüfungen verwenden ausschließlich zufällig benannte
+  SQLite-Datenbanken in automatisch entfernten Tempordnern. Eine harte
+  Schutzprüfung verhindert destruktive Testmigrationen gegen die konfigurierte
+  Nutzdatenbank oder das reguläre Datenverzeichnis.
+- M7-Veröffentlichungsvorbereitung: Version `0.1.0`, Über-Seite, systemd-
+  Dienstvorlage, Linux-/Dockerhilfen, CI-Containerprüfung, Releaseprozess und
+  Plattformdokumentation.
+- Apache-2.0-, Drittkomponenten-, Branding-, Sicherheits-, Beitrags- und
+  Verhaltenshinweise für die öffentliche Veröffentlichung.
+
 - Optionaler Docker-Betrieb mit getrennten Produktions- und Test-Build-Zielen,
   nicht privilegiertem Produktionsprozess, Migrationsprüfung vor dem Start,
   Healthcheck und persistentem benannten Datenvolume.

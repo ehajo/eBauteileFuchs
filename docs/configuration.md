@@ -55,6 +55,15 @@ Eine Compose-Datei enthält keinen Mouser-Schlüssel; Docker liest ihn ausschlie
 aus der lokalen, nicht eingebauten `.env`. Die vollständige Betriebsanleitung
 steht unter [installation/docker.md](installation/docker.md).
 
+## systemd
+
+Die native Linux-Unit lädt `/etc/ebauteilefuchs/ebauteilefuchs.env`. Die Datei
+enthält mindestens Host, Port, Datenpfad, Log-Level und bei Bedarf die öffentliche
+LAN-Basis-URL; der optionale Mouser-Schlüssel bleibt darin lokal. Sie muss für
+root und den Dienstbenutzer lesbar, aber nicht allgemein lesbar sein. Die
+Installation erzeugt eine Vorlage mit Modus `0640`; Details stehen in
+[installation/linux.md](installation/linux.md).
+
 ## Basis-URL für Lagerplatz-QR-Codes
 
 Ohne Konfiguration verwendet ein erzeugtes Etikett die Basis-URL der aktuellen

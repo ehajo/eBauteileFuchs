@@ -15,6 +15,7 @@ def test_dockerfile_separates_production_and_test_targets() -> None:
     assert "COPY . ." in dockerfile
     assert "test-repository-context/Dockerfile /app/Dockerfile" in dockerfile
     assert "test-repository-context/dockerignore /app/.dockerignore" in dockerfile
+    assert "test-repository-context/ci.yml /app/.github/workflows/ci.yml" in dockerfile
     assert 'CMD ["pytest"]' in dockerfile
     assert "USER ebauteilefuchs" in dockerfile
     assert "alembic upgrade head" in (
@@ -61,4 +62,7 @@ def test_test_repository_context_keeps_docker_control_files_in_sync() -> None:
     ).read_bytes()
     assert (TEST_CONTEXT / "dockerignore").read_bytes() == (
         PROJECT_ROOT / ".dockerignore"
+    ).read_bytes()
+    assert (TEST_CONTEXT / "ci.yml").read_bytes() == (
+        PROJECT_ROOT / ".github" / "workflows" / "ci.yml"
     ).read_bytes()

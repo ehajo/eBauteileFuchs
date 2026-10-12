@@ -8,7 +8,22 @@ permissions:
   contents: read
 
 jobs:
+  repository-safety:
+    name: Repository safety
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject tracked local runtime data and environment files
+        run: |
+          if git ls-files | grep -E '(^|/)(\.env|.*\.(db|sqlite|sqlite3|zip|pdf))$|^(data|backups|exports)/' | grep -v '^data/\.gitkeep$'; then
+            echo "Lokale Laufzeitdaten oder Geheimnisse dürfen nicht versioniert sein." >&2
+            exit 1
+          fi
+      - name: Check public license and branding files
+        run: test -f LICENSE && test -f TRADEMARKS.md && test -f THIRD_PARTY_NOTICES.md && test -f SECURITY.md
+
   quality:
+    name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
@@ -29,9 +44,13 @@ jobs:
         run: ruff format --check .
       - name: Lint
         run: ruff check .
-      - name: Check Linux start script syntax
+      - name: Verify migrations in an isolated temporary database
+        run: python scripts/verify-migrations.py
+      - name: Check Linux scripts
         if: runner.os == 'Linux'
-        run: sh -n scripts/start-dev.sh
+        run: |
+          sh -n scripts/*.sh
+          sh -n packaging/docker/entrypoint.sh
       - name: Check Windows start script syntax
         if: runner.os == 'Windows'
         shell: pwsh
@@ -47,5 +66,40 @@ jobs:
             $parseErrors | ForEach-Object { Write-Error $_ }
             exit 1
           }
-      - name: Test
+      - name: Test including documentation, branding and license contracts
         run: pytest
+
+  docker:
+    name: Docker production and test images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare safe Compose configuration
+        run: cp .env.example .env
+      - name: Validate Compose configuration and isolation
+        run: |
+          docker compose config --format json > compose.json
+          python -c "import json; c=json.load(open('compose.json')); assert c['services']['app']['build']['target'] == 'production'; assert c['services']['test']['build']['target'] == 'test'; assert 'ebauteilefuchs-data' not in c['services']['test'].get('volumes', [])"
+      - name: Build production image
+        run: docker compose build app
+      - name: Build test image
+        run: docker compose --profile test build test
+      - name: Run complete test suite in test container
+        run: docker compose --profile test run --rm test pytest
+      - name: Verify production image excludes test tools
+        run: |
+          image=$(docker compose images -q app)
+          docker run --rm --entrypoint python "$image" -c "import importlib.util; assert importlib.util.find_spec('pytest') is None; assert importlib.util.find_spec('ruff') is None"
+          docker run --rm --entrypoint sh "$image" -c "test ! -e /app/.env && test ! -e /app/data && test ! -e /app/backups"
+      - name: Start production service and verify health
+        run: |
+          docker compose up -d app
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:8008/api/v1/health; then exit 0; fi
+            sleep 2
+          done
+          docker compose logs app
+          exit 1
+      - name: Stop services
+        if: always()
+        run: docker compose down

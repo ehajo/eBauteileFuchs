@@ -1,8 +1,8 @@
 # Raspberry Pi
 
-eBauteileFuchs läuft als Docker-Container auf Raspberry Pi OS mit 64-Bit-
-Benutzerland (ARM64). Das Dockerfile enthält keine fest verdrahtete Plattform;
-Docker baut das passende Image für ARM64 oder x86-64.
+eBauteileFuchs läuft auf Raspberry Pi OS mit 64-Bit-Benutzerland (ARM64) per
+Docker oder nativ über systemd. Das Dockerfile enthält keine fest verdrahtete
+Plattform; Docker baut das passende Image für ARM64 oder x86-64.
 
 1. Raspberry Pi OS 64-Bit aktualisieren und Docker Engine mit dem
    Compose-Plug-in gemäß der [offiziellen Docker-Anleitung für Debian](https://docs.docker.com/engine/install/debian/)
@@ -61,3 +61,7 @@ Für Firewall, externe Zugriffe und HTTPS gelten die Hinweise in
 [Konfiguration](../configuration.md). Die Anwendung ist für ein
 vertrauenswürdiges privates LAN gedacht; keine öffentliche Portfreigabe
 einrichten.
+
+Für eine native Installation ohne Docker folgt die identische
+[Linux-/systemd-Anleitung](linux.md). Vor einem Update oder Restore immer eine
+Sicherung unter **Daten** erstellen.
