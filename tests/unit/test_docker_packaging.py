@@ -66,3 +66,12 @@ def test_test_repository_context_keeps_docker_control_files_in_sync() -> None:
     assert (TEST_CONTEXT / "ci.yml").read_bytes() == (
         PROJECT_ROOT / ".github" / "workflows" / "ci.yml"
     ).read_bytes()
+
+
+def test_ci_resolves_built_production_image_without_a_created_container() -> None:
+    workflow = (PROJECT_ROOT / ".github" / "workflows" / "ci.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "image=$(docker compose config --images app)" in workflow
+    assert "docker compose images -q app" not in workflow

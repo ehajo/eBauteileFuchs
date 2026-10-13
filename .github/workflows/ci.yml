@@ -88,7 +88,7 @@ jobs:
         run: docker compose --profile test run --rm test pytest
       - name: Verify production image excludes test tools
         run: |
-          image=$(docker compose images -q app)
+          image=$(docker compose config --images app)
           docker run --rm --entrypoint python "$image" -c "import importlib.util; assert importlib.util.find_spec('pytest') is None; assert importlib.util.find_spec('ruff') is None"
           docker run --rm --entrypoint sh "$image" -c "test ! -e /app/.env && test ! -e /app/data && test ! -e /app/backups"
       - name: Start production service and verify health
