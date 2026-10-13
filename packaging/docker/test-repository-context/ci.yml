@@ -78,7 +78,7 @@ jobs:
         run: cp .env.example .env
       - name: Validate Compose configuration and isolation
         run: |
-          docker compose config --format json > compose.json
+          docker compose --profile test config --format json > compose.json
           python -c "import json; c=json.load(open('compose.json')); assert c['services']['app']['build']['target'] == 'production'; assert c['services']['test']['build']['target'] == 'test'; assert 'ebauteilefuchs-data' not in c['services']['test'].get('volumes', [])"
       - name: Build production image
         run: docker compose build app
